@@ -1,0 +1,100 @@
+# omgevingsdocumentenregister.nl — projectconventies
+
+Onafhankelijk register van omgevingsdocumenten (Ow) en de Wro-plannen die onder
+het overgangsrecht nog gelden. Zero-build statische site op **Cloudflare Pages**,
+backend = de OCD-API op Railway via de `/api`-proxy in `functions/`.
+
+**Dit is geen overheidsvoorziening.** Geen ministerie-attributie, geen
+"Landelijke Voorziening"-ondertitel, geen rijkshuisstijl, geen
+toegangsbeperkte bronhouder-login, en geen toegankelijkheidsverklaring zolang
+er geen echte toets is gedaan. De header draagt permanent
+"Onafhankelijk register · geen officiële overheidsbron".
+
+## Mappenstructuur — wat publiceert en wat niet
+
+```
+public/     ← DE PUBLISH-DIRECTORY. Alles hierin staat straks publiek.
+functions/  ← Pages Functions (proxy + www-redirect). Draait server-side.
+docs/       ← werkdocumenten. Publiceert NOOIT.
+```
+
+Cloudflare Pages-instellingen: **build command leeg**, **build output directory
+`public`**. Die laatste is niet vrijblijvend — wijst hij naar de repo-root, dan
+staan `docs/` en eventuele lokale bestanden op het publieke domein.
+
+## Deploy
+
+**Git-gekoppeld: een push naar `main` deployt.** Bewust géén `wrangler pages
+deploy` / direct upload: dat patroon heeft op ponsenkaart.nl de
+`CLOUDFLARE_API_TOKEN` publiek gezet doordat de hele map inclusief `.env`
+werd geüpload. Met Git-koppeling plus een expliciete publish-directory kan dat
+niet gebeuren.
+
+Na een deploy even nalopen:
+- `curl https://<domein>/.env` mag geen inhoud tonen (let op de **body**, niet
+  de statuscode — Pages geeft door de SPA-fallback overal HTTP 200).
+- `curl https://<domein>/api/health` moet `{"status":...}` geven; komt er een
+  403, dan mist `OCD_API_KEY_PUBLIC`.
+
+## Secrets
+
+`OCD_API_KEY_PUBLIC` staat als **environment variable in Cloudflare Pages**
+(Settings → Environment variables), nooit in de repo. De browser ziet 'm nooit:
+`functions/api/[[catchall]].js` zet 'm server-side op het upstream-verzoek.
+
+## Frontend
+
+Vanilla, geen framework, geen buildstap.
+
+- `public/index.html` — shell (fonts, header, mountpunt, footer)
+- `public/styles.css` — CSS-variabelen, licht + donker (`prefers-color-scheme`
+  én een `data-theme`-override via de toggle)
+- `public/app.js` — router (path-based, SPA-fallback via `_redirects`) + de vijf
+  views
+- `public/lenzen.js` — de federatieve laag: laadt de oordeel-feeds, normaliseert
+  ze naar het contract en rendert de lensstrook
+
+Lokaal draaien: serveer `public/` statisch (bv. `python -m http.server 8080 -d public`)
+en zorg dat de OCD-API op `http://localhost:8002` luistert. `app.js` detecteert
+localhost en praat dan rechtstreeks met de API in plaats van via `/api`.
+
+## De twee regels die het register definiëren
+
+1. **Het register herberekent nooit.** Elk cijfer in een lenspaneel komt
+   ongewijzigd uit de feed van de satelliet die het bezit. Zodra hier een
+   gemiddelde, een drempel of een hertelling wordt ingebouwd, gaat de koepel
+   afwijken van de bron en is het vertrouwen weg.
+2. **Geen cijfer zonder dekking.** Elk lenspaneel toont drie regels:
+   kerncijfer → dekking → doorklik. Een lens die geen dekkingszin levert, wordt
+   niet getoond. Reden: een score die is opgebouwd uit richtlijnen waarvan een
+   deel niet getoetst is, is niet fout maar wel onvolledig, en dat moet zichtbaar
+   zijn op de plek waar het cijfer gelezen wordt.
+
+## Sleutels
+
+- Documenten worden gesleuteld op het **werk**, niet op de expressie:
+  `frbr_work` voor Ow (`/akn/nl/act/gm0193/2026/omgevingsplan`), de IMRO-`idn`
+  voor Wro. Sleutelen op de expressie laat elke link rotten bij een nieuwe versie.
+- `werkVan()` in `app.js` doet de afleiding: alles vóór `/nld@`.
+- Bronhouders worden gesleuteld op de kale `overheidscode` (`gm0193`).
+
+## Aandachtspunten in de datalaag
+
+- **Wro-zoeken alleen mét zoekterm.** `/v1/regelingen/zoek?wro=true` haalt
+  server-side élk ruimtelijk instrument op om er één pagina uit te snijden.
+  `bouwQuery()` stuurt `wro` daarom alleen mee als er een `q` is.
+- **Geen statusdimensie.** *in werking / vastgesteld / ontwerp / historisch*
+  bestaat nog niet als veld in de datalaag; er wordt hier dus ook geen status
+  getoond. Zie fase 2 van het uitvoeringsplan.
+- **Geen tijdreeksen voor Ow.** De datalaag is een momentopname. Het scherm
+  *Landelijk beeld* zegt expliciet dat de kwartaalgrafiek ontbreekt in plaats
+  van een gereconstrueerde reeks te tonen.
+- **Nieuwe endpoints moeten op `main` staan** vóór een `railway up` op de
+  OCD-kant. De `/v1/planvoorraad/*`-router is eerder van productie verdwenen
+  omdat de code alleen op een feature-branch stond.
+
+## Verder lezen
+
+- Uitvoeringsplan (fase 0 t/m 7, zes repo's): `c:/GIT/OCD/docs/koepelregister-uitvoeringsplan.md`
+- Ontwerp + volledige onderbouwing: vault `analysis/Omgevingsdocumentenregister als koepel.md`
+- Feed-contract: `docs/feed-contract.md`

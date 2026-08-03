@@ -1,0 +1,4 @@
+# SPA-fallback: alle paden die geen bestand zijn renderen index.html, dat
+# vervolgens client-side routeert (/document/akn/nl/act/... heeft veel segmenten).
+# Pages Functions (/api/*) gaan hier vóór — die matchen eerder dan deze regel.
+/*  /index.html  200
