@@ -24,11 +24,26 @@ staan `docs/` en eventuele lokale bestanden op het publieke domein.
 
 ## Deploy
 
-**Git-gekoppeld: een push naar `main` deployt.** Bewust géén `wrangler pages
-deploy` / direct upload: dat patroon heeft op ponsenkaart.nl de
-`CLOUDFLARE_API_TOKEN` publiek gezet doordat de hele map inclusief `.env`
-werd geüpload. Met Git-koppeling plus een expliciete publish-directory kan dat
-niet gebeuren.
+> ⚠️ **Stand 2026-08-04: het Pages-project is NIET Git-gekoppeld.** Het is bij
+> het live zetten als direct upload aangemaakt. Gevolg: **`git push` deployt
+> niets.** Vastgesteld doordat GitHub 0 deployments en 0 check-runs op de repo
+> heeft terwijl een Git-gekoppeld project er bij elke push één aanmaakt, en de
+> site na een push de oude `app.js` bleef serveren.
+>
+> Wat er wél goed staat: de publish-directory is `public/`, dus er is niets
+> uit de repo-root gelekt (`/CLAUDE.md`, `/docs/…`, `/.env.example` geven
+> allemaal de SPA-fallback, geen bestandsinhoud).
+>
+> **Op te lossen**: in het Cloudflare-dashboard het project koppelen aan
+> `RicharddeGraaf1/omgevingsdocumentenregister.nl` (branch `main`, build
+> command leeg, output directory `public`). Zolang dat niet gebeurd is, moet
+> elke wijziging handmatig geüpload worden en loopt de site achter op de repo.
+
+De bedoeling is Git-koppeling: een push naar `main` deployt. Bewust géén
+`wrangler pages deploy` vanaf de repo-root: dat patroon heeft op ponsenkaart.nl
+de `CLOUDFLARE_API_TOKEN` publiek gezet doordat de hele map inclusief `.env`
+werd geüpload. Moet er tussentijds tóch handmatig geüpload worden, doe dat dan
+uitsluitend vanuit `public/` — nooit vanuit de repo-root.
 
 Na een deploy even nalopen:
 - `curl https://<domein>/.env` mag geen inhoud tonen (let op de **body**, niet
