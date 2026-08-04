@@ -5,11 +5,12 @@
  * wél doet is normaliseren naar één vorm (het feed-contract, docs/feed-contract.md)
  * en tonen.
  *
- * Stand nu: alleen `annotatiekwaliteit` is aangesloten. Die satelliet publiceert
- * nog geen `oordeel.json`, maar `gezagen.json` draagt de twee sleutels die het
- * contract vraagt (gezag = kale overheidscode, regeling = AKN-frbr_work), dus
- * een adapter volstaat. Zodra fase 4 draait vervalt de adapter en leest dit
- * bestand alle vier de feeds via dezelfde weg.
+ * Stand: `annotatiekwaliteit` en `transitie` zijn aangesloten.
+ *  - annotatieconformiteit publiceert nog geen `oordeel.json`, maar
+ *    `gezagen.json` draagt de twee sleutels die het contract vraagt (gezag =
+ *    kale overheidscode, regeling = AKN-frbr_work), dus een adapter volstaat.
+ *  - ponsenkaart publiceert wél een echte `oordeel.json` — geen adapter.
+ * Nog te doen: instructieregels en de implementatiemonitor.
  */
 (function (global) {
   'use strict';
@@ -23,7 +24,8 @@
       feed: 'https://annotatieconformiteit.nl/data/gezagen.json',
       adapter: adapterAnnotatiekwaliteit
     },
-    { sleutel: 'transitie', naam: 'Transitie Wro → Ow', bron: 'ponsenkaart.nl', site: 'https://ponsenkaart.nl', feed: null },
+    { sleutel: 'transitie', naam: 'Transitie Wro → Ow', bron: 'ponsenkaart.nl', site: 'https://ponsenkaart.nl',
+      feed: 'https://ponsenkaart.nl/data/oordeel.json' },
     { sleutel: 'toepasbareregels', naam: 'Toepasbare regels', bron: 'instructieregels.nl', site: 'https://instructieregels.nl', feed: null },
     { sleutel: 'monitor', naam: 'Landelijke monitor', bron: 'dso-implementatiemonitor.nl', site: 'https://dso-implementatiemonitor.nl', feed: null }
   ];
@@ -185,6 +187,20 @@
         else {
           oordeel = (feed[soort] || {})[id] || null;
           if (oordeel && !oordeel.dekking && feed.dekking_lens) oordeel.dekking = feed.dekking_lens;
+          if (!oordeel) {
+            // Onderscheid twee soorten leegte. "Deze lens meet dit niveau
+            // niet" is iets anders dan "dit object is niet beoordeeld", en
+            // dat verschil hoort de bezoeker te zien.
+            var meet = feed.geldt_voor;
+            var buitenNiveau = Array.isArray(meet) && meet.indexOf(soort) === -1;
+            oordeel = {
+              cijfer: null,
+              nvt_reden: buitenNiveau
+                ? (soort === 'documenten' ? feed.nvt_documenten : feed.nvt_buiten_index) || 'niet van toepassing'
+                : 'niet beoordeeld',
+              dekking: buitenNiveau ? '' : (feed.dekking && feed.dekking.zin) || ''
+            };
+          }
         }
         grid.replaceChild(paneel(lens, oordeel, status), plek);
       });
