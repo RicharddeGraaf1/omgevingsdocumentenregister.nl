@@ -213,10 +213,42 @@ td.num, th.num { text-align: right; font-family: var(--mono); padding-right: 0; 
 .boom .nd-titel { font-size: 14.5px; }
 .boom .ann { font-family: var(--mono); font-size: 11.5px; color: var(--accent); }
 
-.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px,1fr)); gap: 1px; background: var(--rule); border: 1px solid var(--rule); margin: 20px 0; }
-.kpi { background: var(--paper); padding: 13px 15px; }
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); gap: 1px; background: var(--rule); border: 1px solid var(--rule); margin: 20px 0; }
+/* min-width:0 is niet optioneel: zonder dat weigert een grid-kolom te krimpen
+   onder de breedte van zijn langste woord, en een FRBR-identificatie is één
+   lang woord. Die liep dwars over de buurtegel heen. */
+.kpi { background: var(--paper); padding: 13px 15px; min-width: 0; }
 .kpi dt { font-size: 13px; color: var(--ink-3); margin-bottom: 3px; }
-.kpi dd { margin: 0; font-family: var(--serif); font-size: 27px; line-height: 1.1; }
+.kpi dd { margin: 0; font-family: var(--serif); font-size: 27px; line-height: 1.15; overflow-wrap: anywhere; }
+.kpi dd.mono { font-family: var(--mono); font-size: 12.5px; line-height: 1.5; }
+
+/* ── Documentdetail: boom naast leestekst ─────────────── */
+.doc-cols { display: grid; grid-template-columns: minmax(0, 22rem) minmax(0, 1fr); gap: 30px; align-items: start; margin-top: 8px; }
+@media (max-width: 900px) { .doc-cols { grid-template-columns: 1fr; } }
+.doc-boom { border-right: 1px solid var(--rule-soft); padding-right: 22px; max-height: 78vh; overflow: auto; }
+@media (max-width: 900px) { .doc-boom { border-right: 0; padding-right: 0; max-height: none; } }
+.doc-tekst { position: sticky; top: 92px; }
+@media (max-width: 900px) { .doc-tekst { position: static; } }
+
+.boom .nd-titel.klikbaar {
+  background: none; border: 0; padding: 1px 3px; margin-left: -3px; text-align: left;
+  font: inherit; color: var(--link); cursor: pointer; border-radius: 2px;
+}
+.boom .nd-titel.klikbaar:hover { background: var(--paper-2); color: var(--link-hover); }
+.boom li.actief > .nd .nd-titel.klikbaar { background: var(--ink); color: var(--paper); }
+
+.leestekst { max-width: 68ch; }
+.leestekst .lt-kop { border-bottom: 1px solid var(--rule); padding-bottom: 10px; margin-bottom: 14px; }
+.leestekst .lt-kop .nr { font: 500 12px/1 var(--mono); color: var(--ink-3); display: block; margin-bottom: 4px; }
+.leestekst .lt-kop h3 { font-size: 21px; }
+.leestekst p { font-size: 16.5px; line-height: 1.65; margin: 0 0 13px; }
+.leestekst ul, .leestekst ol { padding-left: 22px; margin: 0 0 13px; }
+.leestekst li { margin-bottom: 5px; }
+.leestekst .lid { display: grid; grid-template-columns: 2.2rem 1fr; gap: 6px; margin-bottom: 12px; }
+.leestekst .lid > .lidnr { font: 500 14px/1.7 var(--mono); color: var(--ink-3); }
+.leestekst .verwijzing { color: var(--link); text-decoration: underline; text-decoration-style: dotted; }
+.leestekst .leeg { color: var(--ink-3); font-style: italic; }
+.tekst-hint { color: var(--ink-3); font-style: italic; padding: 20px 0; border-left: 3px solid var(--rule); padding-left: 14px; }
 
 .notice { border-left: 4px solid var(--accent); background: var(--paper-2); padding: 13px 16px; margin: 18px 0; }
 .notice p:last-child { margin-bottom: 0; }

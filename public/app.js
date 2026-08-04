@@ -361,7 +361,7 @@
           ['Vigerend', r.inactief ? 'nee — ' + (r.reden_inactief || 'vervangen') : 'ja, dit is de versie die het register kent']
         ]));
         Lenzen.strook(lensPlek, 'documenten', werk);
-        toonBoom(inhoud, d);
+        toonBoom(inhoud, d, id);
       }).catch(function (e) { leeg(kopBlok); kopBlok.appendChild(fout(e)); });
     } else {
       api('/v1/viewer/wro/' + encodeURIComponent(id.replace(/^\//, '')) + '/detail').then(function (d) {
@@ -388,19 +388,138 @@
       if (p[1] == null || p[1] === '') return;
       dl.appendChild(el('div', { class: 'kpi' }, [
         el('dt', { text: p[0] }),
-        el('dd', { class: String(p[1]).length > 26 ? 'mono' : '', text: String(p[1]) })
+        el('dd', { class: (String(p[1]).length > 26 || String(p[1]).charAt(0) === '/') ? 'mono' : '', text: String(p[1]) })
       ]));
     });
     return dl;
   }
 
-  function toonBoom(node, d) {
+  function toonBoom(node, d, expression) {
     node.appendChild(el('h2', { text: 'Documentstructuur' }));
     var n = telBoom(d.boom || []);
-    node.appendChild(el('p', { class: 'muted', text: n.elementen + ' elementen, waarvan ' + n.metTekst + ' met tekst · ' + n.annotaties + ' geannoteerde onderdelen' }));
+    node.appendChild(el('p', { class: 'muted', text:
+      n.elementen + ' elementen, waarvan ' + n.metTekst + ' met tekst \u00b7 ' + n.annotaties + ' geannoteerde onderdelen' }));
+
+    var kolommen = el('div', { class: 'doc-cols' });
+    var links = el('div', { class: 'doc-boom' });
+    var rechts = el('div', { class: 'doc-tekst' });
+    kolommen.appendChild(links);
+    kolommen.appendChild(rechts);
+    node.appendChild(kolommen);
+
     var ul = el('ul', { class: 'boom' });
-    (d.boom || []).forEach(function (k) { ul.appendChild(boomNode(k)); });
-    node.appendChild(ul);
+    (d.boom || []).forEach(function (k) { ul.appendChild(boomNode(k, expression, rechts)); });
+    links.appendChild(ul);
+
+    // Meteen het eerste onderdeel met tekst openen; een leeg rechterpaneel
+    // naast een boom van honderd regels nodigt niet uit.
+    var eerste = eersteMetTekst(d.boom || []);
+    if (eerste) toonInhoud(expression, eerste, rechts);
+    else rechts.appendChild(el('p', { class: 'tekst-hint', text: 'Dit document heeft geen leesbare tekst-elementen.' }));
+  }
+
+  function eersteMetTekst(nodes) {
+    for (var i = 0; i < nodes.length; i++) {
+      if (nodes[i].heeft_tekst) return nodes[i];
+      var d = eersteMetTekst(nodes[i].kinderen || []);
+      if (d) return d;
+    }
+    return null;
+  }
+
+  /** Haalt de tekst van een onderdeel op en rendert die in het rechterpaneel. */
+  function toonInhoud(expression, knoop, doel) {
+    var vorige = document.querySelectorAll('.boom li.actief');
+    Array.prototype.forEach.call(vorige, function (li) { li.classList.remove('actief'); });
+    if (knoop._li) knoop._li.classList.add('actief');
+
+    leeg(doel);
+    doel.appendChild(laden('Tekst ophalen\u2026'));
+
+    api('/v1/viewer/regeling/' + encodeURIComponent(expression) +
+        '/artikel/' + encodeURIComponent(knoop.wid) + '/inhoud')
+      .then(function (d) {
+        leeg(doel);
+        var wrap = el('div', { class: 'leestekst' });
+        wrap.appendChild(el('div', { class: 'lt-kop' }, [
+          el('span', { class: 'nr', text: (knoop.type || '') + (d.nummer ? ' ' + d.nummer : '') }),
+          el('h3', { text: d.opschrift || knoop.opschrift || '(zonder opschrift)' })
+        ]));
+        if (d.isLeeg) {
+          wrap.appendChild(el('p', { class: 'leeg', text:
+            'Dit onderdeel heeft zelf geen tekst; kies een onderliggend onderdeel.' }));
+        } else {
+          renderStop(d.inhoud, wrap);
+        }
+        doel.appendChild(wrap);
+      })
+      .catch(function (e) { leeg(doel); doel.appendChild(fout(e)); });
+  }
+
+  /* STOP-XML naar leesbare HTML.
+   * Bewust via DOMParser en echte DOM-knopen, niet innerHTML: de inhoud komt
+   * uit de bron en hoort niet als opmaak uitgevoerd te worden. Onbekende
+   * elementen vallen terug op hun tekst, zodat er nooit iets wegvalt. */
+  var BLOK = { Al: 'p', Kop: 'h4', Titel: 'h4', Opschrift: 'h4' };
+  var INLINE = { i: 'em', em: 'em', b: 'strong', strong: 'strong', sup: 'sup', sub: 'sub' };
+  var VERWIJZING = { IntRef: 1, ExtRef: 1, IntIoRef: 1, ExtIoRef: 1 };
+
+  function renderStop(xml, doel) {
+    var doc = null;
+    try { doc = new DOMParser().parseFromString(xml, 'application/xml'); } catch (e) { doc = null; }
+    if (!doc || doc.getElementsByTagName('parsererror').length) {
+      doel.appendChild(el('p', { text: String(xml).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim() }));
+      return;
+    }
+    Array.prototype.forEach.call(doc.documentElement.childNodes, function (k) { schrijf(k, doel); });
+  }
+
+  function schrijf(knoop, doel) {
+    if (knoop.nodeType === 3) {
+      if (knoop.nodeValue && knoop.nodeValue.trim()) doel.appendChild(document.createTextNode(knoop.nodeValue));
+      return;
+    }
+    if (knoop.nodeType !== 1) return;
+    var naam = knoop.localName;
+
+    if (naam === 'Lid') {
+      var nr = '';
+      var body = el('div');
+      Array.prototype.forEach.call(knoop.childNodes, function (k) {
+        if (k.nodeType === 1 && k.localName === 'LidNummer') { nr = k.textContent; return; }
+        schrijf(k, body);
+      });
+      doel.appendChild(el('div', { class: 'lid' }, [el('span', { class: 'lidnr', text: nr }), body]));
+      return;
+    }
+    if (naam === 'Lijst') {
+      var lijst = el('ul');
+      Array.prototype.forEach.call(knoop.childNodes, function (k) { schrijf(k, lijst); });
+      if (lijst.childNodes.length) doel.appendChild(lijst);
+      return;
+    }
+    if (naam === 'Li') {
+      var li = el('li');
+      Array.prototype.forEach.call(knoop.childNodes, function (k) {
+        if (k.nodeType === 1 && k.localName === 'LiNummer') return;
+        schrijf(k, li);
+      });
+      doel.appendChild(li);
+      return;
+    }
+    if (VERWIJZING[naam]) {
+      doel.appendChild(el('span', { class: 'verwijzing', text: knoop.textContent }));
+      return;
+    }
+    if (INLINE[naam]) {
+      var inl = el(INLINE[naam]);
+      Array.prototype.forEach.call(knoop.childNodes, function (k) { schrijf(k, inl); });
+      doel.appendChild(inl);
+      return;
+    }
+    var blok = el(BLOK[naam] || 'div');
+    Array.prototype.forEach.call(knoop.childNodes, function (k) { schrijf(k, blok); });
+    if (blok.childNodes.length) doel.appendChild(blok);
   }
 
   function telBoom(nodes, acc) {
@@ -417,24 +536,30 @@
     return acc;
   }
 
-  function boomNode(n) {
+  function boomNode(n, expression, doel) {
     var titel = [n.nummer, n.opschrift].filter(Boolean).join(' ') || n.type;
-    var rij = el('div', { class: 'nd' }, [
-      el('span', { class: 'nd-type', text: n.type || '' }),
-      el('span', { class: 'nd-titel', text: titel })
-    ]);
+    var label;
+    if (n.heeft_tekst && expression) {
+      label = el('button', { type: 'button', class: 'nd-titel klikbaar', text: titel });
+      label.addEventListener('click', function () { toonInhoud(expression, n, doel); });
+    } else {
+      label = el('span', { class: 'nd-titel', text: titel });
+    }
+
+    var rij = el('div', { class: 'nd' }, [el('span', { class: 'nd-type', text: n.type || '' }), label]);
     var a = n.annotaties;
     if (a) {
       var stukjes = [];
       if ((a.activiteiten || []).length) stukjes.push(a.activiteiten.length + ' act');
       if ((a.gebiedsaanwijzingen || []).length) stukjes.push(a.gebiedsaanwijzingen.length + ' geb');
       if ((a.normwaarden || []).length) stukjes.push(a.normwaarden.length + ' norm');
-      if (stukjes.length) rij.appendChild(el('span', { class: 'ann', text: stukjes.join(' · ') }));
+      if (stukjes.length) rij.appendChild(el('span', { class: 'ann', text: stukjes.join(' \u00b7 ') }));
     }
     var li = el('li', {}, [rij]);
+    n._li = li;
     if ((n.kinderen || []).length) {
       var ul = el('ul');
-      n.kinderen.forEach(function (k) { ul.appendChild(boomNode(k)); });
+      n.kinderen.forEach(function (k) { ul.appendChild(boomNode(k, expression, doel)); });
       li.appendChild(ul);
     }
     return li;
