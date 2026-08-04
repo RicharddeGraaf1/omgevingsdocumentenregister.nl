@@ -1,6 +1,16 @@
 # Ontwerp — GIO-paneel achter een IntIoRef
 
-Status: ontwerp, nog niet gebouwd · 2026-08-04
+Status: **gebouwd** 2026-08-04 · frontend live (`?v=2026-08-04i`), API-kant
+gecommit maar nog niet uitgerold — zolang dat zo is verschijnt er geen enkele
+knop en verandert er niets zichtbaars.
+
+Wat tijdens het bouwen anders liep dan hier stond, is in de tekst verwerkt.
+Drie dingen zijn door de test gevonden en niet door het ontwerp:
+
+- het zoomniveau werd één stap te fijn gekozen (§4),
+- een "dunne vormen verdwijnen"-vangnet bleek een oplossing voor een
+  niet-bestaand probleem en is er weer uit (§4),
+- `ST_AsSVG` negeert y, wat de affine-transformatie omkeert (§5).
 
 Doel: wie in een artikel op een verwijzing naar een informatieobject klikt,
 ziet meteen wát dat object is en wáár het ligt — zonder de leestekst te
