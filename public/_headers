@@ -1,4 +1,13 @@
 /*
+  # Altijd hervalideren. Cloudflare Pages geeft standaard max-age=14400, en
+  # omdat deze site geen buildstap heeft zit er ook geen hash in de
+  # bestandsnamen — een bezoeker houdt dan tot vier uur lang de oude app.js,
+  # ook nadat er een fix live staat. Dat is precies wat er op 2026-08-04
+  # gebeurde: de documentdetail-fix was uitgerold, maar de browser draaide nog
+  # de vorige versie en gaf 404 op elk document.
+  # Met een ETag is hervalideren een 304 van een paar honderd bytes; dat is de
+  # juiste ruil zolang assets niet versioned zijn.
+  Cache-Control: public, max-age=0, must-revalidate
   X-Content-Type-Options: nosniff
   X-Frame-Options: DENY
   Referrer-Policy: strict-origin-when-cross-origin
