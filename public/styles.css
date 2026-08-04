@@ -305,3 +305,71 @@ td.num, th.num { text-align: right; font-family: var(--mono); padding-right: 0; 
 
 .prose h2 { margin-top: 30px; }
 .prose ul { max-width: 78ch; }
+
+/* ── GIO-paneel ─────────────────────────────────────────────────────────
+   Het informatieobject achter een verwijzing. Geen dialoog: het paneel legt
+   zich naast de leestekst, niet eroverheen, want de bezoeker moet de regel en
+   het gebied naast elkaar kunnen zien. Onder 1100px is er geen naast meer en
+   wordt het een blad over de pagina. */
+.leestekst .verwijzing.ioref {
+  font: inherit; background: none; border: 0; padding: 0 1px; cursor: pointer;
+  color: var(--link); text-decoration: underline; text-decoration-style: dotted;
+  text-underline-offset: 2px;
+}
+.leestekst .verwijzing.ioref::after {
+  content: '◱'; font-size: .78em; margin-left: .22em; color: var(--accent);
+  vertical-align: baseline;
+}
+.leestekst .verwijzing.ioref:hover { color: var(--link-hover); background: var(--paper-2); }
+.leestekst .verwijzing.ioref[aria-expanded="true"] { background: var(--accent); color: var(--paper); }
+.leestekst .verwijzing.ioref[aria-expanded="true"]::after { color: var(--paper); }
+
+.gio-paneel {
+  position: fixed; top: 84px; right: 18px; z-index: 40;
+  width: min(420px, calc(100vw - 36px)); max-height: calc(100vh - 108px); overflow: auto;
+  background: var(--paper); border: 1px solid var(--rule-soft);
+  box-shadow: 0 14px 44px rgba(0,0,0,.18); padding: 20px 22px 24px;
+}
+@media (max-width: 1100px) { .gio-paneel { top: auto; bottom: 0; right: 0; left: 0; width: auto; max-height: 74vh; border-bottom: 0; } }
+.gio-paneel:focus { outline: 2px solid var(--accent); outline-offset: -2px; }
+.gio-sluit {
+  position: absolute; top: 10px; right: 12px; background: none; border: 0;
+  font-size: 1.05rem; line-height: 1; color: var(--ink-3); cursor: pointer; padding: 4px 6px;
+}
+.gio-sluit:hover { color: var(--accent); }
+
+.gio-kop { margin-bottom: 14px; padding-right: 26px; }
+.gio-soort {
+  display: block; font-family: 'IBM Plex Mono', monospace; font-size: .68rem;
+  letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 3px;
+}
+.gio-kop h3 { font-size: 1.08rem; line-height: 1.3; margin: 0; }
+
+/* De plaat: tegels in een raster, SVG eroverheen. overflow:hidden knipt het
+   raster af op de plaatmaat — de tegels lopen er per definitie buiten. */
+.gio-kaart {
+  position: relative; overflow: hidden; margin: 0 0 8px;
+  border: 1px solid var(--rule-soft); background: var(--paper-2);
+}
+.gio-tegels { position: absolute; display: flex; flex-wrap: wrap; line-height: 0; }
+.gio-tegels img { display: block; }
+.gio-vorm { position: absolute; inset: 0; width: 100%; height: 100%; }
+.gio-vorm path { fill: rgba(179,50,26,.28); stroke: var(--accent); stroke-width: 1.4; }
+.gio-vorm .gio-omtrek { fill: none; stroke: var(--accent); stroke-width: 1.6; stroke-dasharray: 5 4; }
+.gio-schaal, .gio-bron { font-size: .74rem; margin: 0 0 2px; }
+.gio-bron { margin-bottom: 14px; }
+.gio-geenkaart {
+  font-size: .84rem; border-left: 3px solid var(--rule-soft);
+  padding: 8px 0 8px 12px; margin: 0 0 16px; color: var(--ink-2);
+}
+
+.gio-sectie { margin: 18px 0 8px; font-size: .82rem; letter-spacing: .02em; }
+.gio-blok { margin-bottom: 14px; }
+.gio-blok h4 { font-size: .8rem; margin: 0 0 5px; color: var(--ink-2); }
+.gio-lijst { margin: 0; padding-left: 18px; font-size: .86rem; line-height: 1.45; }
+.gio-lijst li { margin-bottom: 2px; }
+.gio-meta { display: grid; grid-template-columns: auto 1fr; gap: 3px 12px; margin: 0; font-size: .82rem; }
+.gio-meta dt { color: var(--ink-3); }
+.gio-meta dd { margin: 0; overflow-wrap: anywhere; }
+.gio-meta code { font-size: .74rem; }
+.gio-noot { font-size: .76rem; line-height: 1.45; margin: 10px 0 0; }

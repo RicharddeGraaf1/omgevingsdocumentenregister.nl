@@ -21,6 +21,7 @@ const ALLOWED_PREFIXES = [
   '/v1/register',
   '/v1/regelingen/zoek',
   '/v1/viewer/filter-options',
+  '/v1/viewer/gio',
   '/v1/viewer/regeling',
   '/v1/viewer/teksten',
   '/v1/viewer/wro',

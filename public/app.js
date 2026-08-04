@@ -527,7 +527,7 @@
         if (t.begrijpelijk) body.appendChild(el('p', { text: t.begrijpelijk }));
         else body.appendChild(el('p', { class: 'leeg', text: 'Voor dit onderdeel is geen hertaling beschikbaar.' }));
       } else if (t.tekst) {
-        renderStop(t.tekst, body);
+        renderStop(t.tekst, body, t.iorefs);
       }
       if (body.childNodes.length) { blok.appendChild(body); wrap.appendChild(blok); getoond++; }
     });
@@ -550,17 +550,17 @@
   var INLINE = { i: 'em', em: 'em', b: 'strong', strong: 'strong', sup: 'sup', sub: 'sub' };
   var VERWIJZING = { IntRef: 1, ExtRef: 1, IntIoRef: 1, ExtIoRef: 1 };
 
-  function renderStop(xml, doel) {
+  function renderStop(xml, doel, iorefs) {
     var doc = null;
     try { doc = new DOMParser().parseFromString(xml, 'application/xml'); } catch (e) { doc = null; }
     if (!doc || doc.getElementsByTagName('parsererror').length) {
       doel.appendChild(el('p', { text: String(xml).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim() }));
       return;
     }
-    Array.prototype.forEach.call(doc.documentElement.childNodes, function (k) { schrijf(k, doel); });
+    Array.prototype.forEach.call(doc.documentElement.childNodes, function (k) { schrijf(k, doel, iorefs); });
   }
 
-  function schrijf(knoop, doel) {
+  function schrijf(knoop, doel, iorefs) {
     if (knoop.nodeType === 3) {
       if (knoop.nodeValue && knoop.nodeValue.trim()) doel.appendChild(document.createTextNode(knoop.nodeValue));
       return;
@@ -573,14 +573,14 @@
       var body = el('div');
       Array.prototype.forEach.call(knoop.childNodes, function (k) {
         if (k.nodeType === 1 && k.localName === 'LidNummer') { nr = k.textContent; return; }
-        schrijf(k, body);
+        schrijf(k, body, iorefs);
       });
       doel.appendChild(el('div', { class: 'lid' }, [el('span', { class: 'lidnr', text: nr }), body]));
       return;
     }
     if (naam === 'Lijst') {
       var lijst = el('ul');
-      Array.prototype.forEach.call(knoop.childNodes, function (k) { schrijf(k, lijst); });
+      Array.prototype.forEach.call(knoop.childNodes, function (k) { schrijf(k, lijst, iorefs); });
       if (lijst.childNodes.length) doel.appendChild(lijst);
       return;
     }
@@ -588,23 +588,42 @@
       var li = el('li');
       Array.prototype.forEach.call(knoop.childNodes, function (k) {
         if (k.nodeType === 1 && k.localName === 'LiNummer') return;
-        schrijf(k, li);
+        schrijf(k, li, iorefs);
       });
       doel.appendChild(li);
       return;
     }
     if (VERWIJZING[naam]) {
+      // Een IntIoRef wijst naar de wId van een ExtIoRef in hetzelfde document;
+      // die draagt pas de FRBR van het informatieobject. Die twee trappen zijn
+      // server-side al gezet en staan in `iorefs`, gesleuteld op @ref.
+      //
+      // Alleen een knop maken als er ook echt iets achter zit. Een knop die na
+      // de klik blijkt niets op te leveren is erger dan gewone tekst — vandaar
+      // dat het paneel de metadata mee krijgt bij het tekenen en niet pas erna.
+      var ref = naam === 'IntIoRef' && iorefs ? iorefs[knoop.getAttribute('ref')] : null;
+      if (ref && window.Gio) {
+        var knop = el('button', {
+          type: 'button', class: 'verwijzing ioref',
+          'aria-expanded': 'false',
+          title: (ref.naam || 'informatieobject') + ' — toon op de kaart'
+        }, [knoop.textContent]);
+        knop.addEventListener('click', function () { window.Gio.open(knop, ref.gio, knoop.textContent); });
+        knop.addEventListener('mouseenter', function () { window.Gio.prefetch(ref.gio); });
+        doel.appendChild(knop);
+        return;
+      }
       doel.appendChild(el('span', { class: 'verwijzing', text: knoop.textContent }));
       return;
     }
     if (INLINE[naam]) {
       var inl = el(INLINE[naam]);
-      Array.prototype.forEach.call(knoop.childNodes, function (k) { schrijf(k, inl); });
+      Array.prototype.forEach.call(knoop.childNodes, function (k) { schrijf(k, inl, iorefs); });
       doel.appendChild(inl);
       return;
     }
     var blok = el(BLOK[naam] || 'div');
-    Array.prototype.forEach.call(knoop.childNodes, function (k) { schrijf(k, blok); });
+    Array.prototype.forEach.call(knoop.childNodes, function (k) { schrijf(k, blok, iorefs); });
     if (blok.childNodes.length) doel.appendChild(blok);
   }
 
