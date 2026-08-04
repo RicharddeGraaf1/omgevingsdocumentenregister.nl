@@ -30,6 +30,17 @@
     });
   }
 
+  function apiPost(pad, body) {
+    return fetch(API + pad, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify(body)
+    }).then(function (r) {
+      if (!r.ok) throw new Error('API gaf ' + r.status + ' op ' + pad);
+      return r.json();
+    });
+  }
+
   function nl(n) { return (n == null) ? '—' : Number(n).toLocaleString('nl-NL'); }
 
   /** FRBR-work uit een expression: '/akn/…/omgevingsplan/nld@2026-03-12;1' → '/akn/…/omgevingsplan'.
@@ -403,7 +414,7 @@
     node.appendChild(el('h2', { text: 'Documentstructuur' }));
     var n = telBoom(d.boom || []);
     node.appendChild(el('p', { class: 'muted', text:
-      n.elementen + ' elementen, waarvan ' + n.metTekst + ' met tekst \u00b7 ' + n.annotaties + ' geannoteerde onderdelen' }));
+      n.elementen + ' elementen, waarvan ' + n.metTekst + ' met tekst' }));
 
     var kolommen = el('div', { class: 'doc-cols' });
     var links = el('div', { class: 'doc-boom' });
@@ -413,7 +424,10 @@
     node.appendChild(kolommen);
 
     var ul = el('ul', { class: 'boom' });
-    (d.boom || []).forEach(function (k) { ul.appendChild(boomNode(k, expression, rechts)); });
+    (d.boom || []).forEach(function (k) {
+      var knoop = boomNode(k, expression, rechts);
+      if (knoop) ul.appendChild(knoop);
+    });
     links.appendChild(ul);
 
     // Meteen het eerste onderdeel met tekst openen; een leeg rechterpaneel
@@ -432,7 +446,20 @@
     return null;
   }
 
-  /** Haalt de tekst van een onderdeel op en rendert die in het rechterpaneel. */
+  /* Voorkeur voor de begrijpelijke weergave onthouden over artikelen heen. */
+  var begrijpelijkAan = false;
+  try { begrijpelijkAan = localStorage.getItem('odr-begrijpelijk') === '1'; } catch (e) { /* private mode */ }
+
+  /** Verzamelt een knoop plus zijn tekstdragende nakomelingen, in leesvolgorde. */
+  function tekstKnopen(n, uit) {
+    uit = uit || [];
+    if (n.heeft_tekst) uit.push(n);
+    (n.kinderen || []).forEach(function (k) { tekstKnopen(k, uit); });
+    return uit;
+  }
+
+  /** Haalt de tekst van een onderdeel op en rendert die in het rechterpaneel.
+   *  Eén call levert zowel de juridische tekst als de begrijpelijke variant. */
   function toonInhoud(expression, knoop, doel) {
     var vorige = document.querySelectorAll('.boom li.actief');
     Array.prototype.forEach.call(vorige, function (li) { li.classList.remove('actief'); });
@@ -441,27 +468,78 @@
     leeg(doel);
     doel.appendChild(laden('Tekst ophalen\u2026'));
 
-    api('/v1/viewer/regeling/' + encodeURIComponent(expression) +
-        '/artikel/' + encodeURIComponent(knoop.wid) + '/inhoud')
-      .then(function (d) {
+    var delen = tekstKnopen(knoop);
+    if (!delen.length) delen = [knoop];
+
+    apiPost('/v1/viewer/teksten', { wids: delen.map(function (d) { return d.wid; }) })
+      .then(function (res) {
+        var perWid = {};
+        (res.teksten || []).forEach(function (t) { perWid[t.wid] = t; });
         leeg(doel);
-        var wrap = el('div', { class: 'leestekst' });
-        // Een Lid heeft normaal geen opschrift; daar "(zonder opschrift)"
-        // boven zetten suggereert een gat dat er niet is.
-        var titelTekst = d.opschrift || knoop.opschrift || '';
-        wrap.appendChild(el('div', { class: 'lt-kop' }, [
-          el('span', { class: 'nr', text: (knoop.type || '') + (d.nummer ? ' ' + d.nummer : '') }),
-          titelTekst ? el('h3', { text: titelTekst }) : null
-        ]));
-        if (d.isLeeg) {
-          wrap.appendChild(el('p', { class: 'leeg', text:
-            'Dit onderdeel heeft zelf geen tekst; kies een onderliggend onderdeel.' }));
-        } else {
-          renderStop(d.inhoud, wrap);
-        }
-        doel.appendChild(wrap);
+        doel.appendChild(leesPaneel(knoop, delen, perWid));
       })
       .catch(function (e) { leeg(doel); doel.appendChild(fout(e)); });
+  }
+
+  function leesPaneel(knoop, delen, perWid) {
+    var wrap = el('div', { class: 'leestekst' });
+
+    var metHertaling = delen.filter(function (d) {
+      var t = perWid[d.wid];
+      return t && t.begrijpelijk;
+    }).length;
+
+    var titelTekst = knoop.opschrift || '';
+    var kop = el('div', { class: 'lt-kop' }, [
+      el('span', { class: 'nr', text: (knoop.type || '') + (knoop.nummer ? ' ' + knoop.nummer : '') }),
+      titelTekst ? el('h3', { text: titelTekst }) : null
+    ]);
+
+    if (metHertaling) {
+      var schakelaar = el('button', { type: 'button', class: 'schuif', 'aria-pressed': String(begrijpelijkAan) }, [
+        el('span', { class: 'schuif-baan' }, [el('i')]),
+        el('span', { text: 'Begrijpelijke tekst' })
+      ]);
+      schakelaar.addEventListener('click', function () {
+        begrijpelijkAan = !begrijpelijkAan;
+        try { localStorage.setItem('odr-begrijpelijk', begrijpelijkAan ? '1' : '0'); } catch (e) { /* negeren */ }
+        var nieuw = leesPaneel(knoop, delen, perWid);
+        wrap.parentNode.replaceChild(nieuw, wrap);
+      });
+      kop.appendChild(schakelaar);
+    }
+    wrap.appendChild(kop);
+
+    if (begrijpelijkAan && metHertaling) {
+      wrap.appendChild(el('p', { class: 'waarschuwing', text:
+        'Dit is een automatisch gemaakte hertaling zonder juridische status. ' +
+        'Alleen de oorspronkelijke tekst telt; zet de schakelaar uit om die te lezen.' }));
+    }
+
+    var getoond = 0;
+    delen.forEach(function (d) {
+      var t = perWid[d.wid];
+      if (!t) return;
+      var blok = el('div', { class: 'deel' });
+      if (d.type === 'Lid' && d.nummer) blok.appendChild(el('span', { class: 'lidnr', text: d.nummer }));
+      var body = el('div');
+      if (begrijpelijkAan) {
+        if (t.begrijpelijk) body.appendChild(el('p', { text: t.begrijpelijk }));
+        else body.appendChild(el('p', { class: 'leeg', text: 'Voor dit onderdeel is geen hertaling beschikbaar.' }));
+      } else if (t.tekst) {
+        renderStop(t.tekst, body);
+      }
+      if (body.childNodes.length) { blok.appendChild(body); wrap.appendChild(blok); getoond++; }
+    });
+
+    if (!getoond) {
+      wrap.appendChild(el('p', { class: 'leeg', text:
+        'Dit onderdeel heeft zelf geen tekst; kies een onderliggend onderdeel.' }));
+    } else if (metHertaling < delen.length) {
+      wrap.appendChild(el('p', { class: 'muted', style: 'margin-top:16px', text:
+        metHertaling + ' van ' + delen.length + ' onderdelen heeft een begrijpelijke hertaling.' }));
+    }
+    return wrap;
   }
 
   /* STOP-XML naar leesbare HTML.
@@ -544,30 +622,42 @@
     return acc;
   }
 
+  /* Elementtypen die de boom NIET als eigen regel toont. Een Lid is geen
+     structuur maar inhoud: het hoort bij zijn artikel en staat rechts in de
+     leestekst. Ze apart opsommen maakte van een omgevingsplan een lijst van
+     duizenden regels "LID 1." zonder navigatiewaarde. */
+  var VERBERG_IN_BOOM = { Lid: 1 };
+
+  /* Klikbaar is alles waar tekst onder hangt. `heeft_tekst` alleen is niet
+     genoeg: een Artikel heeft zijn tekst meestal in zijn Leden staan en
+     rapporteert daardoor zelf `false`, terwijl het juist de eenheid is die je
+     wilt lezen. */
+  var LEESBAAR = { Artikel: 1, Divisietekst: 1, Divisie: 1, Begrip: 1 };
+
   function boomNode(n, expression, doel) {
+    if (VERBERG_IN_BOOM[n.type]) return null;
+
     var titel = [n.nummer, n.opschrift].filter(Boolean).join(' ') || n.type;
+    var kanLezen = expression && (n.heeft_tekst || LEESBAAR[n.type]);
     var label;
-    if (n.heeft_tekst && expression) {
+    if (kanLezen) {
       label = el('button', { type: 'button', class: 'nd-titel klikbaar', text: titel });
       label.addEventListener('click', function () { toonInhoud(expression, n, doel); });
     } else {
       label = el('span', { class: 'nd-titel', text: titel });
     }
 
-    var rij = el('div', { class: 'nd' }, [el('span', { class: 'nd-type', text: n.type || '' }), label]);
-    var a = n.annotaties;
-    if (a) {
-      var stukjes = [];
-      if ((a.activiteiten || []).length) stukjes.push(a.activiteiten.length + ' act');
-      if ((a.gebiedsaanwijzingen || []).length) stukjes.push(a.gebiedsaanwijzingen.length + ' geb');
-      if ((a.normwaarden || []).length) stukjes.push(a.normwaarden.length + ' norm');
-      if (stukjes.length) rij.appendChild(el('span', { class: 'ann', text: stukjes.join(' \u00b7 ') }));
-    }
-    var li = el('li', {}, [rij]);
+    var li = el('li', {}, [
+      el('div', { class: 'nd' }, [el('span', { class: 'nd-type', text: n.type || '' }), label])
+    ]);
     n._li = li;
-    if ((n.kinderen || []).length) {
+
+    var kinderen = (n.kinderen || [])
+      .map(function (k) { return boomNode(k, expression, doel); })
+      .filter(Boolean);
+    if (kinderen.length) {
       var ul = el('ul');
-      n.kinderen.forEach(function (k) { ul.appendChild(boomNode(k, expression, doel)); });
+      kinderen.forEach(function (k) { ul.appendChild(k); });
       li.appendChild(ul);
     }
     return li;

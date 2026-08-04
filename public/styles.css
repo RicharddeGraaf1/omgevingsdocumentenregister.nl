@@ -260,8 +260,36 @@ td.num, th.num { text-align: right; font-family: var(--mono); padding-right: 0; 
 .leestekst p { font-size: 16.5px; line-height: 1.65; margin: 0 0 13px; }
 .leestekst ul, .leestekst ol { padding-left: 22px; margin: 0 0 13px; }
 .leestekst li { margin-bottom: 5px; }
-.leestekst .lid { display: grid; grid-template-columns: 2.2rem 1fr; gap: 6px; margin-bottom: 12px; }
-.leestekst .lid > .lidnr { font: 500 14px/1.7 var(--mono); color: var(--ink-3); }
+.leestekst .lid, .leestekst .deel { display: grid; grid-template-columns: 2.2rem 1fr; gap: 6px; margin-bottom: 12px; }
+.leestekst .deel:not(:has(> .lidnr)) { grid-template-columns: 1fr; }
+.leestekst .lidnr { font: 500 14px/1.7 var(--mono); color: var(--ink-3); }
+
+/* Schakelaar voor de begrijpelijke weergave. */
+.lt-kop { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+.lt-kop h3 { flex: 1 1 14rem; }
+.schuif {
+  display: inline-flex; align-items: center; gap: 8px; margin-left: auto;
+  background: none; border: 0; cursor: pointer; padding: 4px 2px;
+  font: 500 13px/1 var(--sans); color: var(--ink-2); white-space: nowrap;
+}
+.schuif-baan {
+  width: 34px; height: 18px; border: 1px solid var(--rule); background: var(--paper-3);
+  border-radius: 9px; position: relative; flex: none; transition: background .12s;
+}
+.schuif-baan > i {
+  position: absolute; top: 2px; left: 2px; width: 12px; height: 12px;
+  background: var(--ink-3); border-radius: 50%; transition: transform .12s, background .12s;
+}
+.schuif[aria-pressed="true"] { color: var(--ink); }
+.schuif[aria-pressed="true"] .schuif-baan { background: var(--link); border-color: var(--link); }
+.schuif[aria-pressed="true"] .schuif-baan > i { transform: translateX(16px); background: var(--paper); }
+.schuif:hover .schuif-baan { border-color: var(--ink-2); }
+
+.leestekst .waarschuwing {
+  font-size: 13.5px; line-height: 1.5; color: var(--at-ink);
+  background: var(--at-bg); border-left: 3px solid var(--at-rule);
+  padding: 9px 12px; margin-bottom: 16px;
+}
 .leestekst .verwijzing { color: var(--link); text-decoration: underline; text-decoration-style: dotted; }
 .leestekst .leeg { color: var(--ink-3); font-style: italic; }
 .tekst-hint { color: var(--ink-3); font-style: italic; padding: 20px 0; border-left: 3px solid var(--rule); padding-left: 14px; }
