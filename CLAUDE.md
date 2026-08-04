@@ -24,26 +24,39 @@ staan `docs/` en eventuele lokale bestanden op het publieke domein.
 
 ## Deploy
 
-> ⚠️ **Stand 2026-08-04: het Pages-project is NIET Git-gekoppeld.** Het is bij
-> het live zetten als direct upload aangemaakt. Gevolg: **`git push` deployt
-> niets.** Vastgesteld doordat GitHub 0 deployments en 0 check-runs op de repo
-> heeft terwijl een Git-gekoppeld project er bij elke push één aanmaakt, en de
-> site na een push de oude `app.js` bleef serveren.
->
-> Wat er wél goed staat: de publish-directory is `public/`, dus er is niets
-> uit de repo-root gelekt (`/CLAUDE.md`, `/docs/…`, `/.env.example` geven
-> allemaal de SPA-fallback, geen bestandsinhoud).
->
-> **Op te lossen**: in het Cloudflare-dashboard het project koppelen aan
-> `RicharddeGraaf1/omgevingsdocumentenregister.nl` (branch `main`, build
-> command leeg, output directory `public`). Zolang dat niet gebeurd is, moet
-> elke wijziging handmatig geüpload worden en loopt de site achter op de repo.
+**Git-gekoppeld: een push naar `main` deployt.** Framework preset None, build
+command leeg, build output directory `public`, automatic deployments aan.
+Geverifieerd 2026-08-04 op commit `337b033`.
 
-De bedoeling is Git-koppeling: een push naar `main` deployt. Bewust géén
-`wrangler pages deploy` vanaf de repo-root: dat patroon heeft op ponsenkaart.nl
-de `CLOUDFLARE_API_TOKEN` publiek gezet doordat de hele map inclusief `.env`
-werd geüpload. Moet er tussentijds tóch handmatig geüpload worden, doe dat dan
-uitsluitend vanuit `public/` — nooit vanuit de repo-root.
+Bewust géén `wrangler pages deploy` vanaf de repo-root: dat patroon heeft op
+ponsenkaart.nl de `CLOUDFLARE_API_TOKEN` publiek gezet doordat de hele map
+inclusief `.env` werd geüpload. Hier weegt nog iets mee: **`functions/` staat
+buiten de publish-directory.** Bij een Git-build pakt Cloudflare die
+deterministisch op; bij een handmatige upload hangt het af van de map waaruit
+je hem draait, en draai je hem verkeerd dan verdwijnt de `/api`-proxy stil en
+geeft élke API-call 404 terwijl de site er normaal uitziet.
+
+### Hoe je controleert of een deploy geland is
+
+**Niet** via GitHub. `gh api repos/…/deployments` geeft **0**, ook wanneer de
+koppeling wél werkt en Cloudflare de laatste commit heeft gebouwd — de Pages
+GitHub App maakt geen GitHub Deployment-objecten aan. Dat aantal is dus geen
+signaal, in geen van beide richtingen.
+
+Wat wél werkt: vergelijk de uitgeleverde bestanden met de repo.
+
+```bash
+for f in app.js lenzen.js styles.css; do
+  curl -s "https://omgevingsdocumentenregister.nl/$f" | sha256sum
+  sha256sum "public/$f"
+done
+```
+
+Let op twee dingen bij zo'n controle:
+- `/index.html` geeft **308** naar `/`; zonder `-L` krijg je een lege body en
+  lijkt het bestand af te wijken terwijl dat niet zo is.
+- Op Windows verschillen de regeleindes (`.gitattributes` laat CRLF in de
+  working copy toe), dus normaliseer `\r\n` → `\n` vóór je hasht.
 
 Na een deploy even nalopen:
 - `curl https://<domein>/.env` mag geen inhoud tonen (let op de **body**, niet
