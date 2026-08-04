@@ -552,68 +552,118 @@
   function viewLandelijk() {
     view.appendChild(kruimels([{ tekst: 'Home', href: '/' }, { tekst: 'Landelijk beeld' }]));
     view.appendChild(kop('Het register in cijfers',
-      'Wat er op dit moment in het register zit. Alle tellingen komen rechtstreeks uit de datalaag; er wordt niets geschat.'));
+      'De toestand van de documentvoorraad op dit moment. Alle tellingen komen rechtstreeks uit de datalaag; er wordt niets geschat en niets geëxtrapoleerd.'));
 
     var plek = el('div', {}, [laden()]);
     view.appendChild(plek);
 
     Promise.all([
-      api('/v1/regelingen/zoek?limit=1'),
-      // Wro-totaal via /v1/gezagen optellen i.p.v. via de zoek-API: die zou
-      // élk ruimtelijk instrument moeten ophalen om alleen een telling te geven.
-      api('/v1/gezagen'),
+      api('/v1/register/landelijk'),
       Lenzen.laad(Lenzen.LENZEN[0])
     ]).then(function (r) {
-      var ow = r[0], gezagen = r[1], kwaliteit = r[2];
+      var d = r[0], kwaliteit = r[1];
       leeg(plek);
 
-      var bronhouders = (gezagen.bronhouders || []).filter(function (b) { return b.ow_regelingen || b.wro_instrumenten; });
-      var wroTotaal = bronhouders.reduce(function (n, b) { return n + (b.wro_instrumenten || 0); }, 0);
-
       plek.appendChild(el('dl', { class: 'kpis' }, [
-        kpi('Omgevingsdocumenten (Ow)', nl(ow.totaal)),
-        kpi('Wro-plannen (oud regime)', nl(wroTotaal)),
-        kpi('Bronhouders met documenten', nl(bronhouders.length))
+        kpi('Omgevingsdocumenten (Ow)', nl(d.totalen.ow)),
+        kpi('Wro-plannen (nog geldend)', nl(d.totalen.wro)),
+        kpi('Bronhouders met documenten', nl(d.totalen.bronhouders))
       ]));
 
-      plek.appendChild(el('h2', { text: 'Documenten per bestuurslaag' }));
-      var lagen = (ow.facets || {}).bestuurslaag || {};
-      var max = Math.max.apply(null, Object.keys(lagen).map(function (k) { return lagen[k]; }).concat([1]));
-      var tb = el('table');
-      tb.appendChild(el('thead', {}, [el('tr', {}, [
-        el('th', { text: 'Bestuurslaag' }), el('th', { text: 'Aandeel' }), el('th', { class: 'num', text: 'Ow-documenten' })
-      ])]));
-      var body = el('tbody');
-      Object.keys(lagen).sort(function (a, b) { return lagen[b] - lagen[a]; }).forEach(function (k) {
-        var bar = el('span', { class: 'bar' }, [el('i', { style: 'width:' + Math.round(lagen[k] / max * 100) + '%' })]);
-        body.appendChild(el('tr', {}, [el('td', { text: k }), el('td', {}, [bar]), el('td', { class: 'num', text: nl(lagen[k]) })]));
-      });
-      tb.appendChild(body);
-      plek.appendChild(el('div', { class: 'tablewrap' }, [tb]));
+      // ── Bestuurslaag ────────────────────────────────────
+      plek.appendChild(el('h2', { text: 'Omgevingsdocumenten per bestuurslaag' }));
+      plek.appendChild(staaftabel(
+        ['Bestuurslaag', 'Aandeel', 'Documenten'],
+        d.per_bestuurslaag.map(function (x) { return [x.bestuurslaag, x.n, null]; })
+      ));
 
+      // ── Provincie ───────────────────────────────────────
+      plek.appendChild(el('h2', { text: 'Per provincie' }));
+      plek.appendChild(el('p', { class: 'muted', text:
+        'Alleen gemeentelijke documenten. Een provinciale verordening of een waterschapsverordening hoort niet bij één provinciegebied, en Rijksdocumenten al helemaal niet — die staan in de tabel hierboven.' }));
+      var maxOw = Math.max.apply(null, d.per_provincie.map(function (x) { return x.ow; }).concat([1]));
+      var tp = el('table');
+      tp.appendChild(el('thead', {}, [el('tr', {}, [
+        el('th', { text: 'Provincie' }), el('th', { class: 'num', text: 'Gemeenten' }),
+        el('th', { text: 'Aandeel' }), el('th', { class: 'num', text: 'Ow-documenten' }),
+        el('th', { class: 'num', text: 'Wro-plannen' })
+      ])]));
+      var bp = el('tbody');
+      d.per_provincie.forEach(function (x) {
+        bp.appendChild(el('tr', {}, [
+          el('td', { text: x.provincie }),
+          el('td', { class: 'num', text: nl(x.gemeenten) }),
+          el('td', {}, [el('span', { class: 'bar' }, [el('i', { style: 'width:' + Math.round(x.ow / maxOw * 100) + '%' })])]),
+          el('td', { class: 'num', text: nl(x.ow) }),
+          el('td', { class: 'num', text: nl(x.wro) })
+        ]));
+      });
+      tp.appendChild(bp);
+      plek.appendChild(el('div', { class: 'tablewrap' }, [tp]));
+
+      // ── Documenttype ────────────────────────────────────
+      plek.appendChild(el('h2', { text: 'Per documenttype' }));
+      plek.appendChild(staaftabel(
+        ['Documenttype', 'Aandeel', 'Documenten'],
+        d.per_documenttype.map(function (x) { return [x.documenttype, x.n, null]; })
+      ));
+
+      // ── Opvallend ───────────────────────────────────────
+      if ((d.opvallend || []).length) {
+        plek.appendChild(el('h2', { text: 'Opvallend in het register' }));
+        var grid = el('div', { class: 'lensgrid' });
+        d.opvallend.forEach(function (o) {
+          var waarde = o.expression
+            ? el('a', { href: documentHref(o.expression), text: o.waarde })
+            : document.createTextNode(o.waarde);
+          grid.appendChild(el('div', { class: 'lens' }, [
+            el('div', { class: 'lens-naam', text: o.kop }),
+            el('div', { class: 'lens-cijfer', style: 'font-size:19px; line-height:1.25' }, [waarde]),
+            el('p', { class: 'lens-dekking', text: o.noot })
+          ]));
+        });
+        plek.appendChild(grid);
+      }
+
+      // ── Kwaliteitsverdeling uit de lens ─────────────────
       if (kwaliteit) {
         plek.appendChild(el('h2', { text: 'Annotatiekwaliteit' }));
-        plek.appendChild(el('p', { class: 'muted', text: 'Overgenomen van annotatieconformiteit.nl, peildatum ' + (kwaliteit.peildatum || 'onbekend') + '. ' + (kwaliteit.dekking_lens || '') }));
-        var scores = Object.keys(kwaliteit.bronhouders)
-          .map(function (k) { return kwaliteit.bronhouders[k].cijfer; })
-          .filter(function (v) { return v != null; });
+        plek.appendChild(el('p', { class: 'muted', text:
+          'Overgenomen van annotatieconformiteit.nl, peildatum ' + (kwaliteit.peildatum || 'onbekend') + '. ' + (kwaliteit.dekking_lens || '') }));
         var emmers = { 'goed (80–100)': 0, 'matig (60–79)': 0, 'zwak (0–59)': 0 };
-        scores.forEach(function (v) { emmers[v >= 80 ? 'goed (80–100)' : v >= 60 ? 'matig (60–79)' : 'zwak (0–59)']++; });
-        var t2 = el('table');
-        t2.appendChild(el('thead', {}, [el('tr', {}, [el('th', { text: 'Categorie' }), el('th', { class: 'num', text: 'Bronhouders' })])]));
-        var b2 = el('tbody');
-        Object.keys(emmers).forEach(function (k) {
-          b2.appendChild(el('tr', {}, [el('td', { text: k }), el('td', { class: 'num', text: nl(emmers[k]) })]));
+        Object.keys(kwaliteit.bronhouders).forEach(function (k) {
+          var v = kwaliteit.bronhouders[k].cijfer;
+          if (v != null) emmers[v >= 80 ? 'goed (80–100)' : v >= 60 ? 'matig (60–79)' : 'zwak (0–59)']++;
         });
-        t2.appendChild(b2);
-        plek.appendChild(el('div', { class: 'tablewrap' }, [t2]));
+        plek.appendChild(staaftabel(['Categorie', 'Aandeel', 'Bronhouders'],
+          Object.keys(emmers).map(function (k) { return [k, emmers[k], null]; })));
       }
 
       plek.appendChild(el('div', { class: 'notice' }, [
         el('h3', { text: 'Wat hier bewust níet staat' }),
-        el('p', { text: 'Een grafiek van nieuwe documenten per kwartaal, en de mutatie over de laatste 30 dagen. De datalaag is een momentopname: voor de Wro-kant bestaat een echte tijdreeks, voor de Omgevingswet-kant nog niet. Een gereconstrueerde reeks zou volledigheid suggereren die er niet is, dus die verschijnt pas als er echt gemeten is.' })
+        el('p', { text: 'Ontwikkeling over tijd: nieuwe documenten per kwartaal, mutaties over de laatste dertig dagen, doorlooptijden. De datalaag achter dit register is een momentopname van de geldende situatie en houdt geen betrouwbare geschiedenis bij van de Omgevingswet-kant. Een gereconstrueerde reeks zou volledigheid suggereren die er niet is, dus die staat er niet.' }),
+        el('p', { class: 'muted', text: 'Om dezelfde reden toont het register geen ontwerpen of vastgestelde besluiten die nog niet in werking zijn: alles wat u hier ziet, geldt nu.' })
       ]));
     }).catch(function (e) { leeg(plek); plek.appendChild(fout(e)); });
+  }
+
+  /** Tabel met een staafje voor het aandeel. rijen = [label, waarde, extra]. */
+  function staaftabel(koppen, rijen) {
+    var max = Math.max.apply(null, rijen.map(function (r) { return r[1]; }).concat([1]));
+    var tb = el('table');
+    tb.appendChild(el('thead', {}, [el('tr', {}, [
+      el('th', { text: koppen[0] }), el('th', { text: koppen[1] }), el('th', { class: 'num', text: koppen[2] })
+    ])]));
+    var body = el('tbody');
+    rijen.forEach(function (r) {
+      body.appendChild(el('tr', {}, [
+        el('td', { text: r[0] }),
+        el('td', {}, [el('span', { class: 'bar' }, [el('i', { style: 'width:' + Math.round(r[1] / max * 100) + '%' })])]),
+        el('td', { class: 'num', text: nl(r[1]) })
+      ]));
+    });
+    tb.appendChild(body);
+    return el('div', { class: 'tablewrap' }, [tb]);
   }
 
   function kpi(t, v) { return el('div', { class: 'kpi' }, [el('dt', { text: t }), el('dd', { text: v })]); }
@@ -647,6 +697,21 @@
     ].join('');
     view.appendChild(d);
   }
+
+  /* ── Versie in de voettekst ───────────────────────────────
+   * Leest de ?v=-token uit zijn eigen script-tag, zodat er geen tweede plek
+   * is die bijgewerkt moet worden. Staat er niet voor de sier: twee keer is
+   * een fix "niet zichtbaar" geweest terwijl hij gewoon live stond, doordat
+   * de browser een oude app.js had. Nu is in één oogopslag — ook op een
+   * screenshot — te zien welke build er draait. */
+  (function toonVersie() {
+    var eigen = document.currentScript
+      || document.querySelector('script[src*="app.js"]');
+    var m = eigen && /[?&]v=([^&"]+)/.exec(eigen.getAttribute('src') || '');
+    var foot = document.querySelector('.site-foot .wrap');
+    if (!foot) return;
+    foot.appendChild(el('p', { class: 'muted', text: 'Versie ' + (m ? m[1] : 'onbekend') }));
+  })();
 
   router();
 })();

@@ -18,6 +18,7 @@ const UPSTREAM = 'https://ocd-api-production.up.railway.app';
 const ALLOWED_PREFIXES = [
   '/health',
   '/v1/gezagen',
+  '/v1/register',
   '/v1/regelingen/zoek',
   '/v1/viewer/filter-options',
   '/v1/viewer/regeling',
