@@ -36,6 +36,25 @@ deterministisch op; bij een handmatige upload hangt het af van de map waaruit
 je hem draait, en draai je hem verkeerd dan verdwijnt de `/api`-proxy stil en
 geeft élke API-call 404 terwijl de site er normaal uitziet.
 
+### Bump de `?v=` bij elke wijziging in een .js of .css
+
+`public/index.html` laadt de assets als `/app.js?v=2026-08-04a` (idem
+`lenzen.js`, `styles.css`). **Wijzig je een van die bestanden, verhoog dan die
+token** — één keer, hij is voor alle drie gelijk.
+
+Waarom dit nodig is: Cloudflare Pages beheert de caching van statische assets
+zelf en **negeert `Cache-Control` uit `_headers`** voor die bestanden; ze
+krijgen `max-age=14400`. De overige headers uit `_headers` (CSP, nosniff, …)
+worden daar wél toegepast, en `/` krijgt wél `max-age=0` — dus het is
+specifiek de caching van assets die je niet in de hand hebt.
+
+Zonder bump draait een bezoeker tot vier uur lang de vorige versie, óók als de
+deploy geslaagd is. Dat is op 2026-08-04 precies misgegaan: de
+documentdetail-fix stond live en byte-identiek aan de repo, en de browser gaf
+alsnog 404 op elk document. Te herkennen aan het foutpad in de melding —
+`/v1/viewer/regeling/akn/…` met één slash is de oude code,
+`/v1/viewer/regeling/%2Fakn%2F…` de nieuwe.
+
 ### Hoe je controleert of een deploy geland is
 
 **Niet** via GitHub. `gh api repos/…/deployments` geeft **0**, ook wanneer de
