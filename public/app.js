@@ -41,6 +41,12 @@
 
   function isOw(id) { return String(id).indexOf('/akn/') === 0; }
 
+  /** Link naar de documentpagina. Ow-expressies beginnen met '/', IMRO-idn's
+   *  niet — zonder normalisatie werd dat '/documentNL.IMRO…'. */
+  function documentHref(id) {
+    return '/document/' + String(id).replace(/^\//, '');
+  }
+
   function leeg(node) { while (node.firstChild) node.removeChild(node.firstChild); }
 
   function laden(tekst) { return el('p', { class: 'loading', text: tekst || 'Bezig met ophalen…' }); }
@@ -283,7 +289,7 @@
     var lijst = el('ul', { class: 'hits' });
     res.regelingen.forEach(function (r) {
       var werk = werkVan(r.expression);
-      var titelLink = el('a', { href: '/document' + r.expression, text: r.titel || '(zonder opschrift)' });
+      var titelLink = el('a', { href: documentHref(r.expression), text: r.titel || '(zonder opschrift)' });
 
       lijst.appendChild(el('li', { class: 'hit' }, [
         el('h3', {}, [titelLink]),
@@ -338,7 +344,12 @@
     view.appendChild(inhoud);
 
     if (isOw(id)) {
-      api('/v1/viewer/regeling' + id + '/boom').then(function (d) {
+      // encodeURIComponent, niet concatenatie: de route is
+      // /v1/viewer/regeling/{expression:path}/boom en `expression` moet mét
+      // leidende slash aankomen — die staat ook zo in p2p.regeling. Plakken
+      // gaf /v1/viewer/regeling/akn/… en dus een lookup zonder slash → 404.
+      // Zelfde conventie als OCDviewer (ocd.repository.ts).
+      api('/v1/viewer/regeling/' + encodeURIComponent(id) + '/boom').then(function (d) {
         var r = d.regeling || {};
         leeg(kopBlok);
         kopBlok.appendChild(kop(r.titel || '(zonder opschrift)'));
@@ -523,7 +534,7 @@
         (res.regelingen || []).forEach(function (r) {
           body.appendChild(el('tr', {}, [
             el('td', {}, [
-              el('a', { href: '/document' + r.expression, text: r.titel || '(zonder opschrift)' }),
+              el('a', { href: documentHref(r.expression), text: r.titel || '(zonder opschrift)' }),
               el('div', { class: 'id', text: werkVan(r.expression) })
             ]),
             el('td', { text: r.documenttype || '—' }),
