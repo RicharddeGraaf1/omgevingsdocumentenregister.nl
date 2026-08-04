@@ -5,12 +5,18 @@
  * wél doet is normaliseren naar één vorm (het feed-contract, docs/feed-contract.md)
  * en tonen.
  *
- * Stand: `annotatiekwaliteit` en `transitie` zijn aangesloten.
+ * Stand: alle vier aangesloten.
  *  - annotatieconformiteit publiceert nog geen `oordeel.json`, maar
  *    `gezagen.json` draagt de twee sleutels die het contract vraagt (gezag =
  *    kale overheidscode, regeling = AKN-frbr_work), dus een adapter volstaat.
- *  - ponsenkaart publiceert wél een echte `oordeel.json` — geen adapter.
- * Nog te doen: instructieregels en de implementatiemonitor.
+ *  - ponsenkaart, instructieregels en de implementatiemonitor publiceren een
+ *    echte `oordeel.json` — geen adapter.
+ *
+ * Alleen annotatiekwaliteit draagt een goed/matig/zwak-etiket, en dat is geen
+ * toeval: die meet tegen een norm (de annotatierichtlijnen). De andere drie
+ * meten voortgang of positie, waar zo'n etiket een oordeel zou suggereren dat
+ * de data niet draagt. Zij laten `label` daarom leeg — zie `label_weggelaten`
+ * in hun feeds.
  */
 (function (global) {
   'use strict';
@@ -26,8 +32,10 @@
     },
     { sleutel: 'transitie', naam: 'Transitie Wro → Ow', bron: 'ponsenkaart.nl', site: 'https://ponsenkaart.nl',
       feed: 'https://ponsenkaart.nl/data/oordeel.json' },
-    { sleutel: 'toepasbareregels', naam: 'Toepasbare regels', bron: 'instructieregels.nl', site: 'https://instructieregels.nl', feed: null },
-    { sleutel: 'monitor', naam: 'Landelijke monitor', bron: 'dso-implementatiemonitor.nl', site: 'https://dso-implementatiemonitor.nl', feed: null }
+    { sleutel: 'toepasbareregels', naam: 'Instructieregels', bron: 'instructieregels.nl', site: 'https://instructieregels.nl',
+      feed: 'https://instructieregels.nl/oordeel.json' },
+    { sleutel: 'monitor', naam: 'Landelijke monitor', bron: 'dso-implementatiemonitor.nl', site: 'https://dso-implementatiemonitor.nl',
+      feed: 'https://dso-implementatiemonitor.nl/oordeel.json' }
   ];
 
   var cache = {};
