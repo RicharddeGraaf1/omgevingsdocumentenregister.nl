@@ -69,9 +69,18 @@
 
   function kop(titel, lead) {
     return el('div', { class: 'page-head' }, [
-      el('h1', { text: titel }),
-      lead ? el('p', { class: 'lead', text: lead }) : null
+      el('div', { class: 'kop-tekst' }, [
+        el('h1', { text: titel }),
+        lead ? el('p', { class: 'lead', text: lead }) : null
+      ])
     ]);
+  }
+
+  /** Kop met ruimte rechts voor de oordelen van aangesloten bronnen. */
+  function kopMetLenzen(titel, soort, id) {
+    var blok = kop(titel);
+    Lenzen.strook(blok, soort, id);
+    return blok;
   }
 
   /* ── Router ───────────────────────────────────────────── */
@@ -338,8 +347,6 @@
     view.appendChild(kopBlok);
     kopBlok.appendChild(laden('Document ophalen…'));
 
-    var lensPlek = el('div');
-    view.appendChild(lensPlek);
     var inhoud = el('div');
     view.appendChild(inhoud);
 
@@ -352,7 +359,7 @@
       api('/v1/viewer/regeling/' + encodeURIComponent(id) + '/boom').then(function (d) {
         var r = d.regeling || {};
         leeg(kopBlok);
-        kopBlok.appendChild(kop(r.titel || '(zonder opschrift)'));
+        kopBlok.appendChild(kopMetLenzen(r.titel || '(zonder opschrift)', 'documenten', werk));
         kopBlok.appendChild(metaLijst([
           ['Documenttype', r.type],
           ['Regime', 'Omgevingswet (STOP/TPOD)'],
@@ -360,14 +367,13 @@
           ['Expressie', r.expression],
           ['Vigerend', r.inactief ? 'nee — ' + (r.reden_inactief || 'vervangen') : 'ja, dit is de versie die het register kent']
         ]));
-        Lenzen.strook(lensPlek, 'documenten', werk);
         toonBoom(inhoud, d, id);
       }).catch(function (e) { leeg(kopBlok); kopBlok.appendChild(fout(e)); });
     } else {
       api('/v1/viewer/wro/' + encodeURIComponent(id.replace(/^\//, '')) + '/detail').then(function (d) {
         var p = d.plan || {};
         leeg(kopBlok);
-        kopBlok.appendChild(kop(p.naam || '(zonder naam)'));
+        kopBlok.appendChild(kopMetLenzen(p.naam || '(zonder naam)', 'documenten', werk));
         kopBlok.appendChild(metaLijst([
           ['Plantype', p.type],
           ['Regime', 'Wro (IMRO) — geldig tot uiterlijk 1 januari 2032'],
@@ -376,7 +382,6 @@
           ['Datum', p.datum],
           ['Bronhouder', p.bronhouder]
         ]));
-        Lenzen.strook(lensPlek, 'documenten', werk);
         toonWro(inhoud, d);
       }).catch(function (e) { leeg(kopBlok); kopBlok.appendChild(fout(e)); });
     }
@@ -441,9 +446,12 @@
       .then(function (d) {
         leeg(doel);
         var wrap = el('div', { class: 'leestekst' });
+        // Een Lid heeft normaal geen opschrift; daar "(zonder opschrift)"
+        // boven zetten suggereert een gat dat er niet is.
+        var titelTekst = d.opschrift || knoop.opschrift || '';
         wrap.appendChild(el('div', { class: 'lt-kop' }, [
           el('span', { class: 'nr', text: (knoop.type || '') + (d.nummer ? ' ' + d.nummer : '') }),
-          el('h3', { text: d.opschrift || knoop.opschrift || '(zonder opschrift)' })
+          titelTekst ? el('h3', { text: titelTekst }) : null
         ]));
         if (d.isLeeg) {
           wrap.appendChild(el('p', { class: 'leeg', text:
@@ -628,8 +636,6 @@
     view.appendChild(kruimels([{ tekst: 'Home', href: '/' }, { tekst: 'Bronhouders', href: '/bronhouders' }, { tekst: code }]));
     var kopBlok = el('div', {}, [laden()]);
     view.appendChild(kopBlok);
-    var lensPlek = el('div');
-    view.appendChild(lensPlek);
     var lijstPlek = el('div');
     view.appendChild(lijstPlek);
 
@@ -637,14 +643,13 @@
       var b = (d.bronhouders || []).filter(function (x) { return x.overheidscode === code; })[0];
       leeg(kopBlok);
       if (!b) { kopBlok.appendChild(kop('Onbekende bronhouder')); return; }
-      kopBlok.appendChild(kop(b.naam || code));
+      kopBlok.appendChild(kopMetLenzen(b.naam || code, 'bronhouders', code));
       kopBlok.appendChild(metaLijst([
         ['Bronhoudercode', b.overheidscode],
         ['Bestuurslaag', b.bestuurslaag],
         ['Ow-documenten', nl(b.ow_regelingen)],
         ['Wro-plannen', nl(b.wro_instrumenten)]
       ]));
-      Lenzen.strook(lensPlek, 'bronhouders', code);
 
       lijstPlek.appendChild(el('h2', { text: 'Documenten van deze bronhouder' }));
       var plek = el('div', {}, [laden()]);

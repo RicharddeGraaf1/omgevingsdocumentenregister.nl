@@ -168,49 +168,36 @@
     return el;
   }
 
-  /* soort: 'documenten' | 'bronhouders'; id: frbr_work of overheidscode */
+  /* Rendert de oordelen die er ZIJN, compact naast de paginakop.
+   *
+   * Bewust geen panelen voor lenzen zonder waarde. Eerder stond de hele
+   * strook er altijd, met drie vakken "niet van toepassing" naast één met
+   * een cijfer — dat leest als drie ontbrekende metingen terwijl er niets
+   * ontbreekt: ponsenkaart en de monitor meten nu eenmaal per gemeente en
+   * niet per document. De verantwoording van wat elke lens meet staat op
+   * /over-het-register; hier hoort alleen wat op dit object van toepassing is.
+   *
+   * soort: 'documenten' | 'bronhouders'; id: frbr_work of overheidscode */
   function strook(container, soort, id) {
     var sectie = document.createElement('section');
-    sectie.className = 'lenzen';
-    var h = document.createElement('h2');
-    h.textContent = 'Oordelen van aangesloten bronnen';
-    sectie.appendChild(h);
-
-    var grid = document.createElement('div');
-    grid.className = 'lensgrid';
-    sectie.appendChild(grid);
+    sectie.className = 'kop-lenzen';
     container.appendChild(sectie);
 
-    LENZEN.forEach(function (lens) {
-      var plek = document.createElement('div');
-      plek.className = 'lens is-nvt';
-      plek.innerHTML = '<div class="lens-naam"></div><div class="lens-cijfer">…</div>';
-      plek.querySelector('.lens-naam').textContent = lens.naam;
-      grid.appendChild(plek);
+    var wachtend = LENZEN.length;
+    var gevonden = 0;
 
+    LENZEN.forEach(function (lens) {
       laad(lens).then(function (feed) {
-        var status = null, oordeel = null;
-        if (feed === null) status = 'niet-aangesloten';
-        else if (feed === undefined) status = 'onbereikbaar';
-        else {
-          oordeel = (feed[soort] || {})[id] || null;
-          if (oordeel && !oordeel.dekking && feed.dekking_lens) oordeel.dekking = feed.dekking_lens;
-          if (!oordeel) {
-            // Onderscheid twee soorten leegte. "Deze lens meet dit niveau
-            // niet" is iets anders dan "dit object is niet beoordeeld", en
-            // dat verschil hoort de bezoeker te zien.
-            var meet = feed.geldt_voor;
-            var buitenNiveau = Array.isArray(meet) && meet.indexOf(soort) === -1;
-            oordeel = {
-              cijfer: null,
-              nvt_reden: buitenNiveau
-                ? (soort === 'documenten' ? feed.nvt_documenten : feed.nvt_buiten_index) || 'niet van toepassing'
-                : 'niet beoordeeld',
-              dekking: buitenNiveau ? '' : (feed.dekking && feed.dekking.zin) || ''
-            };
+        wachtend--;
+        if (feed) {
+          var oordeel = (feed[soort] || {})[id];
+          if (oordeel && oordeel.cijfer != null) {
+            if (!oordeel.dekking && feed.dekking_lens) oordeel.dekking = feed.dekking_lens;
+            sectie.appendChild(paneel(lens, oordeel, null));
+            gevonden++;
           }
         }
-        grid.replaceChild(paneel(lens, oordeel, status), plek);
+        if (wachtend === 0 && gevonden === 0) sectie.remove();
       });
     });
   }
