@@ -43,6 +43,19 @@
   /* ── Adapter: gezagen.json → contract-vorm ──────────────────────────
    * scores zijn fracties 0..1; we tonen ze als heel getal /100 maar
    * schalen alleen — we middelen, drempelen of hertellen niets.        */
+  /* URL-vormen van annotatieconformiteit.nl.
+   * Gezag: /gezagen/<overheidscode>
+   * Regeling: /regelingen/<frbr_work met _ i.p.v. />/
+   *   /akn/nl/act/gm0361/2020/omgevingsplan
+   *   -> /regelingen/akn_nl_act_gm0361_2020_omgevingsplan/          */
+  function linkGezag(code) {
+    return 'https://annotatieconformiteit.nl/gezagen/' + encodeURIComponent(code);
+  }
+  function linkRegeling(werk) {
+    var pad = String(werk).replace(/^\//, '').replace(/\//g, '_');
+    return 'https://annotatieconformiteit.nl/regelingen/' + encodeURIComponent(pad) + '/';
+  }
+
   function adapterAnnotatiekwaliteit(data) {
     var out = { peildatum: (data.metadata || {}).generated_at || null, bronhouders: {}, documenten: {} };
     var totaal = (data.metadata || {}).n_regelingen;
@@ -53,7 +66,7 @@
         eenheid: '/100',
         label: labelVoor(g.gem_kwaliteit),
         dekking: dekkingZin(g.gem_categorieen, g.n_regelingen),
-        link: 'https://annotatieconformiteit.nl/gezag/' + encodeURIComponent(g.id),
+        link: linkGezag(g.id),
         nvt_reden: g.gem_kwaliteit == null ? 'niet beoordeeld' : null
       };
       (g.regelingen || []).forEach(function (r) {
@@ -63,7 +76,7 @@
           eenheid: '/100',
           label: labelVoor(s.kwaliteit),
           dekking: dekkingZin(s.categorieen, 1),
-          link: 'https://annotatieconformiteit.nl/gezag/' + encodeURIComponent(g.id),
+          link: linkRegeling(r.id),
           nvt_reden: s.kwaliteit == null ? 'niet beoordeeld' : null
         };
       });
