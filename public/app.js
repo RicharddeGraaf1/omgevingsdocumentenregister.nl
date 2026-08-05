@@ -416,17 +416,109 @@
     return dl;
   }
 
+  /* wid -> <li> in de boom, gevuld tijdens het renderen. Nodig voor het
+     onderwerp-filter: de API geeft wids terug, de boom kent knopen. */
+  var widLi = {};
+
+  /* Onderwerp-strook boven de boom.
+   *
+   * Bewust GEEN etiket op documentniveau. Een omgevingsplan raakt mediaan 5 van
+   * de 9 onderwerpen (Arnhem alle 9), en `procedures` zit op 94% van alle
+   * documenten — als kenmerk onderscheidt het dus niets. Wat het wél is, is een
+   * VERDELING: "hier zit veel over geluid en weinig over infrastructuur". Daarom
+   * tellingen naast elke naam, en daarom filtert een klik de boom in plaats van
+   * dat er een badge verschijnt.
+   *
+   * De classificatie zit op artikelniveau (mediaan 1 onderwerp per element);
+   * daar is hij scherp. Zie docs/onderwerpen-plan.md voor de metingen. */
+  function toonOnderwerpen(doel, expression) {
+    // De sectie NU aanmaken en plaatsen, pas later vullen. Eerder gebeurde het
+    // appenden in de .then() en landde de strook dus onder het kolommenblok dat
+    // intussen al was toegevoegd — zichtbaar als "filter staat onder de boom".
+    var sectie = el('section', { class: 'onderwerpen' });
+    doel.appendChild(sectie);
+
+    api('/v1/viewer/regeling/' + encodeURIComponent(expression) + '/onderwerpen')
+      .then(function (d) {
+        var lijst = (d.onderwerpen || []).filter(function (o) { return o.n_elementen > 0; });
+        if (!lijst.length) { sectie.remove(); return; }
+
+        sectie.appendChild(el('h3', { text: 'Regels filteren op categorie' }));
+        var rij = el('div', { class: 'ow-rij' });
+        var actief = {};
+
+        lijst.forEach(function (o) {
+          var knop = el('button', { type: 'button', class: 'ow', 'aria-pressed': 'false' }, [
+            el('span', { class: 'ow-naam', text: o.naam }),
+            el('span', { class: 'ow-n', text: String(o.n_elementen) })
+          ]);
+          knop.addEventListener('click', function () {
+            if (actief[o.naam]) delete actief[o.naam]; else actief[o.naam] = o.wids || [];
+            knop.setAttribute('aria-pressed', actief[o.naam] ? 'true' : 'false');
+            pasFilterToe(actief, lijst);
+          });
+          rij.appendChild(knop);
+        });
+        sectie.appendChild(rij);
+
+        var dek = d.dekking || {};
+        if (dek.geclassificeerd) {
+          sectie.appendChild(el('p', { class: 'ow-dekking muted', text:
+            dek.geclassificeerd + ' regel-onderdelen ingedeeld op categorie. Machinale indeling, ' +
+            'geen juridische status; de artikelsgewijze toelichting telt niet mee.' }));
+        }
+      })
+      .catch(function () { sectie.remove(); });
+  }
+
+  function pasFilterToe(actief, lijst) {
+    var boom = document.querySelector('.doc-boom .boom');
+    if (!boom) return;
+    Array.prototype.forEach.call(boom.querySelectorAll('li'), function (li) {
+      li.classList.remove('ow-raakt', 'ow-pad');
+    });
+    var namen = Object.keys(actief);
+    boom.classList.toggle('ow-filter', namen.length > 0);
+    if (!namen.length) return;
+
+    namen.forEach(function (naam) {
+      (actief[naam] || []).forEach(function (wid) {
+        var li = widLi[wid];
+        if (!li) return;
+        li.classList.add('ow-raakt');
+        // Voorouders zichtbaar houden, anders verdwijnt de treffer met zijn
+        // hoofdstuk mee en zie je een lege boom.
+        for (var p = li.parentNode; p && p !== boom; p = p.parentNode) {
+          if (p.tagName === 'LI') p.classList.add('ow-pad');
+        }
+      });
+    });
+  }
+
   function toonBoom(node, d, expression) {
+    widLi = {};
     node.appendChild(el('h2', { text: 'Documentstructuur' }));
     var n = telBoom(d.boom || []);
     node.appendChild(el('p', { class: 'muted', text:
       n.elementen + ' elementen, waarvan ' + n.metTekst + ' met tekst' }));
+
+    // Strook boven het kolommenblok: hij hoort bij de boom, niet bij de tekst,
+    // en blijft zo ook staan als de boom over de volle breedte gaat.
+    toonOnderwerpen(node, expression);
 
     var kolommen = el('div', { class: 'doc-cols' });
     var links = el('div', { class: 'doc-boom' });
     var rechts = el('div', { class: 'doc-tekst' });
     kolommen.appendChild(links);
     kolommen.appendChild(rechts);
+    var breed = el('button', { type: 'button', class: 'breedschakelaar', 'aria-pressed': 'false',
+      text: 'Boom over volle breedte' });
+    breed.addEventListener('click', function () {
+      var aan = kolommen.classList.toggle('alleen-boom');
+      breed.setAttribute('aria-pressed', String(aan));
+      breed.textContent = aan ? 'Tekst er weer naast' : 'Boom over volle breedte';
+    });
+    node.appendChild(breed);
     node.appendChild(kolommen);
 
     var ul = el('ul', { class: 'boom' });
@@ -659,6 +751,11 @@
      wilt lezen. */
   var LEESBAAR = { Artikel: 1, Divisietekst: 1, Divisie: 1, Begrip: 1 };
 
+  function registreerVerborgen(n, li) {
+    if (n.wid) widLi[n.wid] = li;
+    (n.kinderen || []).forEach(function (k) { registreerVerborgen(k, li); });
+  }
+
   function boomNode(n, expression, doel) {
     if (VERBERG_IN_BOOM[n.type]) return null;
 
@@ -676,6 +773,13 @@
       el('div', { class: 'nd' }, [el('span', { class: 'nd-type', text: n.type || '' }), label])
     ]);
     n._li = li;
+    if (n.wid) widLi[n.wid] = li;
+    // Verborgen nakomelingen (Leden) hun wid tóch registreren, op de dichtstbijzijnde
+    // zichtbare knoop. Zonder dit kan het onderwerp-filter alleen Divisieteksten
+    // laten oplichten — en die zijn in een omgevingsplan grotendeels de
+    // artikelsgewijze toelichting. De regelinhoud zelf zit in de Leden: van de
+    // 1.168 ingedeelde onderdelen van Arnhem zijn er 732 Lid en 433 toelichting.
+    (n.kinderen || []).forEach(function (k) { if (VERBERG_IN_BOOM[k.type]) registreerVerborgen(k, li); });
 
     var kinderen = (n.kinderen || [])
       .map(function (k) { return boomNode(k, expression, doel); })

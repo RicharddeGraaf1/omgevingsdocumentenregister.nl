@@ -373,3 +373,53 @@ td.num, th.num { text-align: right; font-family: var(--mono); padding-right: 0; 
 .gio-meta dd { margin: 0; overflow-wrap: anywhere; }
 .gio-meta code { font-size: .74rem; }
 .gio-noot { font-size: .76rem; line-height: 1.45; margin: 10px 0 0; }
+
+/* ── Onderwerpen ────────────────────────────────────────────────────────
+   De strook is een verdeling, geen etiket: de tellingen dragen de betekenis.
+   Zie docs/onderwerpen-plan.md — per document zegt de set niets (mediaan 5 van
+   9), per artikel juist wel (mediaan 1). Vandaar filteren i.p.v. labelen. */
+.onderwerpen { margin: 18px 0 4px; padding-top: 14px; border-top: 1px solid var(--rule-soft); }
+.onderwerpen h3 { font-size: .92rem; margin: 0 0 8px; }
+.ow-rij { display: flex; flex-wrap: wrap; gap: 6px; }
+.ow {
+  display: inline-flex; align-items: baseline; gap: 6px;
+  font: inherit; font-size: .84rem; cursor: pointer;
+  padding: 3px 9px; border: 1px solid var(--rule-soft); border-radius: 2px;
+  background: var(--paper); color: var(--ink-2);
+}
+.ow:hover { border-color: var(--ink-3); color: var(--ink); }
+.ow-n { font-family: 'IBM Plex Mono', monospace; font-size: .74rem; color: var(--ink-3); }
+.ow[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+.ow[aria-pressed="true"] .ow-n { color: var(--paper-2); }
+.ow-dekking { font-size: .74rem; margin: 8px 0 0; }
+
+/* Filter: alleen takken tonen die een treffer bevatten. `ow-pad` staat op de
+   voorouders — zonder die regel verdwijnt een treffer samen met zijn hoofdstuk
+   en kijk je naar een lege boom. */
+.boom.ow-filter li:not(.ow-raakt):not(.ow-pad) { display: none; }
+.boom.ow-filter li.ow-raakt > .nd .nd-titel { background: var(--paper-2); box-shadow: inset 2px 0 0 var(--accent); }
+
+/* Boom over de volle breedte: de leestekst verdwijnt en de boom krijgt alle
+   ruimte. Nuttig zodra je op categorie filtert — dan is de boom het antwoord
+   en niet de opstap naar een artikel. De hoogtebeperking gaat er ook af; in
+   deze stand wil je scrollen door de lijst, niet in een kolom van 78vh. */
+.breedschakelaar {
+  font: inherit; font-size: .8rem; cursor: pointer; padding: 4px 10px;
+  border: 1px solid var(--rule-soft); border-radius: 2px;
+  background: var(--paper); color: var(--ink-2);
+  /* Blijft in beeld tijdens het scrollen. Zonder dit sta je in de
+     volle-breedte-stand halverwege een lange boom en moet je helemaal terug
+     naar boven om de tekst weer naast te zetten — precies de knop die je op
+     dat moment nodig hebt. 92px = onder de vaste sitekop, dezelfde waarde die
+     .doc-tekst gebruikt. */
+  position: sticky; top: 92px; z-index: 5;
+  margin: 14px 0 2px; align-self: flex-start;
+  box-shadow: 0 2px 8px rgba(0,0,0,.10);
+}
+@media (max-width: 900px) { .breedschakelaar { position: static; box-shadow: none; } }
+.breedschakelaar:hover { border-color: var(--ink-3); color: var(--ink); }
+.breedschakelaar[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+
+.doc-cols.alleen-boom { grid-template-columns: 1fr; }
+.doc-cols.alleen-boom .doc-tekst { display: none; }
+.doc-cols.alleen-boom .doc-boom { border-right: 0; padding-right: 0; max-height: none; overflow: visible; }
