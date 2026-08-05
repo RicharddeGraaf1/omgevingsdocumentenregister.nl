@@ -5,8 +5,14 @@
 (function () {
   'use strict';
 
-  var LOKAAL = ['localhost', '127.0.0.1'].indexOf(location.hostname) !== -1;
-  var API = LOKAAL ? 'http://localhost:8002' : '/api';
+  /* Altijd same-origin via de proxy — ook lokaal.
+     Hier stond een lokaal-uitzondering die rechtstreeks naar
+     http://localhost:8002 ging. Dat brak zodra een tweede bestand (gio.js)
+     bij dezelfde pagina hoorde: die praatte via /api, app.js via 8002, en de
+     ene helft van het scherm werkte terwijl de andere "Failed to fetch" gaf.
+     Bovendien is 8002 cross-origin, dus het hing ook nog aan de CORS-lijst
+     van de API. Lokaal draai je de proxy: c:/tmp/register-lokaal.py. */
+  var API = '/api';
   var view = document.getElementById('view');
 
   /* ── Helpers ──────────────────────────────────────────── */
