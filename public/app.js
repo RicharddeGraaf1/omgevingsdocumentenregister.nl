@@ -440,7 +440,29 @@
 
     api('/v1/viewer/regeling/' + encodeURIComponent(expression) + '/onderwerpen')
       .then(function (d) {
-        var lijst = (d.onderwerpen || []).filter(function (o) { return o.n_elementen > 0; });
+        // Tel wat de boom kan AANWIJZEN, niet wat de API telt.
+        //
+        // De API telt regel-onderdelen: de classificatie zit op lid-niveau. De
+        // boom vouwt leden in hun artikel (`registreerVerborgen`), dus 29 leden
+        // kunnen één artikel zijn — en dan belooft de knop 29 terwijl je er één
+        // ziet oplichten. `widLi` is hier gegarandeerd gevuld: `toonBoom` bouwt
+        // de boom synchroon af voordat deze `.then()` aan de beurt komt.
+        function nTreffers(wids) {
+          var gezien = new Set();
+          (wids || []).forEach(function (w) { if (widLi[w]) gezien.add(widLi[w]); });
+          return gezien.size;
+        }
+
+        var lijst = (d.onderwerpen || []).map(function (o) {
+          return {
+            naam: o.naam,
+            wids: o.wids,
+            n: nTreffers(o.wids),
+            sub: (o.sub || []).map(function (s) {
+              return { naam: s.naam, wids: s.wids, n: nTreffers(s.wids) };
+            }).filter(function (s) { return s.n > 0; })
+          };
+        }).filter(function (o) { return o.n > 0; }).sort(function (a, b) { return b.n - a.n; });
         if (!lijst.length) { sectie.remove(); return; }
 
         sectie.appendChild(el('h3', { text: 'Regels filteren op categorie' }));
@@ -463,14 +485,14 @@
             if (!zichtbaar[naam]) delete actiefSub[naam];
           });
           var namen = Object.keys(zichtbaar).sort(function (a, b) {
-            return zichtbaar[b].n_elementen - zichtbaar[a].n_elementen;
+            return zichtbaar[b].n - zichtbaar[a].n;
           });
           namen.forEach(function (naam) {
             var sc = zichtbaar[naam];
             var k = el('button', { type: 'button', class: 'ow ow-sub-knop',
               'aria-pressed': actiefSub[naam] ? 'true' : 'false' }, [
               el('span', { class: 'ow-naam', text: sc.naam }),
-              el('span', { class: 'ow-n', text: String(sc.n_elementen) })
+              el('span', { class: 'ow-n', text: String(sc.n) })
             ]);
             k.addEventListener('click', function () {
               if (actiefSub[naam]) delete actiefSub[naam]; else actiefSub[naam] = sc.wids || [];
@@ -486,7 +508,7 @@
         lijst.forEach(function (o) {
           var knop = el('button', { type: 'button', class: 'ow', 'aria-pressed': 'false' }, [
             el('span', { class: 'ow-naam', text: o.naam }),
-            el('span', { class: 'ow-n', text: String(o.n_elementen) })
+            el('span', { class: 'ow-n', text: String(o.n) })
           ]);
           knop.addEventListener('click', function () {
             if (actief[o.naam]) delete actief[o.naam]; else actief[o.naam] = o.wids || [];
@@ -498,10 +520,16 @@
         sectie.appendChild(rij);
         sectie.appendChild(subrij);
 
-        var dek = d.dekking || {};
-        if (dek.geclassificeerd) {
+        // Dezelfde eenheid als de knoppen: knopen in de boom, niet de
+        // regel-onderdelen die de API telt. Anders staat er een noemer onder
+        // een rij getallen die iets anders meet.
+        var alle = new Set();
+        lijst.forEach(function (o) {
+          (o.wids || []).forEach(function (w) { if (widLi[w]) alle.add(widLi[w]); });
+        });
+        if (alle.size) {
           sectie.appendChild(el('p', { class: 'ow-dekking muted', text:
-            dek.geclassificeerd + ' regel-onderdelen ingedeeld op categorie. Machinale indeling, ' +
+            alle.size + ' regels ingedeeld op categorie. Machinale indeling, ' +
             'geen juridische status; de artikelsgewijze toelichting telt niet mee.' }));
         }
       })

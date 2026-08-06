@@ -397,7 +397,16 @@ td.num, th.num { text-align: right; font-family: var(--mono); padding-right: 0; 
    voorouders — zonder die regel verdwijnt een treffer samen met zijn hoofdstuk
    en kijk je naar een lege boom. */
 .boom.ow-filter li:not(.ow-raakt):not(.ow-pad) { display: none; }
-.boom.ow-filter li.ow-raakt > .nd .nd-titel { background: var(--paper-2); box-shadow: inset 2px 0 0 var(--accent); }
+
+/* De markering is opgesplitst omdat het geopende artikel al een eigen stijl
+   heeft: `li.actief` zet ink-op-papier (donkere achtergrond, lichte letter).
+   Eén gecombineerde regel overschreef daar alleen de ACHTERGROND en liet de
+   lichte letterkleur staan — lichte letter op lichte achtergrond, dus het
+   artikel dat je net had aangeklikt werd onleesbaar zodra het ook een
+   filtertreffer was. Het streepje geldt voor elke treffer, de lichte
+   achtergrond alleen voor de niet-geopende. */
+.boom.ow-filter li.ow-raakt > .nd .nd-titel { box-shadow: inset 2px 0 0 var(--accent); }
+.boom.ow-filter li.ow-raakt:not(.actief) > .nd .nd-titel { background: var(--paper-2); }
 
 /* Boom over de volle breedte: de leestekst verdwijnt en de boom krijgt alle
    ruimte. Nuttig zodra je op categorie filtert — dan is de boom het antwoord
