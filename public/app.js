@@ -445,7 +445,43 @@
 
         sectie.appendChild(el('h3', { text: 'Regels filteren op categorie' }));
         var rij = el('div', { class: 'ow-rij' });
-        var actief = {};
+        var subrij = el('div', { class: 'ow-rij ow-sub' });
+        var actief = {};      // hoofdcategorie -> wids
+        var actiefSub = {};   // subcategorie   -> wids
+
+        function herteken() {
+          // Subcategorieën van álle actieve hoofdcategorieën, grootste eerst.
+          // Verdwijnt een hoofdcategorie, dan verdwijnen zijn subs mee — anders
+          // blijf je filteren op iets wat je niet meer ziet staan.
+          leeg(subrij);
+          var zichtbaar = {};
+          lijst.forEach(function (o) {
+            if (!actief[o.naam]) return;
+            (o.sub || []).forEach(function (sc) { zichtbaar[sc.naam] = sc; });
+          });
+          Object.keys(actiefSub).forEach(function (naam) {
+            if (!zichtbaar[naam]) delete actiefSub[naam];
+          });
+          var namen = Object.keys(zichtbaar).sort(function (a, b) {
+            return zichtbaar[b].n_elementen - zichtbaar[a].n_elementen;
+          });
+          namen.forEach(function (naam) {
+            var sc = zichtbaar[naam];
+            var k = el('button', { type: 'button', class: 'ow ow-sub-knop',
+              'aria-pressed': actiefSub[naam] ? 'true' : 'false' }, [
+              el('span', { class: 'ow-naam', text: sc.naam }),
+              el('span', { class: 'ow-n', text: String(sc.n_elementen) })
+            ]);
+            k.addEventListener('click', function () {
+              if (actiefSub[naam]) delete actiefSub[naam]; else actiefSub[naam] = sc.wids || [];
+              herteken();
+            });
+            subrij.appendChild(k);
+          });
+          // Staat er een subcategorie aan, dan is DIE het filter — anders het
+          // hoofdniveau. Allebei tegelijk zou de smalle keuze weer verbreden.
+          pasFilterToe(Object.keys(actiefSub).length ? actiefSub : actief);
+        }
 
         lijst.forEach(function (o) {
           var knop = el('button', { type: 'button', class: 'ow', 'aria-pressed': 'false' }, [
@@ -455,11 +491,12 @@
           knop.addEventListener('click', function () {
             if (actief[o.naam]) delete actief[o.naam]; else actief[o.naam] = o.wids || [];
             knop.setAttribute('aria-pressed', actief[o.naam] ? 'true' : 'false');
-            pasFilterToe(actief, lijst);
+            herteken();
           });
           rij.appendChild(knop);
         });
         sectie.appendChild(rij);
+        sectie.appendChild(subrij);
 
         var dek = d.dekking || {};
         if (dek.geclassificeerd) {
@@ -471,7 +508,7 @@
       .catch(function () { sectie.remove(); });
   }
 
-  function pasFilterToe(actief, lijst) {
+  function pasFilterToe(actief) {
     var boom = document.querySelector('.doc-boom .boom');
     if (!boom) return;
     Array.prototype.forEach.call(boom.querySelectorAll('li'), function (li) {

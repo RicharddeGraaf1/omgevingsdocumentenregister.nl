@@ -423,3 +423,12 @@ td.num, th.num { text-align: right; font-family: var(--mono); padding-right: 0; 
 .doc-cols.alleen-boom { grid-template-columns: 1fr; }
 .doc-cols.alleen-boom .doc-tekst { display: none; }
 .doc-cols.alleen-boom .doc-boom { border-right: 0; padding-right: 0; max-height: none; overflow: visible; }
+
+/* Tweede niveau: subcategorieën van de gekozen categorie. Ingesprongen en
+   lichter, zodat de hiërarchie zichtbaar is zonder een kader eromheen. Leeg
+   blijft hij onzichtbaar — geen lege regel die om aandacht vraagt. */
+.ow-sub { margin-top: 6px; padding-left: 14px; border-left: 2px solid var(--rule-soft); }
+.ow-sub:empty { display: none; }
+.ow-sub-knop { font-size: .79rem; padding: 2px 8px; }
+.ow-sub-knop[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--paper); }
+.ow-sub-knop[aria-pressed="true"] .ow-n { color: var(--paper-2); }
