@@ -447,21 +447,40 @@
         // kunnen één artikel zijn — en dan belooft de knop 29 terwijl je er één
         // ziet oplichten. `widLi` is hier gegarandeerd gevuld: `toonBoom` bouwt
         // de boom synchroon af voordat deze `.then()` aan de beurt komt.
-        function nTreffers(wids) {
+        function trefferKnopen(wids) {
           var gezien = new Set();
           (wids || []).forEach(function (w) { if (widLi[w]) gezien.add(widLi[w]); });
-          return gezien.size;
+          return gezien;
         }
 
+        /* Benoem de eenheid, want een kaal getal naast een categorie laat de
+           lezer raden waar het over gaat — en als hij dan artikelen telt en op
+           iets anders uitkomt, lijkt het register te haperen. In de praktijk
+           zijn het bijna altijd artikelen (Arnhem: 725 artikelen tegen 4
+           divisieteksten), maar dat "bijna" hardcoderen zou weer een belofte
+           zijn die soms niet klopt. Daarom geteld naar het type dat in de boom
+           voor de knoop staat. */
+        function omschrijf(knopen) {
+          var per = {};
+          knopen.forEach(function (li) {
+            var s = li.querySelector('.nd-type');
+            var naam = ((s && s.textContent) || 'element').toLowerCase();
+            per[naam] = (per[naam] || 0) + 1;
+          });
+          return Object.keys(per)
+            .sort(function (a, b) { return per[b] - per[a]; })
+            .map(function (k) { return per[k] + ' ' + k + (per[k] > 1 ? 'en' : ''); })
+            .join(', ');
+        }
+
+        function meet(x) {
+          var knopen = trefferKnopen(x.wids);
+          return { naam: x.naam, wids: x.wids, n: knopen.size, uitleg: omschrijf(knopen) };
+        }
         var lijst = (d.onderwerpen || []).map(function (o) {
-          return {
-            naam: o.naam,
-            wids: o.wids,
-            n: nTreffers(o.wids),
-            sub: (o.sub || []).map(function (s) {
-              return { naam: s.naam, wids: s.wids, n: nTreffers(s.wids) };
-            }).filter(function (s) { return s.n > 0; })
-          };
+          var h = meet(o);
+          h.sub = (o.sub || []).map(meet).filter(function (s) { return s.n > 0; });
+          return h;
         }).filter(function (o) { return o.n > 0; }).sort(function (a, b) { return b.n - a.n; });
         if (!lijst.length) { sectie.remove(); return; }
 
@@ -490,6 +509,7 @@
           namen.forEach(function (naam) {
             var sc = zichtbaar[naam];
             var k = el('button', { type: 'button', class: 'ow ow-sub-knop',
+              title: sc.naam + ' — ' + sc.uitleg,
               'aria-pressed': actiefSub[naam] ? 'true' : 'false' }, [
               el('span', { class: 'ow-naam', text: sc.naam }),
               el('span', { class: 'ow-n', text: String(sc.n) })
@@ -506,7 +526,8 @@
         }
 
         lijst.forEach(function (o) {
-          var knop = el('button', { type: 'button', class: 'ow', 'aria-pressed': 'false' }, [
+          var knop = el('button', { type: 'button', class: 'ow',
+            title: o.naam + ' — ' + o.uitleg, 'aria-pressed': 'false' }, [
             el('span', { class: 'ow-naam', text: o.naam }),
             el('span', { class: 'ow-n', text: String(o.n) })
           ]);
@@ -529,7 +550,7 @@
         });
         if (alle.size) {
           sectie.appendChild(el('p', { class: 'ow-dekking muted', text:
-            alle.size + ' regels ingedeeld op categorie. Machinale indeling, ' +
+            omschrijf(alle) + ' ingedeeld op categorie. Machinale indeling, ' +
             'geen juridische status; de artikelsgewijze toelichting telt niet mee.' }));
         }
       })
