@@ -42,11 +42,42 @@ geeft élke API-call 404 terwijl de site er normaal uitziet.
 `lenzen.js`, `styles.css`). **Wijzig je een van die bestanden, verhoog dan die
 token** — één keer, hij is voor alle drie gelijk.
 
-Waarom dit nodig is: Cloudflare Pages beheert de caching van statische assets
-zelf en **negeert `Cache-Control` uit `_headers`** voor die bestanden; ze
-krijgen `max-age=14400`. De overige headers uit `_headers` (CSP, nosniff, …)
-worden daar wél toegepast, en `/` krijgt wél `max-age=0` — dus het is
-specifiek de caching van assets die je niet in de hand hebt.
+Waarom dit nodig is: op het custom domein krijgen `.js` en `.css` alsnog
+`max-age=14400`, ook al zegt `_headers` `max-age=0, must-revalidate`. De
+overige headers uit `_headers` (CSP, nosniff, …) worden wél toegepast, en `/`
+krijgt wél `max-age=0`.
+
+**Let op — de oorzaak is niet Cloudflare Pages.** Hier stond eerder dat Pages
+`Cache-Control` uit `_headers` zou negeren voor statische assets. Dat is op
+2026-08-07 weerlegd door hetzelfde bestand uit dezelfde deployment via beide
+hostnames op te halen:
+
+```
+omgevingsdocumentenregister-nl.pages.dev/gio.js  →  public, max-age=0, must-revalidate
+omgevingsdocumentenregister.nl/gio.js            →  public, max-age=14400, must-revalidate
+```
+
+Pages honoreert `_headers` dus prima. Het is een **zone-instelling**: *Browser
+Cache TTL* stond op 4 uur en herschrijft de header voor statische extensies.
+14400 s is exact die standaardwaarde. Structureel op te lossen in het
+dashboard:
+
+> zone → **Caching → Configuration → Browser Cache TTL** → *Respect Existing
+> Headers*
+
+Op instructieregels.nl is dat op 2026-08-07 gedaan; het sloeg meteen door, ook
+op al gecachete entries, en `_headers` deed daarna wat er stond. Zolang dat
+hier nog niet is omgezet, is de `?v=`-bump het enige wat de bezoeker vers
+houdt.
+
+**Blijf de `?v=` daarna toch bumpen.** Hij is gratis en dekt méér af dan de
+browsercache: een nieuwe URL omzeilt ook de edge-cache en elke tussenliggende
+proxy. Na het omzetten van de zone-instelling is hij een tweede slot in plaats
+van het enige slot — een keer vergeten is dan niet meer meteen een incident.
+
+**Diagnose-truc bij twijfel**: vergelijk het custom domein met
+`<project>.pages.dev`. Verschillen de headers, dan zit het in de zone en niet
+in `_headers`.
 
 Zonder bump draait een bezoeker tot vier uur lang de vorige versie, óók als de
 deploy geslaagd is. Dat is op 2026-08-04 precies misgegaan: de
