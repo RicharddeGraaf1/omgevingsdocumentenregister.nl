@@ -441,3 +441,20 @@ td.num, th.num { text-align: right; font-family: var(--mono); padding-right: 0; 
 .ow-sub-knop { font-size: .79rem; padding: 2px 8px; }
 .ow-sub-knop[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--paper); }
 .ow-sub-knop[aria-pressed="true"] .ow-n { color: var(--paper-2); }
+
+/* Tweede filter-as: soort bepaling. Bewust een ander accent dan de
+   onderwerp-knoppen — het zijn twee onafhankelijke assen en niet twee niveaus
+   van dezelfde, en dat verschil moet je kunnen zien zonder het label te lezen. */
+.ow-aslabel { font-size: .74rem; margin: 12px 0 4px; letter-spacing: .04em;
+  text-transform: uppercase; }
+.ow-type { margin-top: 0; }
+.ow-type-knop { font-size: .79rem; border-style: dashed; }
+.ow-type-knop[aria-pressed="true"] { background: var(--accent); border-color: var(--accent);
+  border-style: solid; color: var(--paper); }
+.ow-type-knop[aria-pressed="true"] .ow-n { color: var(--paper-2); }
+
+/* "Niet ingedeeld" is geen categorie maar de eerlijke rest. Grijs en als
+   laatste, zodat hij zichtbaar is zonder tussen de onderwerpen te gaan staan. */
+.ow-onbekend { border-style: dotted; color: var(--ink-3); }
+.ow-onbekend[aria-pressed="true"] { background: var(--ink-3); border-color: var(--ink-3);
+  border-style: solid; color: var(--paper); }

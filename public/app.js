@@ -477,18 +477,24 @@
           var knopen = trefferKnopen(x.wids);
           return { naam: x.naam, wids: x.wids, n: knopen.size, uitleg: omschrijf(knopen) };
         }
-        var lijst = (d.onderwerpen || []).map(function (o) {
+        var lijst = (d.categorieen || d.onderwerpen || []).map(function (o) {
           var h = meet(o);
           h.sub = (o.sub || []).map(meet).filter(function (s) { return s.n > 0; });
           return h;
         }).filter(function (o) { return o.n > 0; }).sort(function (a, b) { return b.n - a.n; });
-        if (!lijst.length) { sectie.remove(); return; }
+        var typen = (d.type_bepalingen || []).map(meet)
+          .filter(function (t) { return t.n > 0; })
+          .sort(function (a, b) { return b.n - a.n; });
+        var onbekend = meet(d.niet_ingedeeld || { naam: 'niet ingedeeld', wids: [] });
+        if (!lijst.length && !typen.length) { sectie.remove(); return; }
 
-        sectie.appendChild(el('h3', { text: 'Regels filteren op categorie' }));
+        sectie.appendChild(el('h3', { text: 'Regels filteren' }));
         var rij = el('div', { class: 'ow-rij' });
         var subrij = el('div', { class: 'ow-rij ow-sub' });
-        var actief = {};      // hoofdcategorie -> wids
+        var typerij = el('div', { class: 'ow-rij ow-type' });
+        var actief = {};      // categorie      -> wids
         var actiefSub = {};   // subcategorie   -> wids
+        var actiefType = {};  // typeBepaling   -> wids
 
         function herteken() {
           // Subcategorieën van álle actieve hoofdcategorieën, grootste eerst.
@@ -520,9 +526,10 @@
             });
             subrij.appendChild(k);
           });
-          // Staat er een subcategorie aan, dan is DIE het filter — anders het
-          // hoofdniveau. Allebei tegelijk zou de smalle keuze weer verbreden.
-          pasFilterToe(Object.keys(actiefSub).length ? actiefSub : actief);
+          // Staat er een subcategorie aan, dan is DIE het onderwerp-filter —
+          // anders het hoofdniveau. Allebei tegelijk zou de smalle keuze weer
+          // verbreden. Het type-filter is een aparte as en komt er los bij.
+          pasFilterToe(Object.keys(actiefSub).length ? actiefSub : actief, actiefType);
         }
 
         lijst.forEach(function (o) {
@@ -538,8 +545,52 @@
           });
           rij.appendChild(knop);
         });
+        // "Niet ingedeeld" hoort zichtbaar te zijn, niet weggemoffeld: het is
+        // de eerlijke prijs van de keuze om liever niets te zeggen dan iets
+        // verkeerds. Zonder deze knop lijkt het document volledig ingedeeld.
+        if (onbekend.n) {
+          var knopOnbekend = el('button', { type: 'button', class: 'ow ow-onbekend',
+            title: 'Artikelen waar het register geen categorie voor heeft — '
+                 + onbekend.uitleg, 'aria-pressed': 'false' }, [
+            el('span', { class: 'ow-naam', text: 'niet ingedeeld' }),
+            el('span', { class: 'ow-n', text: String(onbekend.n) })
+          ]);
+          knopOnbekend.addEventListener('click', function () {
+            if (actief['(niet ingedeeld)']) delete actief['(niet ingedeeld)'];
+            else actief['(niet ingedeeld)'] = onbekend.wids || [];
+            knopOnbekend.setAttribute('aria-pressed',
+              actief['(niet ingedeeld)'] ? 'true' : 'false');
+            herteken();
+          });
+          rij.appendChild(knopOnbekend);
+        }
+
         sectie.appendChild(rij);
         sectie.appendChild(subrij);
+
+        // Tweede as: wat VOOR bepaling is het. Los van het onderwerp, want
+        // "laat me alle meldplichten zien" is een andere vraag dan "laat me
+        // alles over geur zien" — en tot 2026-08 kon je die eerste niet stellen
+        // omdat de typen als subcategorie tussen de onderwerpen stonden.
+        if (typen.length) {
+          sectie.appendChild(el('p', { class: 'ow-aslabel muted',
+            text: 'Soort bepaling' }));
+          typen.forEach(function (t) {
+            var k = el('button', { type: 'button', class: 'ow ow-type-knop',
+              title: t.naam + ' — ' + t.uitleg, 'aria-pressed': 'false' }, [
+              el('span', { class: 'ow-naam', text: t.naam }),
+              el('span', { class: 'ow-n', text: String(t.n) })
+            ]);
+            k.addEventListener('click', function () {
+              if (actiefType[t.naam]) delete actiefType[t.naam];
+              else actiefType[t.naam] = t.wids || [];
+              k.setAttribute('aria-pressed', actiefType[t.naam] ? 'true' : 'false');
+              herteken();
+            });
+            typerij.appendChild(k);
+          });
+          sectie.appendChild(typerij);
+        }
 
         // Dezelfde eenheid als de knoppen: knopen in de boom, niet de
         // regel-onderdelen die de API telt. Anders staat er een noemer onder
@@ -550,34 +601,55 @@
         });
         if (alle.size) {
           sectie.appendChild(el('p', { class: 'ow-dekking muted', text:
-            omschrijf(alle) + ' ingedeeld op categorie. Machinale indeling, ' +
-            'geen juridische status; de artikelsgewijze toelichting telt niet mee.' }));
+            omschrijf(alle) + ' ingedeeld op categorie'
+            + (onbekend.n ? ', ' + onbekend.n + ' niet' : '')
+            + '. Indeling op basis van de kopjes boven het artikel; '
+            + 'geen juridische status.' }));
         }
       })
       .catch(function () { sectie.remove(); });
   }
 
-  function pasFilterToe(actief) {
+  /* Twee ASSEN, dus een DOORSNEDE en geen vereniging.
+     Binnen een as is het "of" (geur of geluid), tussen de assen "en" —
+     "toepassingsbereik binnen geur" is de vraag die iemand stelt, niet
+     "alles wat geur is plus alles wat toepassingsbereik is". Een as zonder
+     actieve knop legt geen beperking op. */
+  function pasFilterToe() {
     var boom = document.querySelector('.doc-boom .boom');
     if (!boom) return;
     Array.prototype.forEach.call(boom.querySelectorAll('li'), function (li) {
       li.classList.remove('ow-raakt', 'ow-pad');
     });
-    var namen = Object.keys(actief);
-    boom.classList.toggle('ow-filter', namen.length > 0);
-    if (!namen.length) return;
 
-    namen.forEach(function (naam) {
-      (actief[naam] || []).forEach(function (wid) {
-        var li = widLi[wid];
-        if (!li) return;
-        li.classList.add('ow-raakt');
-        // Voorouders zichtbaar houden, anders verdwijnt de treffer met zijn
-        // hoofdstuk mee en zie je een lege boom.
-        for (var p = li.parentNode; p && p !== boom; p = p.parentNode) {
-          if (p.tagName === 'LI') p.classList.add('ow-pad');
-        }
-      });
+    var assen = [];
+    Array.prototype.forEach.call(arguments, function (as) {
+      var namen = Object.keys(as || {});
+      if (!namen.length) return;
+      var set = new Set();
+      namen.forEach(function (n) { (as[n] || []).forEach(function (w) { set.add(w); }); });
+      assen.push(set);
+    });
+
+    boom.classList.toggle('ow-filter', assen.length > 0);
+    if (!assen.length) return;
+
+    var treffers = assen[0];
+    for (var i = 1; i < assen.length; i++) {
+      var vorige = treffers;
+      treffers = new Set();
+      assen[i].forEach(function (w) { if (vorige.has(w)) treffers.add(w); });
+    }
+
+    treffers.forEach(function (wid) {
+      var li = widLi[wid];
+      if (!li) return;
+      li.classList.add('ow-raakt');
+      // Voorouders zichtbaar houden, anders verdwijnt de treffer met zijn
+      // hoofdstuk mee en zie je een lege boom.
+      for (var p = li.parentNode; p && p !== boom; p = p.parentNode) {
+        if (p.tagName === 'LI') p.classList.add('ow-pad');
+      }
     });
   }
 
