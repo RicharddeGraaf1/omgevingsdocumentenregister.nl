@@ -492,6 +492,7 @@
         var rij = el('div', { class: 'ow-rij' });
         var subrij = el('div', { class: 'ow-rij ow-sub' });
         var typerij = el('div', { class: 'ow-rij ow-type' });
+        var aslabel = el('p', { class: 'ow-aslabel muted', text: 'Soort bepaling' });
         var actief = {};      // categorie      -> wids
         var actiefSub = {};   // subcategorie   -> wids
         var actiefType = {};  // typeBepaling   -> wids
@@ -529,7 +530,63 @@
           // Staat er een subcategorie aan, dan is DIE het onderwerp-filter —
           // anders het hoofdniveau. Allebei tegelijk zou de smalle keuze weer
           // verbreden. Het type-filter is een aparte as en komt er los bij.
-          pasFilterToe(Object.keys(actiefSub).length ? actiefSub : actief, actiefType);
+          var onderwerp = Object.keys(actiefSub).length ? actiefSub : actief;
+          tekenTypen(onderwerp);
+          pasFilterToe(onderwerp, actiefType);
+        }
+
+        /* De type-rij hoort zich te schikken naar wat erboven aanstaat: staat
+           `geur` aan, dan zijn de soorten bepaling die je ziet de soorten die
+           BINNEN geur voorkomen, met hun aantal daarbinnen. Anders belooft een
+           knop "meldingsplicht 344" iets wat na het klikken nul treffers geeft,
+           en dat leest als een kapot filter.
+
+           Eenrichtingsverkeer: het onderwerp begrenst de typen, niet andersom.
+           Wederzijds herschalen zou betekenen dat elke klik beide rijen
+           hertekent en je de knop die je net indrukte ziet verspringen. */
+        function tekenTypen(onderwerp) {
+          leeg(typerij);
+          var namen = Object.keys(onderwerp);
+          var binnen = null;
+          if (namen.length) {
+            binnen = new Set();
+            namen.forEach(function (n) {
+              (onderwerp[n] || []).forEach(function (w) { binnen.add(w); });
+            });
+          }
+
+          var zichtbaar = typen.map(function (t) {
+            if (!binnen) return t;
+            var wids = (t.wids || []).filter(function (w) { return binnen.has(w); });
+            return { naam: t.naam, wids: wids, n: trefferKnopen(wids).size,
+                     uitleg: t.uitleg };
+          }).filter(function (t) { return t.n > 0; })
+            .sort(function (a, b) { return b.n - a.n; });
+
+          // Een type dat door de nieuwe onderwerp-keuze wegvalt, mag niet als
+          // onzichtbaar filter blijven hangen.
+          var bestaat = {};
+          zichtbaar.forEach(function (t) { bestaat[t.naam] = t; });
+          Object.keys(actiefType).forEach(function (naam) {
+            if (!bestaat[naam]) delete actiefType[naam];
+            else actiefType[naam] = bestaat[naam].wids;
+          });
+
+          aslabel.style.display = zichtbaar.length ? '' : 'none';
+          zichtbaar.forEach(function (t) {
+            var k = el('button', { type: 'button', class: 'ow ow-type-knop',
+              title: t.naam + ' — ' + t.uitleg,
+              'aria-pressed': actiefType[t.naam] ? 'true' : 'false' }, [
+              el('span', { class: 'ow-naam', text: t.naam }),
+              el('span', { class: 'ow-n', text: String(t.n) })
+            ]);
+            k.addEventListener('click', function () {
+              if (actiefType[t.naam]) delete actiefType[t.naam];
+              else actiefType[t.naam] = t.wids || [];
+              herteken();
+            });
+            typerij.appendChild(k);
+          });
         }
 
         lijst.forEach(function (o) {
@@ -568,29 +625,18 @@
         sectie.appendChild(rij);
         sectie.appendChild(subrij);
 
-        // Tweede as: wat VOOR bepaling is het. Los van het onderwerp, want
-        // "laat me alle meldplichten zien" is een andere vraag dan "laat me
-        // alles over geur zien" — en tot 2026-08 kon je die eerste niet stellen
-        // omdat de typen als subcategorie tussen de onderwerpen stonden.
+        // Tweede as: wat VOOR bepaling is het. "Laat me alle meldplichten zien"
+        // is een andere vraag dan "laat me alles over geur zien" — en tot
+        // 2026-08 kon je die eerste niet stellen omdat de typen als
+        // subcategorie tussen de onderwerpen stonden.
+        //
+        // De knoppen zelf worden door `tekenTypen` gezet, want hun aantal hangt
+        // af van wat erboven aanstaat.
         if (typen.length) {
-          sectie.appendChild(el('p', { class: 'ow-aslabel muted',
-            text: 'Soort bepaling' }));
-          typen.forEach(function (t) {
-            var k = el('button', { type: 'button', class: 'ow ow-type-knop',
-              title: t.naam + ' — ' + t.uitleg, 'aria-pressed': 'false' }, [
-              el('span', { class: 'ow-naam', text: t.naam }),
-              el('span', { class: 'ow-n', text: String(t.n) })
-            ]);
-            k.addEventListener('click', function () {
-              if (actiefType[t.naam]) delete actiefType[t.naam];
-              else actiefType[t.naam] = t.wids || [];
-              k.setAttribute('aria-pressed', actiefType[t.naam] ? 'true' : 'false');
-              herteken();
-            });
-            typerij.appendChild(k);
-          });
+          sectie.appendChild(aslabel);
           sectie.appendChild(typerij);
         }
+        herteken();
 
         // Dezelfde eenheid als de knoppen: knopen in de boom, niet de
         // regel-onderdelen die de API telt. Anders staat er een noemer onder
