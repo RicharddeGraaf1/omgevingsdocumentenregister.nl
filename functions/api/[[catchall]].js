@@ -25,6 +25,8 @@ const ALLOWED_PREFIXES = [
   '/v1/viewer/regeling',
   '/v1/viewer/teksten',
   '/v1/viewer/wro',
+  // Vragenbomen: werkzaamheid x overheid -> vergunningcheck + dragende artikelen.
+  '/v1/vergunningcheck',
 ];
 
 export async function onRequest({ request, env, params }) {

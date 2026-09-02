@@ -108,7 +108,10 @@
     { m: /^\/bronhouders\/([^/]+)$/, fn: viewBronhouder, nav: 'bronhouders' },
     { m: /^\/bronhouders\/?$/, fn: viewBronhouders, nav: 'bronhouders' },
     { m: /^\/landelijk-beeld\/?$/, fn: viewLandelijk, nav: 'landelijk-beeld' },
-    { m: /^\/over-het-register\/?$/, fn: viewOver, nav: 'over-het-register' }
+    { m: /^\/over-het-register\/?$/, fn: viewOver, nav: 'over-het-register' },
+    { m: /^\/vragenbomen\/([^/]+)\/([^/]+)\/?$/, fn: vbPagina, nav: 'vragenbomen' },
+    { m: /^\/vragenbomen\/([^/]+)\/?$/, fn: vbOverheden, nav: 'vragenbomen' },
+    { m: /^\/vragenbomen\/?$/, fn: vbZoek, nav: 'vragenbomen' }
   ];
 
   function router() {
@@ -1257,6 +1260,289 @@
    * een fix "niet zichtbaar" geweest terwijl hij gewoon live stond, doordat
    * de browser een oude app.js had. Nu is in één oogopslag — ook op een
    * screenshot — te zien welke build er draait. */
+  /* ── Vragenbomen ──────────────────────────────────────
+   *
+   * De derde as van het register. De andere twee zijn het document
+   * (/document/<id>) en de bronhouder (/bronhouders/<code>); een vragenboom
+   * hangt aan geen van beide maar aan een ACTIVITEIT, bereikt via een
+   * werkzaamheid plus een overheid. Dat adres bestaat verder nergens in het
+   * stelsel — het Omgevingsloket heeft er geen permalink voor. Vandaar dat
+   * het hier hoort: het register bezit adressen.
+   *
+   * Gemeten vorm van de data (2026-09-01/02), bepalend voor deze schermen:
+   *   werkzaamheid x overheid -> mediaan 1 activiteit
+   *   activiteit -> mediaan 3 dragende regelteksten, p90 16, uitschieter 926
+   *   de aanvraagboom is grofweg zesmaal zo groot als de check
+   *   dekking verschilt sterk: 360 overheden voor tuinmeubilair, 49 voor vuurwerk
+   *
+   * Wat hier NIET gebeurt: de artikelenlijst inkorten op basis van een
+   * aangeklikte vraag. De koppeling vraag->artikel is een tekstuele heuristiek,
+   * geen vastgelegd verband; die mag iets oplichten en nooit iets wegnemen.
+   */
+
+  var VB_LAAG = { gemeente: 'Gemeenten', waterschap: 'Waterschappen',
+                  provincie: 'Provincies', rijk: 'Rijk' };
+
+  function vbZoek(hit) {
+    var q = (new URLSearchParams(location.search)).get('q') || '';
+    view.appendChild(kruimels([{ tekst: 'Register', href: '/' }, { tekst: 'Vragenbomen' }]));
+    view.appendChild(kop('Vragenbomen',
+      'Kies wat u wilt doen. Per overheid ziet u de vergunningcheck die daar is ' +
+      'gepubliceerd, met daarnaast de wetsartikelen waarop die check rust.'));
+
+    var invoer = el('input', {
+      class: 'vb-zoek', type: 'search', value: q, autocomplete: 'off',
+      placeholder: 'Bijvoorbeeld: dakkapel, stuw, vuurwerk, rwzi…',
+      'aria-label': 'Zoek een werkzaamheid'
+    });
+    var uit = el('div', { class: 'vb-uit' });
+    view.appendChild(el('div', { class: 'vb-zoekbalk' }, [invoer]));
+    view.appendChild(uit);
+
+    function haal(term) {
+      leeg(uit);
+      uit.appendChild(laden('Werkzaamheden zoeken…'));
+      api('/v1/vergunningcheck/werkzaamheden?limit=60' +
+          (term ? '&q=' + encodeURIComponent(term) : ''))
+        .then(function (rijen) {
+          leeg(uit);
+          if (!rijen.length) {
+            uit.appendChild(el('p', { class: 'muted', text:
+              'Geen werkzaamheid gevonden voor “' + term + '”. Landelijk zijn er 293; ' +
+              'ze worden centraal vastgesteld, een overheid verzint ze niet zelf.' }));
+            return;
+          }
+          var lijst = el('ul', { class: 'vb-lijst' });
+          rijen.forEach(function (w) {
+            var syn = (w.trefwoorden || []).slice(0, 6).join(' · ');
+            lijst.appendChild(el('li', {}, [
+              el('a', { class: 'vb-rij', href: '/vragenbomen/' + encodeURIComponent(w.urn) }, [
+                el('span', { class: 'vb-naam', text: w.naam }),
+                syn ? el('span', { class: 'vb-syn', text: syn }) : null,
+                el('span', { class: 'vb-tel', text:
+                  w.overheden == null ? '' : nl(w.overheden) + ' overheden' })
+              ])
+            ]));
+          });
+          uit.appendChild(lijst);
+        })
+        .catch(function (e) { leeg(uit); uit.appendChild(fout(e)); });
+    }
+
+    var timer = null;
+    invoer.addEventListener('input', function () {
+      clearTimeout(timer);
+      timer = setTimeout(function () {
+        var t = invoer.value.trim();
+        history.replaceState(null, '', '/vragenbomen' + (t ? '?q=' + encodeURIComponent(t) : ''));
+        haal(t);
+      }, 220);
+    });
+    haal(q);
+    invoer.focus();
+  }
+
+  function vbOverheden(hit) {
+    var urn = decodeURIComponent(hit[1]);
+    view.appendChild(kruimels([
+      { tekst: 'Register', href: '/' },
+      { tekst: 'Vragenbomen', href: '/vragenbomen' },
+      { tekst: urn }
+    ]));
+    var doel = el('div');
+    view.appendChild(doel);
+    doel.appendChild(laden('Dekking ophalen…'));
+
+    api('/v1/vergunningcheck/' + encodeURIComponent(urn) + '/overheden')
+      .then(function (rijen) {
+        leeg(doel);
+        doel.appendChild(kop('Waar bestaat dit?',
+          'Niet elke overheid publiceert elke werkzaamheid. Hieronder staat waar ' +
+          'deze wél is klaargezet, en waar er ook echt een gevulde vragenboom achter zit.'));
+        var perLaag = {};
+        rijen.forEach(function (r) {
+          (perLaag[r.bestuurslaag || 'overig'] = perLaag[r.bestuurslaag || 'overig'] || []).push(r);
+        });
+        Object.keys(VB_LAAG).forEach(function (laag) {
+          var groep = perLaag[laag];
+          if (!groep || !groep.length) return;
+          doel.appendChild(el('h2', { class: 'vb-laagkop ' + vbKlasse(laag),
+            text: VB_LAAG[laag] + ' (' + nl(groep.length) + ')' }));
+          var ul = el('ul', { class: 'vb-lijst' });
+          groep.forEach(function (o) {
+            var zonder = o.met_vragenboom === 0;
+            ul.appendChild(el('li', {}, [
+              el('a', { class: 'vb-rij ' + vbKlasse(laag),
+                href: '/vragenbomen/' + encodeURIComponent(urn) + '/' + encodeURIComponent(o.overheid_ns) }, [
+                el('span', { class: 'vb-naam', text: o.naam || o.overheid_ns }),
+                el('span', { class: 'vb-syn', text: o.overheid_ns }),
+                el('span', { class: 'vb-tel' + (zonder ? ' vb-tel--leeg' : ''), text:
+                  zonder ? 'aangekondigd, nog niet gevuld'
+                         : nl(o.met_vragenboom) + ' van ' + nl(o.activiteiten) + ' met vragenboom' })
+              ])
+            ]));
+          });
+          doel.appendChild(ul);
+        });
+      })
+      .catch(function (e) { leeg(doel); doel.appendChild(fout(e)); });
+  }
+
+  function vbKlasse(laag) {
+    return laag === 'gemeente' ? 'gem' : laag === 'provincie' ? 'prov'
+         : laag === 'waterschap' ? 'water' : laag === 'rijk' ? 'rijk' : '';
+  }
+
+  function vbPagina(hit) {
+    var urn = decodeURIComponent(hit[1]);
+    var oh = decodeURIComponent(hit[2]);
+    view.appendChild(kruimels([
+      { tekst: 'Register', href: '/' },
+      { tekst: 'Vragenbomen', href: '/vragenbomen' },
+      { tekst: urn, href: '/vragenbomen/' + encodeURIComponent(urn) },
+      { tekst: oh }
+    ]));
+    var doel = el('div');
+    view.appendChild(doel);
+    doel.appendChild(laden('Vragenbomen en artikelen ophalen…'));
+
+    api('/v1/vergunningcheck/' + encodeURIComponent(urn) + '/' + encodeURIComponent(oh))
+      .then(function (d) {
+        leeg(doel);
+        doel.appendChild(kop(d.werkzaamheid.naam,
+          (d.overheid.naam || oh) + ' — de gepubliceerde vergunningcheck, en de ' +
+          'wetsartikelen waarop die rust.'));
+
+        (d.activiteiten || []).forEach(function (a) {
+          doel.appendChild(vbActiviteit(a, d.overheid));
+        });
+
+        doel.appendChild(el('p', { class: 'vb-voet muted', text:
+          'De begrijpelijke uitleg is machinaal gemaakt en heeft geen juridische ' +
+          'status. Bij twijfel geldt de wettekst.' }));
+      })
+      .catch(function (e) { leeg(doel); doel.appendChild(fout(e)); });
+  }
+
+  function vbActiviteit(a, overheid) {
+    var wrap = el('section', { class: 'vb-act ' + vbKlasse(overheid.bestuurslaag) });
+
+    wrap.appendChild(el('div', { class: 'vb-actkop' }, [
+      el('h2', { text: a.activiteit_naam || '(activiteit zonder naam)' }),
+      el('code', { class: 'vb-urn', text: a.activiteit_urn })
+    ]));
+
+    if (!a.in_p2p) {
+      wrap.appendChild(el('div', { class: 'vb-gat' }, [
+        el('p', { text: 'Deze activiteit staat wel in het register van toepasbare regels, ' +
+                        'maar wij vinden hem niet terug in de omgevingsdocumenten.' }),
+        el('p', { class: 'muted', text: 'Wij verbergen dat niet: als het een fout is, ' +
+                        'hoort iemand het te kunnen zien.' })
+      ]));
+      return wrap;
+    }
+
+    var kolommen = el('div', { class: 'vb-kolommen' });
+
+    /* links — de vragenbomen */
+    var links = el('div', { class: 'vb-kol' });
+    links.appendChild(el('h3', { text: 'Wat wordt er gevraagd?' }));
+    var bomen = (a.regelbeheerobjecten || []);
+    if (!bomen.length) {
+      links.appendChild(el('p', { class: 'muted', text:
+        'Voor deze activiteit is geen vragenboom gepubliceerd.' }));
+    } else {
+      bomen.forEach(function (r) {
+        var rij = el('div', { class: 'vb-boom' + (r.heeft_logica ? '' : ' vb-boom--leeg') });
+        rij.appendChild(el('div', { class: 'vb-boomkop' }, [
+          el('strong', { text: vbBoomnaam(r.typering) }),
+          el('span', { class: 'vb-boommaat', text: r.heeft_logica
+            ? nl(r.knopen) + ' vragen en tussenstappen'
+            : 'aangekondigd, nog niet gevuld' })
+        ]));
+        rij.appendChild(el('p', { class: 'vb-boomuit', text: vbBoomuitleg(r.typering) }));
+        rij.appendChild(el('div', { class: 'vb-boomtoggle' }, [ el('span', { text:
+          'De machinaal opgestelde beslislogica is beschikbaar via de API; hij wordt hier ' +
+          'niet als diagram getoond omdat de knoopnamen geen leestaal zijn.' }) ]));
+        links.appendChild(rij);
+      });
+    }
+
+    /* rechts — de wet */
+    var rechts = el('div', { class: 'vb-kol vb-kol--wet' });
+    var teksten = a.regelteksten || [];
+    rechts.appendChild(el('h3', {}, [
+      document.createTextNode('Waar staat dat?'),
+      el('span', { class: 'vb-aantal', text: teksten.length
+        ? nl(teksten.length) + ' regelteksten · volledig' : 'geen' })
+    ]));
+    if (!teksten.length) {
+      rechts.appendChild(el('p', { class: 'muted', text:
+        'Geen artikelen gevonden die naar deze activiteit verwijzen.' }));
+    } else {
+      var huidigeRegeling = null;
+      teksten.forEach(function (t) {
+        if (t.regeling !== huidigeRegeling) {
+          huidigeRegeling = t.regeling;
+          rechts.appendChild(el('div', { class: 'vb-regeling', text: t.regeling || '(onbekende regeling)' }));
+        }
+        rechts.appendChild(vbArtikel(t));
+      });
+    }
+
+    kolommen.appendChild(links);
+    kolommen.appendChild(rechts);
+    wrap.appendChild(kolommen);
+    return wrap;
+  }
+
+  function vbBoomnaam(t) {
+    return t === 'Conclusie' ? 'Mag het?'
+         : t === 'Indieningsvereisten' ? 'Wat moet u meesturen?'
+         : t === 'Maatregelen' ? 'Waaraan moet u zich houden?' : t;
+  }
+
+  function vbBoomuitleg(t) {
+    return t === 'Conclusie'
+      ? 'Bepaalt of u een vergunning of melding nodig hebt.'
+      : t === 'Indieningsvereisten'
+      ? 'Bepaalt welke gegevens en bijlagen bij de aanvraag horen.'
+      : t === 'Maatregelen'
+      ? 'Geeft de voorschriften waaraan u zich tijdens het uitvoeren moet houden.'
+      : '';
+  }
+
+  function vbArtikel(t) {
+    var n = el('article', { class: 'vb-art' });
+    var kopregel = el('div', { class: 'vb-artkop' }, [
+      el('span', { class: 'vb-artnr', text: 'Artikel ' + (t.artikel || '?') }),
+      t.opschrift ? el('span', { class: 'vb-artop', text: t.opschrift }) : null,
+      el('span', { class: 'vb-artlid', text: t.niveau === 'Lid' ? 'lid ' + (t.lid || '') : 'artikel' })
+    ]);
+    n.appendChild(kopregel);
+    n.appendChild(el('p', { class: 'vb-arttx', text: t.tekst || '' }));
+
+    if (t.begrijpelijk) {
+      n.appendChild(el('div', { class: 'vb-herta', text: t.begrijpelijk }));
+    } else {
+      n.appendChild(el('div', { class: 'vb-hertaleeg', text: 'Nog geen begrijpelijke uitleg voor dit artikel.' }));
+    }
+
+    /* De hint mag nooit als vaststelling lezen: hij draagt zijn bewijs mee én
+       de mededeling dat het uit de tekst is afgeleid. */
+    if (t.heuristiek_onderdeel) {
+      n.appendChild(el('div', { class: 'vb-vermoed' }, [
+        el('span', { text: 'Hoort vermoedelijk bij “' + vbBoomnaam(
+          t.heuristiek_onderdeel === 'conclusie' ? 'Conclusie'
+          : t.heuristiek_onderdeel === 'indieningsvereisten' ? 'Indieningsvereisten'
+          : 'Maatregelen') + '”' +
+          (t.heuristiek_bewijs ? ' — herkend aan “' + t.heuristiek_bewijs + '”' : '') +
+          '. Afgeleid uit de tekst, niet vastgelegd door de overheid.' })
+      ]));
+    }
+    return n;
+  }
+
   (function toonVersie() {
     var eigen = document.currentScript
       || document.querySelector('script[src*="app.js"]');
