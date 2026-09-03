@@ -559,3 +559,20 @@ td.num, th.num { text-align: right; font-family: var(--mono); padding-right: 0; 
 .vb-vermoed { margin-top: 8px; padding: 8px 10px; font-size: .8rem; line-height: 1.5;
   color: var(--ink-2); background: var(--paper-2); border-left: 2px solid var(--link); }
 .vb-voet { margin-top: 26px; font-size: .82rem; }
+
+/* De vragen zelf. Genummerd op inter:prioriteit — dat is de volgorde waarin
+   het Omgevingsloket ze stelt, en zonder die volgorde is een vragenlijst een
+   willekeurige verzameling. */
+.vb-vragen { margin: 9px 0 0; padding-left: 1.35em; }
+.vb-vraag { margin: 0 0 11px; padding-left: 2px; }
+.vb-vraag::marker { color: var(--ink-3); font-size: .8em; }
+.vb-vraagtx { font-size: .92rem; line-height: 1.5; }
+.vb-vraagmeta { margin-left: 7px; white-space: nowrap; }
+.vb-tag { font-size: .68rem; text-transform: uppercase; letter-spacing: .08em;
+  color: var(--ink-3); border: 1px solid var(--rule); border-radius: 999px;
+  padding: 1px 7px; }
+.vb-opties { margin: 5px 0 0; padding-left: 1.1em; list-style: none; }
+.vb-opties li { font-size: .84rem; color: var(--ink-2); line-height: 1.5; position: relative; }
+.vb-opties li::before { content: "○"; position: absolute; left: -1.1em; color: var(--ink-3); }
+.vb-vraaguit { margin: 5px 0 0; padding-left: 10px; border-left: 2px solid var(--paper-3);
+  font-size: .82rem; line-height: 1.55; color: var(--ink-3); white-space: pre-line; }

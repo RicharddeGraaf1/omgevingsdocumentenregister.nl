@@ -1454,16 +1454,15 @@
     } else {
       bomen.forEach(function (r) {
         var rij = el('div', { class: 'vb-boom' + (r.heeft_logica ? '' : ' vb-boom--leeg') });
+        var aantal = (r.vragen || []).length;
         rij.appendChild(el('div', { class: 'vb-boomkop' }, [
           el('strong', { text: vbBoomnaam(r.typering) }),
-          el('span', { class: 'vb-boommaat', text: r.heeft_logica
-            ? nl(r.knopen) + ' vragen en tussenstappen'
-            : 'aangekondigd, nog niet gevuld' })
+          el('span', { class: 'vb-boommaat', text: !r.heeft_logica
+            ? 'aangekondigd, nog niet gevuld'
+            : aantal ? nl(aantal) + ' vragen' : nl(r.knopen) + ' stappen' })
         ]));
         rij.appendChild(el('p', { class: 'vb-boomuit', text: vbBoomuitleg(r.typering) }));
-        rij.appendChild(el('div', { class: 'vb-boomtoggle' }, [ el('span', { text:
-          'De machinaal opgestelde beslislogica is beschikbaar via de API; hij wordt hier ' +
-          'niet als diagram getoond omdat de knoopnamen geen leestaal zijn.' }) ]));
+        rij.appendChild(vbVragen(r));
         links.appendChild(rij);
       });
     }
@@ -1494,6 +1493,41 @@
     kolommen.appendChild(rechts);
     wrap.appendChild(kolommen);
     return wrap;
+  }
+
+  /* De vragen zoals het Omgevingsloket ze stelt, op inter:prioriteit.
+     Geen diagram van de beslisgraaf: die knoopnamen zijn machinetaal. Dit is
+     de tekst die de initiatiefnemer werkelijk voorgelegd krijgt. */
+  function vbVragen(r) {
+    var vragen = r.vragen || [];
+    if (!vragen.length) {
+      return el('p', { class: 'vb-boomtoggle', text: r.heeft_logica
+        ? 'De vragen van deze boom zijn nog niet opgehaald. Dat gebeurt in ' +
+          'nachtelijke porties, zodat het stelsel er overdag geen last van heeft.'
+        : 'Er is nog geen inhoud gepubliceerd voor deze boom.' });
+    }
+    var ol = el('ol', { class: 'vb-vragen' });
+    vragen.forEach(function (q) {
+      var li = el('li', { class: 'vb-vraag' });
+      li.appendChild(el('span', { class: 'vb-vraagtx', text: q.label }));
+      var meta = el('span', { class: 'vb-vraagmeta' });
+      if (q.regel_type === 'Bijlage') meta.appendChild(el('span', { class: 'vb-tag', text: 'bijlage' }));
+      else if (q.gegevens_type) meta.appendChild(el('span', { class: 'vb-tag', text: vbType(q.gegevens_type) }));
+      li.appendChild(meta);
+      if (q.opties && q.opties.length) {
+        var ul = el('ul', { class: 'vb-opties' });
+        q.opties.forEach(function (o) { ul.appendChild(el('li', { text: o })); });
+        li.appendChild(ul);
+      }
+      if (q.toelichting) li.appendChild(el('p', { class: 'vb-vraaguit', text: q.toelichting }));
+      ol.appendChild(li);
+    });
+    return ol;
+  }
+
+  function vbType(t) {
+    return { boolean: 'ja / nee', number: 'een getal', date: 'een datum',
+             string: 'vrije tekst', list: 'keuze' }[t] || t;
   }
 
   function vbBoomnaam(t) {
