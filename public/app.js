@@ -1388,6 +1388,153 @@
       .catch(function (e) { leeg(doel); doel.appendChild(fout(e)); });
   }
 
+  /* Het registertabblad. Bewust wel kaarten met randen, waar de leeskolom
+     hiernaast juist geen kaders kent: een register wordt opgezocht, niet
+     gelezen. Alles wat hier staat komt uit de RTR of uit onze eigen
+     kruiscontrole daarop - er wordt niets afgeleid en niets ingevuld. */
+  function vbRegister(a, werkzaamheid, overheid) {
+    var wrap = el('section', { class: 'rg-act ' + vbKlasse(overheid.bestuurslaag) });
+    var r = a.registratie;
+
+    wrap.appendChild(el('div', { class: 'vb-actkop' }, [
+      el('h2', { text: a.activiteit_naam || '(activiteit zonder naam)' }),
+      el('code', { class: 'vb-urn', text: a.activiteit_urn })
+    ]));
+
+    if (!r) {
+      wrap.appendChild(el('div', { class: 'rg-leeg' }, [
+        el('p', { text: 'Van deze activiteit hebben wij de registratiegegevens nog niet opgehaald.' }),
+        el('p', { class: 'muted', text:
+          'Het zoek-endpoint van de RTR levert per bevoegd gezag maar twintig ' +
+          'activiteiten en negeert de paginaparameter, dus deze gegevens komen ' +
+          'langs een andere weg binnen. Wat hieronder ontbreekt, ontbreekt bij ' +
+          'ons - niet in het register.' })
+      ]));
+      return wrap;
+    }
+
+    /* De einddatum krijgt de zwaarste plek, maar alleen als hij er is. Bijna
+       geen enkel bevoegd gezag zet er een; wie dat wel doet zegt daarmee dat
+       de registratie op een datum ophoudt. Dat hoort niet weggestopt in een
+       veldenlijst. */
+    if (r.eind_datum) {
+      var dagen = Math.round((new Date(r.eind_datum) - new Date()) / 86400000);
+      wrap.appendChild(el('div', {
+        class: 'rg-alarm' + (dagen <= 60 ? ' rg-alarm--nabij' : '')
+      }, [
+        el('strong', { text: dagen < 0
+          ? 'Deze registratie is op ' + datum(r.eind_datum) + ' verlopen'
+          : 'Deze registratie loopt op ' + datum(r.eind_datum) + ' af' }),
+        el('p', { text: dagen < 0
+          ? 'Het bevoegd gezag heeft een einddatum gezet die inmiddels voorbij is.'
+          : 'Het bevoegd gezag heeft zelf een einddatum gezet. Verreweg de meeste ' +
+            'doen dat niet, dus een gevulde einddatum is een uitspraak en geen routine.' })
+      ]));
+    }
+
+    var grid = el('div', { class: 'rg-grid' });
+    grid.appendChild(rgKaart('Registratiegegevens', [
+      rgRij('Bevoegd gezag', (overheid.naam || '') +
+        (r.oin ? ' - OIN ' + r.oin : '') +
+        (r.organisatie_type ? ' * ' + r.organisatie_type + ' ' + (r.organisatie_code || '') : '')),
+      rgRij('Bestuurslaag', r.bestuurslaag),
+      rgRij('Geregistreerd vanaf', datum(r.begin_datum)),
+      rgRij('Geldig tot', r.eind_datum ? datum(r.eind_datum) : 'geen einddatum gezet'),
+      rgRij('Werkingsgebied', (r.locaties && r.locaties.length)
+        ? r.locaties.map(function (l) { return l.identificatie; }).join(', ')
+        : null)
+    ]));
+
+    grid.appendChild(rgKaart('Hoe de activiteit zich gedraagt', [
+      rgRij('Verfijnbaar', r.verfijnbaar == null ? null : (r.verfijnbaar
+        ? 'Ja - de check kan doorvragen naar een specifiekere activiteit.'
+        : 'Nee - deze activiteit wordt niet verder opgesplitst in de check.'))
+    ], 'Het register kent hier maar een eigenschap. Zichtbaarheid in het ' +
+       'Omgevingsloket en magneetgedrag staan niet in de publieke RTR, ook niet ' +
+       'op het detail-endpoint. Wij tonen ze daarom niet, ook niet als lege regel.'));
+
+    var rboKind = [
+      rgRij('Genoemd in het register', r.rbo_genoemd_in_register == null
+        ? null : nl(r.rbo_genoemd_in_register)),
+      rgRij('Gevonden in regelbestanden', nl(r.rbo_gevonden_in_regelbestanden))
+    ];
+    grid.appendChild(rgKaart('Regelbeheerobjecten', rboKind,
+      r.rbo_spreekt_elkaar_tegen
+        ? 'Deze twee getallen horen gelijk te zijn en zijn dat niet. Wij tonen ' +
+          'beide en kiezen niet: het register en de regelbestanden spreken ' +
+          'elkaar hier tegen.'
+        : null,
+      r.rbo_spreekt_elkaar_tegen));
+
+    wrap.appendChild(grid);
+
+    if (r.keten && r.keten.length) {
+      var st = el('div', { class: 'rg-kaart rg-kaart--breed' });
+      st.appendChild(el('h3', { text: 'Plek in de landelijke structuur' }));
+      var ol = el('ol', { class: 'rg-keten' });
+      r.keten.forEach(function (k, i) {
+        ol.appendChild(el('li', {
+          class: 'rg-ketenstap' + (i === r.keten.length - 1 ? ' rg-ketenstap--zelf' : ''),
+          text: k.naam || k.identificatie
+        }));
+      });
+      st.appendChild(ol);
+      st.appendChild(el('p', { class: 'rg-toe muted', text:
+        'Van de algemene tophaak naar deze activiteit. Elke stap is een ' +
+        'activiteit die andere activiteiten onder zich hangt; de keten is ' +
+        'landelijk en overschrijdt bestuurslagen.' }));
+      wrap.appendChild(st);
+    }
+
+    var tref = (werkzaamheid.trefwoorden || []);
+    var zo = el('div', { class: 'rg-kaart rg-kaart--breed' });
+    zo.appendChild(el('h3', { text: 'Zo vindt een initiatiefnemer dit' }));
+    zo.appendChild(el('p', { class: 'rg-werk' }, [
+      document.createTextNode('Werkzaamheid '),
+      el('strong', { text: werkzaamheid.naam })
+    ]));
+    if (tref.length) {
+      var ul = el('ul', { class: 'rg-tref' });
+      tref.forEach(function (t) { ul.appendChild(el('li', { text: t })); });
+      zo.appendChild(ul);
+    } else {
+      zo.appendChild(el('p', { class: 'muted', text:
+        'Bij deze werkzaamheid staan geen zoektermen geregistreerd.' }));
+    }
+    wrap.appendChild(zo);
+    return wrap;
+  }
+
+  function rgKaart(titel, rijen, toelichting, spanning) {
+    var k = el('div', { class: 'rg-kaart' + (spanning ? ' rg-kaart--spanning' : '') });
+    k.appendChild(el('h3', { text: titel }));
+    var dl = el('dl', { class: 'rg-dl' });
+    rijen.forEach(function (r) { if (r) { dl.appendChild(r[0]); dl.appendChild(r[1]); } });
+    k.appendChild(dl);
+    if (toelichting) k.appendChild(el('p', { class: 'rg-toe muted', text: toelichting }));
+    return k;
+  }
+
+  /* Een lege waarde wordt getoond als leeg, niet weggelaten: dat een veld
+     ontbreekt is zelf informatie. */
+  function rgRij(label, waarde) {
+    return [
+      el('dt', { text: label }),
+      (waarde == null || waarde === '')
+        ? el('dd', { class: 'rg-onbekend', text: 'niet opgehaald' })
+        : el('dd', { text: String(waarde) })
+    ];
+  }
+
+  function datum(d) {
+    if (!d) return null;
+    var p = String(d).slice(0, 10).split('-');
+    if (p.length !== 3) return String(d);
+    var m = ['januari', 'februari', 'maart', 'april', 'mei', 'juni', 'juli',
+             'augustus', 'september', 'oktober', 'november', 'december'];
+    return Number(p[2]) + ' ' + m[Number(p[1]) - 1] + ' ' + p[0];
+  }
+
   function vbKlasse(laag) {
     return laag === 'gemeente' ? 'gem' : laag === 'provincie' ? 'prov'
          : laag === 'waterschap' ? 'water' : laag === 'rijk' ? 'rijk' : '';
@@ -1413,13 +1560,53 @@
           (d.overheid.naam || oh) + ' — de gepubliceerde vergunningcheck, en de ' +
           'wetsartikelen waarop die rust.'));
 
-        (d.activiteiten || []).forEach(function (a) {
-          doel.appendChild(vbActiviteit(a, d.overheid));
+        /* Twee ingangen, geen drie. De check en de aanvraag zijn samen één
+           verhaal over dezelfde regels; het register is een ánder object —
+           andere auteur, eigen geldigheid. Een derde weergave-toggle naast
+           juridisch en begrijpelijk zou juist dat verschil platslaan. */
+        var paneel = el('div');
+        var tabs = el('div', { class: 'vb-tabs', role: 'tablist' });
+        var knop = {};
+        ['regels', 'register'].forEach(function (naam) {
+          knop[naam] = el('button', {
+            class: 'vb-tab' + (naam === 'regels' ? ' vb-tab--aan' : ''),
+            type: 'button', role: 'tab',
+            'aria-selected': naam === 'regels' ? 'true' : 'false',
+            text: naam === 'regels'
+              ? 'Mag het, en wat moet u meesturen?'
+              : 'Wat is er geregistreerd?'
+          });
+          knop[naam].addEventListener('click', function () { toon(naam); });
+          tabs.appendChild(knop[naam]);
         });
+        doel.appendChild(tabs);
+        doel.appendChild(paneel);
 
-        doel.appendChild(el('p', { class: 'vb-voet muted', text:
-          'De begrijpelijke uitleg is machinaal gemaakt en heeft geen juridische ' +
-          'status. Bij twijfel geldt de wettekst.' }));
+        function toon(naam) {
+          Object.keys(knop).forEach(function (k) {
+            var aan = k === naam;
+            knop[k].className = 'vb-tab' + (aan ? ' vb-tab--aan' : '');
+            knop[k].setAttribute('aria-selected', aan ? 'true' : 'false');
+          });
+          leeg(paneel);
+          if (naam === 'regels') {
+            (d.activiteiten || []).forEach(function (a) {
+              paneel.appendChild(vbActiviteit(a, d.overheid));
+            });
+            paneel.appendChild(el('p', { class: 'vb-voet muted', text:
+              'De begrijpelijke uitleg is machinaal gemaakt en heeft geen juridische ' +
+              'status. Bij twijfel geldt de wettekst.' }));
+          } else {
+            (d.activiteiten || []).forEach(function (a) {
+              paneel.appendChild(vbRegister(a, d.werkzaamheid, d.overheid));
+            });
+            paneel.appendChild(el('p', { class: 'vb-voet muted', text:
+              'Deze gegevens komen uit het register van toepasbare regels (RTR) ' +
+              'en zijn van het bevoegd gezag zelf. Ze zeggen iets anders dan de ' +
+              'omgevingsdocumenten: wat er gepubliceerd is, niet wat er geldt.' }));
+          }
+        }
+        toon('regels');
       })
       .catch(function (e) { leeg(doel); doel.appendChild(fout(e)); });
   }

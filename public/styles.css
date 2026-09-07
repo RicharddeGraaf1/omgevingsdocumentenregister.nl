@@ -576,3 +576,68 @@ td.num, th.num { text-align: right; font-family: var(--mono); padding-right: 0; 
 .vb-opties li::before { content: "○"; position: absolute; left: -1.1em; color: var(--ink-3); }
 .vb-vraaguit { margin: 5px 0 0; padding-left: 10px; border-left: 2px solid var(--paper-3);
   font-size: .82rem; line-height: 1.55; color: var(--ink-3); white-space: pre-line; }
+
+/* ── Registertabblad ──────────────────────────────────────────────────────
+   Hier wél kaders, waar de leeskolom er juist geen heeft. Een wettekst wordt
+   gelezen en krijgt zijn hiërarchie uit typografie; een register wordt
+   opgezocht, en dan helpt een raster met randen. Alle kleuren komen uit de
+   bestaande tokens, ook de bestuurslaag-rail (--src) die de regelkant al
+   gebruikt — geen tweede kleurtaal voor hetzelfde onderscheid. */
+.vb-tabs { display: flex; gap: 2px; margin: 22px 0 0; border-bottom: 1px solid var(--rule); }
+.vb-tab { appearance: none; background: none; border: 0; border-bottom: 2px solid transparent;
+  margin-bottom: -1px; padding: 9px 14px; font: inherit; font-size: .92rem;
+  color: var(--ink-3); cursor: pointer; }
+.vb-tab:hover { color: var(--ink); }
+.vb-tab--aan { color: var(--ink); font-weight: 700; border-bottom-color: var(--accent); }
+
+.rg-act { margin: 24px 0 0; border-top: 2px solid var(--src, var(--rule)); padding-top: 14px; }
+
+.rg-leeg { margin: 12px 0 0; padding: 13px 16px; background: var(--nv-bg);
+  border-left: 3px solid var(--nv-rule); }
+.rg-leeg p { margin: 0; font-size: .9rem; }
+.rg-leeg p + p { margin-top: 6px; }
+
+.rg-alarm { margin: 12px 0 0; padding: 13px 16px; background: var(--paper-2);
+  border-left: 4px solid var(--rule); }
+.rg-alarm--nabij { background: var(--no-bg); border-left-color: var(--no-rule); color: var(--no-ink); }
+.rg-alarm strong { display: block; font-size: 1.02rem; }
+.rg-alarm p { margin: 5px 0 0; font-size: .88rem; }
+
+.rg-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 14px; margin-top: 14px; }
+.rg-kaart { border: 1px solid var(--rule); border-radius: 8px; padding: 14px 16px;
+  background: var(--paper); }
+.rg-kaart--breed { margin-top: 14px; }
+.rg-kaart--spanning { border-color: var(--no-rule); background: var(--no-bg); }
+.rg-kaart h3 { margin: 0 0 10px; font-size: .72rem; letter-spacing: .10em;
+  text-transform: uppercase; color: var(--ink-3); font-weight: 700; }
+
+.rg-dl { margin: 0; display: grid; grid-template-columns: minmax(110px, auto) 1fr;
+  gap: 6px 14px; font-size: .89rem; }
+.rg-dl dt { color: var(--ink-3); }
+.rg-dl dd { margin: 0; color: var(--ink); overflow-wrap: anywhere; }
+.rg-onbekend { color: var(--ink-3); font-style: italic; }
+.rg-toe { margin: 10px 0 0; font-size: .82rem; line-height: 1.45; }
+
+/* De keten loopt van de tophaak naar beneden; het laatste blokje is de
+   activiteit zelf en krijgt daarom de accentkleur in plaats van een cijfer. */
+.rg-keten { list-style: none; margin: 0; padding: 0; }
+.rg-ketenstap { position: relative; padding: 3px 0 3px 20px; font-size: .89rem;
+  color: var(--ink-2); }
+.rg-ketenstap::before { content: ''; position: absolute; left: 5px; top: 12px;
+  width: 7px; height: 7px; border-radius: 50%; background: var(--rule); }
+.rg-ketenstap:not(:last-child)::after { content: ''; position: absolute; left: 8px;
+  top: 19px; bottom: -3px; width: 1px; background: var(--rule); }
+.rg-ketenstap--zelf { color: var(--ink); font-weight: 700; }
+.rg-ketenstap--zelf::before { background: var(--accent); }
+
+.rg-werk { margin: 0 0 8px; font-size: .89rem; color: var(--ink-2); }
+.rg-tref { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.rg-tref li { font-size: .8rem; padding: 3px 9px; border-radius: 999px;
+  background: var(--paper-3); color: var(--ink-2); }
+
+@media (max-width: 620px) {
+  .vb-tabs { flex-wrap: wrap; }
+  .rg-dl { grid-template-columns: 1fr; gap: 2px 0; }
+  .rg-dl dd { margin-bottom: 6px; }
+}
