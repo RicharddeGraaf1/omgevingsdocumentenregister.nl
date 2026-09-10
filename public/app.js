@@ -1676,10 +1676,54 @@
       });
     }
 
+    /* Artikelen die de vragenboom ZELF noemt, en die langs de annotatie niet
+       te vinden zijn. Ze staan onder de relationele lijst en niet ertussen:
+       ze komen langs een andere weg binnen en dat hoort zichtbaar te blijven. */
+    var genoemd = a.genoemde_artikelen || [];
+    if (genoemd.length) {
+      rechts.appendChild(vbGenoemd(genoemd));
+    }
+
     kolommen.appendChild(links);
     kolommen.appendChild(rechts);
     wrap.appendChild(kolommen);
     return wrap;
+  }
+
+  /* Geen vermoeden, maar een vindplaats: de bronhouder heeft het artikelnummer
+     zelf in de vragenboom gezet. Daarom staat er WELKE boom hem noemt, en
+     niet -- zoals bij de heuristiek hiernaast -- een gok op basis van de
+     wettekst. */
+  function vbGenoemd(lijst) {
+    var blok = el('div', { class: 'vb-genoemd' });
+    blok.appendChild(el('h4', {}, [
+      document.createTextNode('Ook genoemd door de vragenboom'),
+      el('span', { class: 'vb-aantal', text: nl(lijst.length) +
+        (lijst.length === 1 ? ' artikel' : ' artikelen') })
+    ]));
+    blok.appendChild(el('p', { class: 'vb-genoemduit muted', text:
+      'Deze artikelen staan niet hierboven, omdat de annotatie ze aan een ' +
+      'andere activiteit heeft gehangen — meestal een bredere, zoals ' +
+      '“milieubelastende activiteit”. Het zijn vaak de algemene bepalingen: ' +
+      'maatwerkvoorschriften, meet- en rekenbepalingen, toepassingsbereik. ' +
+      'De vragenboom verwijst er wél naar.' }));
+
+    lijst.forEach(function (t) {
+      var n = el('article', { class: 'vb-art vb-art--genoemd' });
+      n.appendChild(el('div', { class: 'vb-artkop' }, [
+        el('span', { class: 'vb-artnr', text: 'Artikel ' + t.nummer }),
+        t.opschrift ? el('span', { class: 'vb-artop', text: t.opschrift }) : null
+      ]));
+      if (t.tekst) n.appendChild(el('p', { class: 'vb-arttx', text: t.tekst }));
+      n.appendChild(el('div', { class: 'vb-bron' }, [
+        el('span', { text: 'Genoemd door ' +
+          (t.genoemd_door || []).map(vbBoomnaam).join(' en ') +
+          '. Vastgelegd door de overheid in de vragenboom zelf, niet door ' +
+          'ons afgeleid.' })
+      ]));
+      blok.appendChild(n);
+    });
+    return blok;
   }
 
   /* De vragen zoals het Omgevingsloket ze stelt, op inter:prioriteit.

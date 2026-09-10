@@ -641,3 +641,14 @@ td.num, th.num { text-align: right; font-family: var(--mono); padding-right: 0; 
   .rg-dl { grid-template-columns: 1fr; gap: 2px 0; }
   .rg-dl dd { margin-bottom: 6px; }
 }
+
+/* Artikelen die de vragenboom zelf noemt. Onder de relationele lijst, met
+   een eigen kop en een lichte rail — ze komen langs een andere weg binnen
+   dan de artikelen erboven, en dat mag het scherm niet gladstrijken. */
+.vb-genoemd { margin-top: 26px; padding-top: 16px; border-top: 1px dashed var(--rule); }
+.vb-genoemd h4 { margin: 0 0 6px; font-size: .72rem; letter-spacing: .10em;
+  text-transform: uppercase; color: var(--ink-3); font-weight: 700;
+  display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.vb-genoemduit { margin: 0 0 14px; font-size: .84rem; line-height: 1.5; max-width: 62ch; }
+.vb-art--genoemd { padding-left: 13px; border-left: 2px solid var(--rule-soft); }
+.vb-bron { margin-top: 6px; font-size: .8rem; color: var(--ink-3); line-height: 1.45; }
