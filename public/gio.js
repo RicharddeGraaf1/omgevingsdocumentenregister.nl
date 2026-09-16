@@ -42,6 +42,10 @@
     if (attrs) Object.keys(attrs).forEach(function (k) {
       if (k === 'class') n.className = attrs[k];
       else if (k === 'text') n.textContent = attrs[k];
+      // Via de CSSOM, niet als attribuut: de CSP (style-src zonder 'unsafe-inline')
+      // blokkeert style="…"-attributen stil. Zo bleven staafjes en de GIO-plaat
+      // zonder afmetingen (gevonden 2026-09-16).
+      else if (k === 'style') { if (attrs[k] != null) n.style.cssText = attrs[k]; }
       else if (attrs[k] != null) n.setAttribute(k, attrs[k]);
     });
     (kids || []).forEach(function (c) { if (c) n.appendChild(typeof c === 'string' ? document.createTextNode(c) : c); });
