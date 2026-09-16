@@ -17,3 +17,12 @@
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: geolocation=(), camera=(), microphone=(), interest-cohort=()
   Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://service.pdok.nl; connect-src 'self' https://annotatieconformiteit.nl https://ponsenkaart.nl https://instructieregels.nl https://dso-implementatiemonitor.nl; frame-ancestors 'none'; base-uri 'self'; form-action 'self'
+
+# Regels op maat: eigen CSP. De kaart haalt adressen en percelen bij PDOK
+# (api.pdok.nl) en tegels bij service.pdok.nl; <ocd-regeltekst> zet zijn CSS als
+# <style> in zijn shadow root, vandaar style-src 'unsafe-inline'. script-src
+# blijft strikt 'self'. De "!" haalt eerst de algemene CSP van /* weg — twee
+# CSP-headers zouden allebei gelden en elkaar dichtzetten.
+/regels-op-maat/*
+  ! Content-Security-Policy
+  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://service.pdok.nl; connect-src 'self' https://api.pdok.nl; worker-src 'self' blob:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'

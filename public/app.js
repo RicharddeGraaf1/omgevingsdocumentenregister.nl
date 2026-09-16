@@ -143,7 +143,8 @@
     var a = e.target.closest && e.target.closest('a');
     if (!a) return;
     var href = a.getAttribute('href');
-    if (!href || href.charAt(0) !== '/' || a.hasAttribute('target')) return;
+    // data-volledig: een eigen pagina buiten deze SPA (Regels op maat) — gewoon laden.
+    if (!href || href.charAt(0) !== '/' || a.hasAttribute('target') || a.hasAttribute('data-volledig')) return;
     e.preventDefault();
     ga(href);
   });
