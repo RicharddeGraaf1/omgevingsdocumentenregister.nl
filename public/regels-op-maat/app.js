@@ -99,10 +99,25 @@
     return 0;
   }
 
-  /** Artikel-wid bij een lid-wid: alles tot en met het __art_-segment. */
+  /** Artikel-wid bij een lid-wid, als er geen documentboom is: alles tot en met
+   *  het __art_-segment. Dit werkt NIET voor wId's zonder dat segment
+   *  (Amsterdam: gm0363_<hash>__para_2) — daar kan alleen de boom het artikel
+   *  aanwijzen. Zie ouderArtikelen(). */
   function artikelWid(wid) {
     var m = /^(.*?__art_[^_]+)/.exec(wid || '');
     return m ? m[1] : wid;
+  }
+
+  /** wid -> wid van het omhullende Artikel, uit de documentboom. */
+  function ouderArtikelen(boom) {
+    var kaart = {};
+    function loop(knoop, art) {
+      var a = knoop.type === 'Artikel' ? knoop.wid : art;
+      if (knoop.wid && a) kaart[knoop.wid] = a;
+      (knoop.kinderen || []).forEach(function (k) { loop(k, a); });
+    }
+    (boom || []).forEach(function (k) { loop(k, null); });
+    return kaart;
   }
 
   // ── URL ───────────────────────────────────────────────
@@ -427,14 +442,19 @@
     var onderwerpen = doc.bron_type === 'ow'
       ? api('/v1/viewer/regeling/' + encodeURIComponent(doc.bron_id) + '/onderwerpen').catch(function () { return null; })
       : Promise.resolve(null);
-    analyses[sleutel] = Promise.all([rijen, onderwerpen]).then(function (r) {
-      return bouwAnalyse(doc, (r[0] && r[0].regelmix) || [], r[1]);
+    // De boom is nodig om leden bij hun artikel te krijgen (zie artikelWid). Niet
+    // voor landelijke regelingen: die boom is megabytes, en hun wId's hebben wél
+    // een __art_-segment.
+    var boom = (doc.bron_type === 'ow' && doc.bestuurslaag !== 'rijk') ? haalBoom(doc.bron_id) : Promise.resolve(null);
+    analyses[sleutel] = Promise.all([rijen, onderwerpen, boom]).then(function (r) {
+      return bouwAnalyse(doc, (r[0] && r[0].regelmix) || [], r[1], r[2]);
     });
     analyses[sleutel].catch(function () { delete analyses[sleutel]; });
     return analyses[sleutel];
   }
 
-  function bouwAnalyse(doc, rijen, ond) {
+  function bouwAnalyse(doc, rijen, ond, boom) {
+    var ouder = boom ? ouderArtikelen(boom) : {};
     // wid -> {categorie, sub}
     var indeling = {}, heeftIndeling = !!(ond && ond.categorieen);
     if (heeftIndeling) {
@@ -452,7 +472,7 @@
       if (doc.bron_type === 'wro') {
         sleutel = 'wro-' + i;
       } else {
-        artWid = artikelWid(r.wid);
+        artWid = ouder[r.wid] || artikelWid(r.wid);
         sleutel = artWid;
       }
       var a = perSleutel[sleutel];
