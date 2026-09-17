@@ -432,9 +432,15 @@
       el('p', { class: 'laden', text: 'Onderwerpen tellen…' })
     ]);
     doel.appendChild(blok);
-    var alleLink = el('p', { class: 'ow-alles' }, [
-      el('a', { href: '#', onclick: function (e) { e.preventDefault(); navigeer({ alles: true }); } },
-        ['Alle ' + nl(staat.docs.length) + ' documenten op deze locatie'])
+    // Bewust een volwaardige knop en geen voetnoot-link: dit is de enige weg naar
+    // Wro-plannen, beleid en landelijke regels (feedback 2026-09-17: te verborgen).
+    var alleLink = el('button', { type: 'button', class: 'ow-alles blad', onclick: function () { navigeer({ alles: true }); } }, [
+      el('span', { class: 'ow-alles-icoon' }, [icoon('M5 2.5h7l3.5 3.5v11.5H5z'), icoon('M12 2.5V6h3.5')]),
+      el('span', { class: 'ow-tegel-tekst' }, [
+        el('b', { text: 'Alle ' + nl(staat.docs.length) + ' documenten op deze locatie' }),
+        el('span', { class: 'muted', text: 'Ook bestemmingsplannen, beleid en landelijke regels' })
+      ]),
+      icoon(PAD_RECHTS)
     ]);
     doel.appendChild(alleLink);
 

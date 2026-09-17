@@ -202,7 +202,15 @@ details.sectie > summary { cursor: pointer; list-style-position: outside; }
 .ow-klein-knop:hover { color: var(--inkt); box-shadow: 0 0 0 1px var(--acc); }
 .ow-klein-rest { background: none; box-shadow: none; border: 1px dashed var(--lijn); }
 .ow-noot { margin: 2px 0 0; font-size: 12.5px; color: var(--inkt-3); }
-.ow-alles { margin: 0; font-size: 13.5px; }
+.ow-alles {
+  display: flex; align-items: center; gap: 14px; width: 100%; text-align: left; cursor: pointer;
+  border: 0; padding: 12px 14px; font: inherit; color: inherit; margin-top: 4px;
+}
+.ow-alles:hover { box-shadow: 0 0 0 1px var(--acc), 0 1px 3px oklch(20% 0.02 262 / .08); }
+.ow-alles:hover b { color: var(--acc); }
+.ow-alles > .icoon { color: var(--inkt-3); flex: none; }
+.ow-alles-icoon { position: relative; width: 44px; height: 44px; flex: none; display: grid; place-items: center; background: var(--inkt); color: var(--blad); border-radius: 3px; }
+.ow-alles-icoon .icoon { grid-area: 1 / 1; width: 22px; height: 22px; }
 .ow-res-kop { justify-content: flex-start; align-items: center; gap: 12px; }
 .chip .ow-icoon { color: var(--inkt-3); flex: none; }
 button.chip[aria-pressed="true"] .ow-icoon { color: var(--blad); }
