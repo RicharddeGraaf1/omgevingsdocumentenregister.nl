@@ -473,11 +473,14 @@
       blok.removeChild(blok.querySelector('.laden'));
       var tel = {};
       res.forEach(function (r) { Object.keys(r.a.tegels).forEach(function (k) { tel[k] = (tel[k] || 0) + r.a.tegels[k]; }); });
+      // Alleen de onderwerpen waar een bezoeker naar op zoek is. Aanvragen en
+      // vergunningen, regels voor de overheid en niet-ingedeelde artikelen staan
+      // hier niet meer als tegel (gebruikersbesluit 2026-09-17); ze blijven
+      // bereikbaar via alle documenten en via het filter binnen een document.
       var groot = Object.keys(tel).filter(function (k) { return tel[k] > 0 && !RomThema.isKlein(k); })
         .sort(function (a, b) { return tel[b] - tel[a]; });
-      var klein = RomThema.ONDERWERPEN.filter(function (o) { return o.klein && tel[o.id] > 0; }).map(function (o) { return o.id; });
 
-      if (!groot.length && !klein.length) {
+      if (!groot.length) {
         blok.appendChild(el('p', { class: 'leeg-melding', text:
           'De regels van gemeente, provincie en waterschap op dit punt zijn (nog) niet op onderwerp ingedeeld. Bekijk ze via alle documenten.' }));
         return;
@@ -494,16 +497,6 @@
         ]));
       });
       blok.appendChild(raster);
-      if (klein.length) {
-        var rij = el('div', { class: 'ow-klein' });
-        klein.forEach(function (id) {
-          rij.appendChild(el('button', { type: 'button', class: 'ow-klein-knop' + (id === 'niet-ingedeeld' ? ' ow-klein-rest' : ''),
-            onclick: function () { navigeer({ onderwerp: id }); } }, [
-            RomThema.icoon(id, 18), RomThema.naam(id) + ' ', el('b', { text: nl(tel[id]) })
-          ]));
-        });
-        blok.appendChild(rij);
-      }
       blok.appendChild(el('p', { class: 'ow-noot', text:
         'Onderwerpindeling van het register, per artikel. Landelijke regels, beleid en Wro-plannen tellen hier niet mee.' }));
     });
