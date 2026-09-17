@@ -290,3 +290,17 @@ button.chip-groep[aria-pressed="true"] { background: var(--acc-zacht); color: va
 .lg-ala { border: 2px solid var(--acc); background: color-mix(in oklch, var(--acc) 16%, transparent); }
 .lg-ga { border: 2px solid var(--at); background: color-mix(in oklch, var(--at) 16%, transparent); }
 .lg-dekkend { background: none; border-style: dashed; }
+
+/* ── Kenmerken bij een artikel (fase 9) ────────────────── */
+.kenmerken { border-top: 1px dashed var(--lijn); margin: 2px 0 6px; }
+.kenmerken-kop { display: flex; align-items: center; gap: 8px; width: 100%; text-align: left; border: 0; background: none; cursor: pointer; padding: 7px 0; font: inherit; color: inherit; }
+.kenmerken-kop .icoon { color: var(--inkt-3); transition: transform .12s; }
+.kenmerken.open .kenmerken-kop .icoon { transform: rotate(90deg); }
+.kenmerken-kop .muted { font-size: 12.5px; }
+.kenmerken-body { padding: 2px 0 10px; }
+.kenmerken-lijst { display: grid; grid-template-columns: minmax(110px, auto) 1fr; gap: 4px 14px; margin: 0; font-size: 13.5px; }
+.kenmerken-lijst dt { color: var(--inkt-3); }
+.kenmerken-lijst dd { margin: 0; color: var(--inkt); overflow-wrap: anywhere; }
+.kenmerken-lijst .muted { font-size: 12.5px; }
+.norm-waarde { font-family: var(--mono); font-size: 13px; }
+.kw { display: inline-block; font-size: 11.5px; padding: 2px 6px; margin-left: 6px; border-radius: 3px; background: var(--acc-zacht); color: var(--acc); }

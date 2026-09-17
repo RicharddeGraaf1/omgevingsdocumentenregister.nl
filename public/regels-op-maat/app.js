@@ -130,22 +130,62 @@
    *  endpoint voor het werkingsgebied. */
   function locatiesUitBoom(boom) {
     var per = {};
-    function voegToe(art, item, soort) {
-      if (!art || !item || !item.locatie_id) return;
-      var lijst = per[art] || (per[art] = []);
+    function vak(art) {
+      return per[art] || (per[art] = { locaties: [], activiteiten: [], gebiedsaanwijzingen: [], normwaarden: [] });
+    }
+    function voegLocatie(art, item, soort) {
+      if (!item || !item.locatie_id) return;
+      var lijst = vak(art).locaties;
       if (lijst.some(function (l) { return l.id === item.locatie_id; })) return;
       lijst.push({ id: item.locatie_id, soort: soort, naam: item.naam || '',
         type: item.type || item.groep || '', kwalificatie: item.kwalificatie || '' });
     }
+    function uniek(lijst, item, sleutel) {
+      if (lijst.some(function (x) { return sleutel(x) === sleutel(item); })) return;
+      lijst.push(item);
+    }
     function loop(knoop, art) {
       var a = knoop.type === 'Artikel' ? knoop.wid : art;
       var ann = knoop.annotaties || {};
-      (ann.activiteiten || []).forEach(function (x) { voegToe(a, x, 'activiteit'); });
-      (ann.gebiedsaanwijzingen || []).forEach(function (x) { voegToe(a, x, 'gebiedsaanwijzing'); });
+      if (a) {
+        (ann.activiteiten || []).forEach(function (x) {
+          voegLocatie(a, x, 'activiteit');
+          uniek(vak(a).activiteiten, x, function (y) { return (y.naam || '') + '|' + (y.kwalificatie || ''); });
+        });
+        (ann.gebiedsaanwijzingen || []).forEach(function (x) {
+          voegLocatie(a, x, 'gebiedsaanwijzing');
+          uniek(vak(a).gebiedsaanwijzingen, x, function (y) { return (y.type || '') + '|' + (y.naam || ''); });
+        });
+        (ann.normwaarden || []).forEach(function (x) {
+          voegLocatie(a, x, 'norm');
+          uniek(vak(a).normwaarden, x, function (y) { return (y.naam || '') + '|' + y.waarde + '|' + (y.locatie_id || ''); });
+        });
+      }
       (knoop.kinderen || []).forEach(function (k) { loop(k, a); });
     }
     (boom || []).forEach(function (k) { loop(k, null); });
     return per;
+  }
+
+  /** Welke locaties liggen op het gekozen punt? Nodig om te zeggen of een norm
+   *  hier geldt of elders in het gebied van het artikel. Eén aanroep per locatie. */
+  var objectenCache = {};
+  function locatiesOpPunt() {
+    var loc = staat.loc;
+    var sleutel = loc.x + ',' + loc.y;
+    if (!objectenCache[sleutel]) {
+      objectenCache[sleutel] = api('/v1/viewer/objecten?x=' + loc.x + '&y=' + loc.y).then(function (d) {
+        var set = {};
+        ['gebiedsaanwijzingen', 'activiteitlocatieaanduidingen', 'normwaarden', 'omgevingsnormen', 'ongetypeerde_locaties']
+          .forEach(function (k) {
+            (d[k] || []).forEach(function (o) {
+              (o.locatie_ids || (o.locatie_id ? [o.locatie_id] : [])).forEach(function (id) { set[id] = true; });
+            });
+          });
+        return set;
+      }).catch(function () { return {}; });
+    }
+    return objectenCache[sleutel];
   }
 
   // ── URL ───────────────────────────────────────────────
@@ -1053,7 +1093,9 @@
         };
         if (artWid && indeling[artWid]) { a.categorie = indeling[artWid].categorie; a.sub = indeling[artWid].sub; }
         a.onderwerp = RomThema.onderwerpVan(a.categorie, a.sub);
-        a.locaties = (artWid && locatiesPerArtikel[artWid]) || [];
+        var vak = (artWid && locatiesPerArtikel[artWid]) || null;
+        a.locaties = vak ? vak.locaties : [];
+        a.kenmerken = vak;
         artikelen.push(a);
       }
       if (r.wid && r.wid !== artWid) a.leden.push({ nummer: r.lid_nummer || '', wid: r.wid });
@@ -1353,14 +1395,128 @@
     }
     legenda.hidden = false;
     legenda.appendChild(el('b', { text: 'Dit artikel geldt in' }));
-    art.locaties.slice(0, 6).forEach(function (l) {
+    // Op naam ontdubbeld: één gebied bestaat vaak uit meerdere locaties met
+    // dezelfde naam. Op de kaart tekenen ze allemaal; in de legenda één regel.
+    var gezien = {}, uniek = [];
+    art.locaties.forEach(function (l) {
       var ga = l.soort === 'gebiedsaanwijzing';
-      var vlag = el('i', { class: ga ? 'lg-ga' : 'lg-ala' });
-      if (String(l.id).indexOf('.ambtsgebied.') >= 0) vlag.classList.add('lg-dekkend');
-      legenda.appendChild(el('span', {}, [vlag, l.naam || (ga ? l.type : 'werkingsgebied')]));
+      var naam = l.naam || (ga ? l.type : 'werkingsgebied');
+      if (gezien[naam]) return;
+      gezien[naam] = true;
+      uniek.push({ naam: naam, ga: ga, dekkend: String(l.id).indexOf('.ambtsgebied.') >= 0 });
     });
-    if (art.locaties.length > 6) {
-      legenda.appendChild(el('span', { class: 'muted', text: '+ ' + (art.locaties.length - 6) + ' meer' }));
+    uniek.slice(0, 6).forEach(function (l) {
+      var vlag = el('i', { class: l.ga ? 'lg-ga' : 'lg-ala' });
+      if (l.dekkend) vlag.classList.add('lg-dekkend');
+      legenda.appendChild(el('span', {}, [vlag, l.naam]));
+    });
+    if (uniek.length > 6) {
+      legenda.appendChild(el('span', { class: 'muted', text: '+ ' + (uniek.length - 6) + ' meer' }));
+    }
+  }
+
+  /** Kenmerken van een artikel: wat het DSO erbij annoteert. Uit de
+   *  documentboom (activiteiten, gebiedsaanwijzingen, normwaarden). "Type regel"
+   *  zit daar niet in en staat er daarom ook niet — liever niets dan een gok. */
+  function kenmerkenBlok(art) {
+    var k = art.kenmerken || { activiteiten: [], gebiedsaanwijzingen: [], normwaarden: [] };
+    var blok = el('div', { class: 'kenmerken' });
+    var kop = el('button', { type: 'button', class: 'kenmerken-kop', 'aria-expanded': 'false' }, [
+      icoon(PAD_RECHTS), el('span', { class: 'label', text: 'Kenmerken' }),
+      el('span', { class: 'muted', text: samenvatting() })
+    ]);
+    var body = el('div', { class: 'kenmerken-body', hidden: true });
+    blok.appendChild(kop); blok.appendChild(body);
+    var gevuld = false;
+    kop.addEventListener('click', function () {
+      var open = kop.getAttribute('aria-expanded') !== 'true';
+      kop.setAttribute('aria-expanded', open ? 'true' : 'false');
+      blok.classList.toggle('open', open);
+      body.hidden = !open;
+      if (open && !gevuld) { gevuld = true; vul(); }
+    });
+    return blok;
+
+    function samenvatting() {
+      var d = [];
+      if (k.activiteiten.length) d.push(k.activiteiten.length + (k.activiteiten.length === 1 ? ' activiteit' : ' activiteiten'));
+      if (k.gebiedsaanwijzingen.length) d.push(k.gebiedsaanwijzingen.length + ' gebiedsaanwijzing' + (k.gebiedsaanwijzingen.length === 1 ? '' : 'en'));
+      if (k.normwaarden.length) d.push(k.normwaarden.length + (k.normwaarden.length === 1 ? ' norm' : ' normen'));
+      if (!d.length) d.push('niet geannoteerd in dit plan');
+      return d.join(' · ');
+    }
+
+    function rij(term, waarde, extra) {
+      return [el('dt', { text: term }), el('dd', {}, [waarde].concat(extra || []))];
+    }
+
+    function vul() {
+      var lijst = el('dl', { class: 'kenmerken-lijst' });
+      body.appendChild(lijst);
+
+      // Werkingsgebied (fase 8): waar geldt dit artikel?
+      if (art.locaties.length) {
+        // Ontdubbelen op naam: één gebied kan uit meerdere locaties bestaan die
+        // allemaal hetzelfde heten ("Gronden en bouwwerken gebruiken" ×4).
+        var gezien = {}, namen = [];
+        art.locaties.forEach(function (l) {
+          var naam = l.naam || l.type || 'werkingsgebied';
+          if (gezien[naam]) return;
+          gezien[naam] = true; namen.push(naam);
+        });
+        rij('Geldt in', namen.slice(0, 4).join(' · ') + (namen.length > 4 ? ' · +' + (namen.length - 4) : ''),
+          [el('span', { class: 'muted', text: ' — op de kaart gemarkeerd' })]).forEach(function (n) { lijst.appendChild(n); });
+      } else {
+        rij('Geldt in', 'het hele regelingsgebied', [el('span', { class: 'muted', text: ' — geen eigen werkingsgebied geannoteerd' })])
+          .forEach(function (n) { lijst.appendChild(n); });
+      }
+
+      // Een artikel kan tientallen activiteiten dragen (gezien: 60). Toon er acht
+      // en meld de rest, zodat het paneel leesbaar blijft.
+      var MAX = 8;
+      k.activiteiten.slice(0, MAX).forEach(function (a) {
+        rij('Activiteit', a.naam || '(zonder naam)', [
+          a.kwalificatie ? el('span', { class: 'kw', text: a.kwalificatie }) : null,
+          a.groep && a.groep !== 'overig' ? el('span', { class: 'muted', text: ' · ' + a.groep }) : null
+        ]).forEach(function (n) { lijst.appendChild(n); });
+      });
+
+      if (k.activiteiten.length > MAX) {
+        rij('', '+ ' + (k.activiteiten.length - MAX) + ' activiteiten meer', []).forEach(function (n) { lijst.appendChild(n); });
+      }
+
+      k.gebiedsaanwijzingen.slice(0, MAX).forEach(function (g) {
+        rij('Gebiedsaanwijzing', g.naam || g.type || '(zonder naam)', [
+          g.type ? el('span', { class: 'muted', text: ' · ' + g.type + (g.groep ? ' / ' + g.groep : '') }) : null
+        ]).forEach(function (n) { lijst.appendChild(n); });
+      });
+
+      if (k.gebiedsaanwijzingen.length > MAX) {
+        rij('', '+ ' + (k.gebiedsaanwijzingen.length - MAX) + ' gebiedsaanwijzingen meer', []).forEach(function (n) { lijst.appendChild(n); });
+      }
+
+      if (k.normwaarden.length) {
+        var normRijen = [];
+        k.normwaarden.forEach(function (w) {
+          var waarde = (w.waarde != null ? String(w.waarde).replace('.', ',') : '—') + (w.eenheid ? ' ' + w.eenheid : '');
+          var hier = el('span', { class: 'muted', text: '' });
+          normRijen.push({ el: hier, id: w.locatie_id });
+          rij(w.type_norm || 'Omgevingsnorm', w.naam || '', [
+            el('b', { class: 'norm-waarde', text: ' ' + waarde }), hier
+          ]).forEach(function (n) { lijst.appendChild(n); });
+        });
+        // Geldt de waarde op het gekozen punt of elders binnen dit artikel?
+        locatiesOpPunt().then(function (set) {
+          normRijen.forEach(function (r) {
+            r.el.textContent = r.id ? (set[r.id] ? ' — geldt op uw locatie' : ' — geldt elders in het gebied van dit artikel') : '';
+          });
+        });
+      }
+
+      if (!k.activiteiten.length && !k.gebiedsaanwijzingen.length && !k.normwaarden.length) {
+        body.appendChild(el('p', { class: 'leeg-melding', text:
+          'Dit artikel is in dit plan niet geannoteerd met een activiteit, gebiedsaanwijzing of norm. Dat is hoe het gepubliceerd is, niet iets dat hier ontbreekt.' }));
+      }
     }
   }
 
@@ -1372,14 +1528,7 @@
       doel.appendChild(el('div', { class: 'lid' }, [el('span', { class: 'lid-nr' }), blok]));
       return;
     }
-    if (art.locaties && art.locaties.length) {
-      var namen = art.locaties.map(function (l) { return l.naam || l.type || 'werkingsgebied'; });
-      doel.appendChild(el('p', { class: 'art-gebied', text: 'Geldt in: ' + namen.slice(0, 4).join(' · ') +
-        (namen.length > 4 ? ' · +' + (namen.length - 4) : '') + ' — op de kaart gemarkeerd.' }));
-    } else if (art.wid) {
-      doel.appendChild(el('p', { class: 'art-gebied art-gebied-leeg', text:
-        'Geen eigen werkingsgebied geannoteerd; dit artikel geldt in het hele regelingsgebied.' }));
-    }
+    if (art.wid) doel.appendChild(kenmerkenBlok(art));
 
     var delen = art.leden.length ? art.leden.slice() : [];
     if (art.eigenTekst || !delen.length) delen.unshift({ nummer: '', wid: art.wid });

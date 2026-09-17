@@ -33,6 +33,8 @@ const ALLOWED_PREFIXES = [
   '/v1/regelteksten-bij-vraag',
   // Vectortiles met de locaties (werkingsgebieden) op de PDOK-RD-piramide.
   '/v1/tiles',
+  // Welke OW-objecten liggen op dit punt (voor "geldt op uw locatie").
+  '/v1/viewer/objecten',
 ];
 
 export async function onRequest({ request, env, params }) {
