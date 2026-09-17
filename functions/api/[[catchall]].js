@@ -31,6 +31,8 @@ const ALLOWED_PREFIXES = [
   '/v1/vergunningcheck',
   // Regels op maat: zoeken op een vraag binnen een locatie (geen taalmodel).
   '/v1/regelteksten-bij-vraag',
+  // Vectortiles met de locaties (werkingsgebieden) op de PDOK-RD-piramide.
+  '/v1/tiles',
 ];
 
 export async function onRequest({ request, env, params }) {

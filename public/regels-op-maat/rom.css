@@ -281,3 +281,12 @@ button.chip-groep[aria-pressed="false"] { background: none; border: 1px dashed v
 button.chip-term[aria-pressed="true"] { background: var(--blad); color: var(--inkt-2); box-shadow: var(--blad-schaduw); }
 button.chip-term[aria-pressed="true"] b { color: var(--inkt); }
 button.chip-groep[aria-pressed="true"] { background: var(--acc-zacht); color: var(--acc); box-shadow: none; }
+
+/* ── Werkingsgebied bij een artikel (fase 8) ───────────── */
+.art-gebied { margin: 0 0 4px; font-size: 13px; color: var(--inkt-2); }
+.art-gebied-leeg { color: var(--inkt-3); font-style: italic; }
+.werking-legenda { bottom: 96px; }
+.werking-legenda b { font-size: 12.5px; }
+.lg-ala { border: 2px solid var(--acc); background: color-mix(in oklch, var(--acc) 16%, transparent); }
+.lg-ga { border: 2px solid var(--at); background: color-mix(in oklch, var(--at) 16%, transparent); }
+.lg-dekkend { background: none; border-style: dashed; }

@@ -24,6 +24,7 @@
   var TEGELS = 'https://service.pdok.nl/brt/achtergrondkaart/wmts/v2_0/grijs/EPSG:28992/{z}/{x}/{y}.png';
 
   var map, bron, locatie = null;
+  var werkBron, werkLaag, werking = {};   // locatie_id -> {kleur, vulling, dekkend}
 
   function cssKleur(naam, alfa) {
     var v = getComputedStyle(document.documentElement).getPropertyValue(naam).trim() || '#4256b8';
@@ -69,6 +70,7 @@
             })
           })
         }),
+        werkingLaag(),
         new ol.layer.Vector({ className: 'overlay', source: bron, style: stijl })
       ],
       view: new ol.View({
@@ -92,10 +94,10 @@
     // Thema-wissel (licht/donker) verandert de CSS-kleuren; laat de laag opnieuw tekenen.
     if (global.matchMedia) {
       var mq = global.matchMedia('(prefers-color-scheme: dark)');
-      if (mq.addEventListener) mq.addEventListener('change', function () { bron.changed(); });
+      if (mq.addEventListener) mq.addEventListener('change', function () { bron.changed(); if (werkLaag) werkLaag.changed(); });
     }
     if (global.MutationObserver) {
-      new MutationObserver(function () { bron.changed(); }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+      new MutationObserver(function () { bron.changed(); if (werkLaag) werkLaag.changed(); }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
     }
   }
 
@@ -133,6 +135,58 @@
     else v.animate({ center: locatie, duration: 250 });
   }
 
+  /* ── Werkingsgebieden ───────────────────────────────────────────────
+     Uit de vectortiles van OCD (`/v1/tiles/locaties`, PDOK-RD-piramide). De
+     tegel draagt alleen `id` — hetzelfde locatie_id dat in de documentboom bij
+     een artikel staat — dus de kleur komt van hier en niet uit de tegel. Zo is
+     er geen aparte geometrie-aanroep nodig: een tegel is ~4 kB en wordt een uur
+     gecachet, tegenover megabytes aan GeoJSON per gebied. */
+  function werkingLaag() {
+    werkBron = new ol.source.VectorTile({
+      format: new ol.format.MVT(),
+      projection: RD,
+      tileGrid: new ol.tilegrid.TileGrid({
+        origin: [-285401.92, 903401.92],
+        resolutions: RESOLUTIES,
+        extent: RD.getExtent(),
+        tileSize: 256
+      }),
+      url: '/api/v1/tiles/locaties/{z}/{x}/{y}.mvt'
+    });
+    werkLaag = new ol.layer.VectorTile({ className: 'werking', source: werkBron, renderMode: 'vector', style: werkStijl });
+    return werkLaag;
+  }
+
+  function werkStijl(feature) {
+    var a = werking[feature.get('id')];
+    if (!a) return null;   // alles wat niet bij dit artikel hoort blijft onzichtbaar
+    // Geen contour. De tegels zijn op de tegelrand geknipt, dus een lijn tekent
+    // die rand mee: je ziet dan het tegelraster in plaats van het gebied. Om
+    // dezelfde reden staat de buffer in het tile-endpoint op 0. Een ambtsgebied
+    // of provinciebrede zone krijgt een lichtere vulling, anders ligt er een
+    // waas over de hele kaart die niets zegt.
+    return new ol.style.Style({ fill: new ol.style.Fill({ color: a.dekkend ? a.waas : a.vulling }) });
+  }
+
+  /** lijst: [{id, soort}] — soort 'gebiedsaanwijzing' of 'activiteit'. */
+  function toonWerkingsgebieden(lijst) {
+    werking = {};
+    (lijst || []).forEach(function (l) {
+      var ga = l.soort === 'gebiedsaanwijzing';
+      var kleur = cssKleur(ga ? '--at' : '--acc');
+      werking[l.id] = {
+        kleur: kleur,
+        // Gebiedsaanwijzingen zijn meestal begrensd (een zone, een monument);
+        // activiteit-locaties beslaan vaak de hele gemeente. Daarom is die
+        // laatste lichter, anders kleurt het hele scherm.
+        vulling: cssKleur(ga ? '--at' : '--acc', ga ? 0.20 : 0.10),
+        waas: cssKleur(ga ? '--at' : '--acc', 0.06),
+        dekkend: String(l.id).indexOf('.ambtsgebied.') >= 0
+      };
+    });
+    if (werkLaag) werkLaag.changed();
+  }
+
   /** Perceelgrens als WKT in RD (zoals de Locatieserver hem levert). */
   function toonPerceel(wkt) {
     bron.getFeatures().forEach(function (f) { if (f.get('soort') === 'perceel') bron.removeFeature(f); });
@@ -147,5 +201,6 @@
     }
   }
 
-  global.RomKaart = { init: init, toonLocatie: toonLocatie, toonPerceel: toonPerceel, naarLocatie: naarLocatie };
+  global.RomKaart = { init: init, toonLocatie: toonLocatie, toonPerceel: toonPerceel,
+    naarLocatie: naarLocatie, toonWerkingsgebieden: toonWerkingsgebieden };
 })(window);

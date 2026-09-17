@@ -123,6 +123,31 @@
     return kaart;
   }
 
+  /** Artikel-wid -> de locaties waar het geldt, uit de annotaties in de boom.
+   *  De boom draagt per lid de activiteit-locatieaanduiding en de
+   *  gebiedsaanwijzing, elk met hun locatie_id; de vectortiles tekenen precies
+   *  die id's (zie kaart.js). Eén aanroep die RoM toch al doet, dus geen extra
+   *  endpoint voor het werkingsgebied. */
+  function locatiesUitBoom(boom) {
+    var per = {};
+    function voegToe(art, item, soort) {
+      if (!art || !item || !item.locatie_id) return;
+      var lijst = per[art] || (per[art] = []);
+      if (lijst.some(function (l) { return l.id === item.locatie_id; })) return;
+      lijst.push({ id: item.locatie_id, soort: soort, naam: item.naam || '',
+        type: item.type || item.groep || '', kwalificatie: item.kwalificatie || '' });
+    }
+    function loop(knoop, art) {
+      var a = knoop.type === 'Artikel' ? knoop.wid : art;
+      var ann = knoop.annotaties || {};
+      (ann.activiteiten || []).forEach(function (x) { voegToe(a, x, 'activiteit'); });
+      (ann.gebiedsaanwijzingen || []).forEach(function (x) { voegToe(a, x, 'gebiedsaanwijzing'); });
+      (knoop.kinderen || []).forEach(function (k) { loop(k, a); });
+    }
+    (boom || []).forEach(function (k) { loop(k, null); });
+    return per;
+  }
+
   // ── URL ───────────────────────────────────────────────
   function schrijfUrl(loc, vervang) {
     var q = new URLSearchParams();
@@ -395,6 +420,8 @@
   function toon(nr) {
     var doel = $('resultaat');
     leeg(doel);
+    RomKaart.toonWerkingsgebieden([]);
+    var wl = $('werking-legenda'); if (wl) { leeg(wl); wl.hidden = true; }
     if (!staat.docs.length) {
       doel.appendChild(el('p', { class: 'leeg-melding', text:
         'Op dit punt vonden we geen omgevingsdocumenten. Ligt het punt in zee of buiten Nederland? Anders ontbreekt hier data in het register.' }));
@@ -978,10 +1005,12 @@
     var onderwerpen = doc.bron_type === 'ow'
       ? api('/v1/viewer/regeling/' + encodeURIComponent(doc.bron_id) + '/onderwerpen').catch(function () { return null; })
       : Promise.resolve(null);
-    // De boom is nodig om leden bij hun artikel te krijgen (zie artikelWid). Niet
-    // voor landelijke regelingen: die boom is megabytes, en hun wId's hebben wél
-    // een __art_-segment.
-    var boom = (doc.bron_type === 'ow' && doc.bestuurslaag !== 'rijk') ? haalBoom(doc.bron_id) : Promise.resolve(null);
+    // De boom levert twee dingen: leden bij hun artikel (zie artikelWid) en de
+    // locaties waar een artikel geldt. Overslaan alleen voor de grote landelijke
+    // regelingen — die boom is megabytes. Voorbeschermingsregels van het Rijk
+    // zijn klein en krijgen hem dus wél.
+    var grootRijk = doc.bestuurslaag === 'rijk' && !/^voorbeschermings/i.test(doc.documenttype || '');
+    var boom = (doc.bron_type === 'ow' && !grootRijk) ? haalBoom(doc.bron_id) : Promise.resolve(null);
     analyses[sleutel] = Promise.all([rijen, onderwerpen, boom]).then(function (r) {
       return bouwAnalyse(doc, (r[0] && r[0].regelmix) || [], r[1], r[2]);
     });
@@ -991,6 +1020,7 @@
 
   function bouwAnalyse(doc, rijen, ond, boom) {
     var ouder = boom ? ouderArtikelen(boom) : {};
+    var locatiesPerArtikel = boom ? locatiesUitBoom(boom) : {};
     // wid -> {categorie, sub}
     var indeling = {}, heeftIndeling = !!(ond && ond.categorieen);
     if (heeftIndeling) {
@@ -1023,6 +1053,7 @@
         };
         if (artWid && indeling[artWid]) { a.categorie = indeling[artWid].categorie; a.sub = indeling[artWid].sub; }
         a.onderwerp = RomThema.onderwerpVan(a.categorie, a.sub);
+        a.locaties = (artWid && locatiesPerArtikel[artWid]) || [];
         artikelen.push(a);
       }
       if (r.wid && r.wid !== artWid) a.leden.push({ nummer: r.lid_nummer || '', wid: r.wid });
@@ -1090,7 +1121,7 @@
     body.appendChild(el('p', { class: 'laden', text: 'Artikelen ophalen…' }));
     var delen = delenVan(doc).map(function (d) {
       // Structuur (titels) niet voor de grote landelijke regelingen: die boom is megabytes.
-      var groot = d === doc && groep === 'rijk';
+      var groot = d === doc && groep === 'rijk' && !/^voorbeschermings/i.test(d.documenttype || '');
       var structuur = (d.bron_type === 'ow' && !groot) ? haalBoom(d.bron_id) : Promise.resolve(null);
       return Promise.all([analyseer(d), structuur]).then(function (r) { return { a: r[0], boom: r[1] }; });
     });
@@ -1295,8 +1326,42 @@
       wrap.classList.toggle('open', open);
       inhoud.hidden = !open;
       if (open && !geladen) { geladen = true; vulArtikel(art, inhoud); }
+      if (open) toonWerkingsgebied(art, wrap);
+      else RomKaart.toonWerkingsgebieden([]);
     });
     return wrap;
+  }
+
+  /** Zet het werkingsgebied van dit artikel op de kaart en vertel wat er ligt. */
+  function toonWerkingsgebied(art, wrap) {
+    // Eén artikel tegelijk: een tweede open artikel vervangt het beeld, zoals
+    // het ⓘ-paneel in de mockup ook één artikel laat zien.
+    Array.prototype.forEach.call(document.querySelectorAll('.art.open'), function (a) {
+      if (a !== wrap) {
+        a.classList.remove('open');
+        var k = a.querySelector('.art-kop'); if (k) k.setAttribute('aria-expanded', 'false');
+        var i = a.querySelector('.art-inhoud'); if (i) i.hidden = true;
+      }
+    });
+    RomKaart.toonWerkingsgebieden(art.locaties || []);
+    var legenda = $('werking-legenda');
+    if (!legenda) return;
+    leeg(legenda);
+    if (!(art.locaties || []).length) {
+      legenda.hidden = true;
+      return;
+    }
+    legenda.hidden = false;
+    legenda.appendChild(el('b', { text: 'Dit artikel geldt in' }));
+    art.locaties.slice(0, 6).forEach(function (l) {
+      var ga = l.soort === 'gebiedsaanwijzing';
+      var vlag = el('i', { class: ga ? 'lg-ga' : 'lg-ala' });
+      if (String(l.id).indexOf('.ambtsgebied.') >= 0) vlag.classList.add('lg-dekkend');
+      legenda.appendChild(el('span', {}, [vlag, l.naam || (ga ? l.type : 'werkingsgebied')]));
+    });
+    if (art.locaties.length > 6) {
+      legenda.appendChild(el('span', { class: 'muted', text: '+ ' + (art.locaties.length - 6) + ' meer' }));
+    }
   }
 
   function vulArtikel(art, doel) {
@@ -1307,6 +1372,15 @@
       doel.appendChild(el('div', { class: 'lid' }, [el('span', { class: 'lid-nr' }), blok]));
       return;
     }
+    if (art.locaties && art.locaties.length) {
+      var namen = art.locaties.map(function (l) { return l.naam || l.type || 'werkingsgebied'; });
+      doel.appendChild(el('p', { class: 'art-gebied', text: 'Geldt in: ' + namen.slice(0, 4).join(' · ') +
+        (namen.length > 4 ? ' · +' + (namen.length - 4) : '') + ' — op de kaart gemarkeerd.' }));
+    } else if (art.wid) {
+      doel.appendChild(el('p', { class: 'art-gebied art-gebied-leeg', text:
+        'Geen eigen werkingsgebied geannoteerd; dit artikel geldt in het hele regelingsgebied.' }));
+    }
+
     var delen = art.leden.length ? art.leden.slice() : [];
     if (art.eigenTekst || !delen.length) delen.unshift({ nummer: '', wid: art.wid });
     var wids = delen.map(function (d) { return d.wid; }).filter(function (w) { return !teksten[w]; });
