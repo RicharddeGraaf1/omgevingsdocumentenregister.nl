@@ -29,6 +29,8 @@ const ALLOWED_PREFIXES = [
   '/v1/viewer/wro',
   // Vragenbomen: werkzaamheid x overheid -> vergunningcheck + dragende artikelen.
   '/v1/vergunningcheck',
+  // Regels op maat: zoeken op een vraag binnen een locatie (geen taalmodel).
+  '/v1/regelteksten-bij-vraag',
 ];
 
 export async function onRequest({ request, env, params }) {
@@ -45,7 +47,10 @@ export async function onRequest({ request, env, params }) {
   // Eén POST-endpoint is toegestaan: de batch-tekstopvraag. Die is POST omdat
   // er een wid-lijst in gaat, niet omdat hij iets muteert — de hele OCD-API is
   // read-only. Al het andere blijft GET.
-  const POST_TOEGESTAAN = upstreamPath === '/v1/viewer/teksten';
+  // Twee POST-endpoints zijn toegestaan; beide zijn read-only (de hele OCD-API is
+  // dat). POST omdat er een wid-lijst resp. een vraag in gaat, niet omdat ze muteren.
+  const POST_TOEGESTAAN = upstreamPath === '/v1/viewer/teksten' ||
+                          upstreamPath === '/v1/regelteksten-bij-vraag';
   if (request.method !== 'GET' && request.method !== 'HEAD' &&
       !(request.method === 'POST' && POST_TOEGESTAAN)) {
     return new Response('Method Not Allowed', { status: 405 });

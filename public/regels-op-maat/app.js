@@ -24,6 +24,7 @@
   var analyses = {};   // bron_id -> Promise<analyse>
   var bomen = {};      // expr -> Promise<boom|null>
   var teksten = {};    // wid -> tekst-object
+  var vragen = {};     // x,y|vraag|uitgesloten -> Promise<antwoord van /regelteksten-bij-vraag>
 
   // ── hulpjes ───────────────────────────────────────────
   function $(id) { return document.getElementById(id); }
@@ -62,6 +63,7 @@
   }
   var PAD_NEER = 'M5 8l5 5 5-5';
   var PAD_RECHTS = 'M8 5l5 5-5 5';
+  var PAD_ZOEK = 'M13 13l4.5 4.5M14 8.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z';
 
   function haalJson(url, opties) {
     return fetch(url, opties).then(function (r) {
@@ -127,7 +129,8 @@
     if (loc) {
       q.set('x', loc.x); q.set('y', loc.y);
       if (loc.label) q.set('locatie', loc.label);
-      if (staat.view.onderwerp) q.set('onderwerp', staat.view.onderwerp);
+      if (staat.view.vraag) q.set('vraag', staat.view.vraag);
+      else if (staat.view.onderwerp) q.set('onderwerp', staat.view.onderwerp);
       else if (staat.view.alles) q.set('weergave', 'alle-documenten');
     }
     var url = location.pathname + (loc ? '?' + q.toString() : '');
@@ -145,6 +148,8 @@
 
   function viewUitUrl() {
     var q = new URLSearchParams(location.search);
+    var v = (q.get('vraag') || '').trim();
+    if (v.length >= 2) return { vraag: v.slice(0, 500) };
     var o = q.get('onderwerp');
     if (o && RomThema.bestaat(o)) return { onderwerp: o };
     if (q.get('weergave') === 'alle-documenten') return { alles: true };
@@ -395,7 +400,8 @@
         'Op dit punt vonden we geen omgevingsdocumenten. Ligt het punt in zee of buiten Nederland? Anders ontbreekt hier data in het register.' }));
       return;
     }
-    if (staat.view.alles) toonDocumenten(nr);
+    if (staat.view.vraag) toonVraag(staat.view.vraag, nr);
+    else if (staat.view.alles) toonDocumenten(nr);
     else if (staat.view.onderwerp) toonOnderwerp(staat.view.onderwerp, nr);
     else toonOnderwerpen(nr);
   }
@@ -421,9 +427,27 @@
   }
 
   /** Tussenscherm: welke onderwerpen spelen hier, met iconen. */
+  /** Het vraagveld: zoekt regels bij een vraag binnen deze locatie. */
+  function vraagVak(waarde) {
+    var invoer = el('input', { type: 'text', id: 'vraaginvoer', autocomplete: 'off',
+      placeholder: 'Stel een vraag over deze locatie, bijv. mag ik een aanbouw bouwen?',
+      'aria-label': 'Vraag over deze locatie', value: waarde || '' });
+    function stel() {
+      var q = invoer.value.trim();
+      if (q.length < 2) { invoer.focus(); return; }
+      navigeer({ vraag: q.slice(0, 500) });
+    }
+    invoer.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); stel(); } });
+    return el('div', { class: 'vraagvak vraagdeel' }, [
+      el('div', { class: 'vraagveld blad' }, [icoon(PAD_ZOEK), invoer]),
+      el('button', { type: 'button', class: 'knop', onclick: stel }, ['Zoek regels'])
+    ]);
+  }
+
   function toonOnderwerpen(nr) {
     var doel = $('resultaat');
     doel.appendChild(el('div', { class: 'res-kop' }, [el('h1', { text: 'Waar bent u naar op zoek?' })]));
+    doel.appendChild(vraagVak(''));
     var blok = el('section', { class: 'onderwerpen', 'aria-labelledby': 'ow-kop' }, [
       el('div', { class: 'ow-kopregel' }, [
         el('h2', { class: 'label', id: 'ow-kop', text: 'Onderwerpen op deze locatie' }),
@@ -511,6 +535,382 @@
       met.forEach(function (r) { sectie.appendChild(documentKaart(r.doc, 'lokaal', nr, id)); });
       doel.appendChild(sectie);
     });
+  }
+
+  // ── Zoeken op een vraag (geen taalmodel) ──────────────
+  // Zelfde mechaniek als de AI-modus van de OCD-viewer: POST
+  // /v1/regelteksten-bij-vraag doet SKOS-begripsmatch → activiteit-join op het
+  // punt → tekst-fallback, en geeft de gevonden regels met een relevantie terug.
+  // De vierde stap van de viewer (een taalmodel dat samenvat) laten we weg:
+  // RoM toont regels en geeft geen oordeel (gebruikersbesluit 2026-09-17).
+  var STAP = { wacht: 'wacht', bezig: 'bezig', klaar: 'klaar' };
+
+  function zoekVraag(vraag, uitgesloten) {
+    var loc = staat.loc;
+    var sleutel = Math.round(loc.x) + ',' + Math.round(loc.y) + '|' + vraag.toLowerCase() +
+      (uitgesloten.length ? '|-' + uitgesloten.slice().sort().join(',') : '');
+    if (vragen[sleutel]) return vragen[sleutel];
+    vragen[sleutel] = api('/v1/regelteksten-bij-vraag', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ question: vraag, x: loc.x, y: loc.y, max_concepts: 5,
+        max_regelteksten: 50, uitgesloten_termen: uitgesloten })
+    });
+    vragen[sleutel].catch(function () { delete vragen[sleutel]; });
+    return vragen[sleutel];
+  }
+
+  /** Termen met gewicht, zoals de viewer ze uit `keywords` haalt. */
+  function termenUit(d) {
+    var uit = [];
+    (d.keywords || []).forEach(function (k) {
+      var t = String(k.term || '').toLowerCase();
+      if (t.length < 3) return;
+      var rel = typeof k.relevantie === 'number' ? k.relevantie : 1;
+      uit.push({ term: t, gewicht: (k.is_actie ? 0.5 : 1) * rel, sterk: !k.is_actie && rel >= 0.8,
+        bron: k.bron || '', actie: !!k.is_actie });
+    });
+    if (!uit.length) {
+      (d.expanded_keywords || []).forEach(function (t) {
+        t = String(t || '').toLowerCase();
+        if (t.length >= 3) uit.push({ term: t, gewicht: 1, sterk: true, bron: '', actie: false });
+      });
+    }
+    var top = uit.reduce(function (m, t) { return Math.max(m, t.gewicht); }, 0) || 1;
+    uit.forEach(function (t) { t.aandeel = t.gewicht / top; });
+    return uit.sort(function (a, b) { return b.gewicht - a.gewicht; });
+  }
+
+  function raakt(tekst, term) {
+    return new RegExp('(?:^|[^a-z0-9])' + term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).test(String(tekst || '').toLowerCase());
+  }
+
+  /** Score van een regel binnen de aangezette termen; 0 = valt buiten het filter. */
+  function regelScore(hit, termen) {
+    var tekst = [hit.artikel, hit.artikel_opschrift, hit.activiteit_naam, hit.inhoud].join(' ');
+    var score = 0, sterk = false;
+    termen.forEach(function (t) {
+      if (!raakt(tekst, t.term)) return;
+      score += t.gewicht * (raakt(hit.activiteit_naam, t.term) ? 1.5 : 1);
+      if (t.sterk) sterk = true;
+    });
+    return sterk ? score : 0;
+  }
+
+  var ROUTE = {
+    werkzaamheid_fk: 'via de activiteit', activiteit_uri: 'via de activiteit',
+    werkzaamheid_naam: 'via de activiteit (naam-match)', tekst_fallback: 'via de tekst',
+    selectie: 'uit je selectie'
+  };
+
+  function toonVraag(vraag, nr) {
+    var doel = $('resultaat');
+    doel.appendChild(terugLink());
+    doel.appendChild(el('div', { class: 'res-kop' }, [el('h1', { text: 'Gevonden voor uw vraag' })]));
+    doel.appendChild(vraagVak(vraag));
+
+    var feed = el('section', { class: 'feed vraagdeel', 'aria-label': 'Hoe er gezocht is' });
+    doel.appendChild(feed);
+    var lijstDoel = el('div');
+    doel.appendChild(lijstDoel);
+
+    var stapBegrip = stapKaart('Begrippen', 'hier zoek ik op');
+    var stapRegels = stapKaart('Tekstonderdelen', 'dit zijn de regels');
+    feed.appendChild(stapBegrip.el);
+    feed.appendChild(stapRegels.el);
+    stapBegrip.bezig('Ik zoek uit welke begrippen in uw vraag zitten…');
+    stapRegels.bezig('Regels op deze locatie zoeken…');
+
+    var uitgesloten = [];
+    laad(uitgesloten, false);
+
+    function laad(uit, opnieuw) {
+      zoekVraag(vraag, uit).then(function (d) {
+        if (nr !== staat.volgnr || staat.view.vraag !== vraag) return;
+        render(d, uit, opnieuw);
+      }).catch(function (e) {
+        if (nr !== staat.volgnr || staat.view.vraag !== vraag) return;
+        stapBegrip.fout(); stapRegels.fout();
+        leeg(lijstDoel);
+        lijstDoel.appendChild(foutBlok(e, function () { leeg(lijstDoel); laad(uit, opnieuw); }));
+      });
+    }
+
+    function render(d, uit, opnieuw) {
+      var termen = termenUit(d), hits = d.regelteksten || [];
+      var concepten = d.matched_concepts || [];
+      var aan = {};   // term -> aan
+      termen.forEach(function (t) { aan[t.term] = true; });
+
+      // Stap 1: begrippen en termen
+      stapBegrip.klaar();
+      var kop = concepten.length
+        ? 'Er wordt gezocht op de volgende begrippen en termen uit uw vraag:'
+        : (termen.length ? 'Geen vakbegrip herkend — er wordt gezocht op deze term(en) uit uw vraag:'
+                         : 'Geen bruikbare woorden in uw vraag — er wordt niet gefilterd.');
+      stapBegrip.inhoud([
+        el('p', { class: 'stap-tekst', text: kop }),
+        concepten.length ? el('div', { class: 'chips', style: 'margin-bottom:6px' },
+          concepten.slice(0, 6).map(function (c) {
+            return el('span', { class: 'chip chip-begrip', title: (c.scheme || 'begrip') +
+              (c.matched_terms && c.matched_terms.length ? ' — matchte op: ' + c.matched_terms.join(', ') : '') },
+              [c.naam]);
+          })) : null,
+        termenRij(),
+        el('div', { class: 'stap-acties' })
+      ]);
+      if (opnieuw) {
+        stapBegrip.el.querySelector('.stap-acties').appendChild(el('p', { class: 'stap-tekst', text:
+          'Opnieuw gezocht zonder ' + uit.length + (uit.length === 1 ? ' term' : ' termen') + '.' }));
+        stapBegrip.el.querySelector('.stap-acties').appendChild(
+          el('button', { type: 'button', class: 'knop-stil knop', onclick: function () { herstart([]); } }, ['Alles terugzetten']));
+      }
+
+      /* Termen uit de vraag en exacte begripsmatches staan los; de synoniemen uit
+         de begrippenlijst (bron skos-trefwoord, hier 141 stuks) zitten achter één
+         chip. Anders staan er 146 knopjes op het scherm. */
+      function termChip(t) {
+        var k = el('button', { type: 'button', class: 'chip chip-term', 'aria-pressed': aan[t.term] ? 'true' : 'false',
+          title: (t.bron ? 'bron: ' + t.bron : 'letterlijk uit uw vraag') + (t.actie ? ' · actiewoord' : '') },
+          [t.term]);
+        k.addEventListener('click', function () {
+          aan[t.term] = !aan[t.term];
+          k.setAttribute('aria-pressed', aan[t.term] ? 'true' : 'false');
+          tekenLijst();
+        });
+        return k;
+      }
+
+      function termenRij() {
+        var hoofd = termen.filter(function (t) { return t.bron !== 'skos-trefwoord'; });
+        var syn = termen.filter(function (t) { return t.bron === 'skos-trefwoord'; });
+        var rij = el('div', { class: 'chips' });
+        (hoofd.length ? hoofd : termen).forEach(function (t) { rij.appendChild(termChip(t)); });
+        if (!hoofd.length || !syn.length) return rij;
+
+        var lijstje = el('div', { class: 'chips syn-lijst', hidden: true });
+        syn.forEach(function (t) { lijstje.appendChild(termChip(t)); });
+        var groep = el('button', { type: 'button', class: 'chip chip-groep', 'aria-pressed': 'true',
+          title: 'Verwante woorden uit de begrippenlijst van het DSO' },
+          [nl(syn.length) + ' synoniemen uit de begrippenlijst']);
+        groep.addEventListener('click', function () {
+          var uitzetten = groep.getAttribute('aria-pressed') === 'true';
+          syn.forEach(function (t) { aan[t.term] = !uitzetten; });
+          groep.setAttribute('aria-pressed', uitzetten ? 'false' : 'true');
+          Array.prototype.forEach.call(lijstje.querySelectorAll('.chip-term'), function (k) {
+            k.setAttribute('aria-pressed', uitzetten ? 'false' : 'true');
+          });
+          tekenLijst();
+        });
+        var uitklap = el('button', { type: 'button', class: 'syn-toggle', 'aria-expanded': 'false' }, ['bekijk']);
+        uitklap.addEventListener('click', function () {
+          var open = uitklap.getAttribute('aria-expanded') !== 'true';
+          uitklap.setAttribute('aria-expanded', open ? 'true' : 'false');
+          uitklap.textContent = open ? 'verberg' : 'bekijk';
+          lijstje.hidden = !open;
+        });
+        rij.appendChild(groep);
+        rij.appendChild(uitklap);
+        return el('div', { class: 'termen' }, [rij, lijstje]);
+      }
+
+      function herstart(nieuwUit) {
+        uitgesloten = nieuwUit;
+        leeg(feed); leeg(lijstDoel);
+        stapBegrip = stapKaart('Begrippen', 'hier zoek ik op');
+        stapRegels = stapKaart('Tekstonderdelen', 'dit zijn de regels');
+        feed.appendChild(stapBegrip.el); feed.appendChild(stapRegels.el);
+        stapBegrip.bezig('Ik zoek uit welke begrippen in uw vraag zitten…');
+        stapRegels.bezig('Regels op deze locatie zoeken…');
+        laad(nieuwUit, nieuwUit.length > 0);
+      }
+
+      var perDocument = false, limiet = 10;
+
+      function actieveTermen() { return termen.filter(function (t) { return aan[t.term]; }); }
+
+      function gefilterd() {
+        var act = actieveTermen();
+        var uitAantal = termen.length - act.length;
+        var lijst = hits.map(function (h) {
+          return { hit: h, score: uitAantal ? regelScore(h, act) : (h.relevantie || 0) };
+        });
+        if (uitAantal) lijst = lijst.filter(function (r) { return r.score > 0; });
+        return lijst.sort(function (a, b) { return b.score - a.score; });
+      }
+
+      function tekenLijst() {
+        var rijen = gefilterd();
+        var uitAantal = termen.length - actieveTermen().length;
+        stapRegels.klaar();
+        var regelingen = {};
+        rijen.forEach(function (r) { regelingen[r.hit.regeling || ''] = true; });
+        stapRegels.inhoud([
+          el('p', { class: 'stap-tekst', text: rijen.length
+            ? nl(rijen.length) + (rijen.length === 1 ? ' tekstonderdeel uit ' : ' tekstonderdelen uit ') +
+              Object.keys(regelingen).length + (Object.keys(regelingen).length === 1 ? ' regeling.' : ' regelingen.')
+            : 'Geen tekstonderdelen gevonden die bij uw vraag passen.' }),
+          uitAantal ? el('div', { class: 'stap-acties' }, [
+            el('p', { class: 'stap-tekst', text: uitAantal + (uitAantal === 1 ? ' term' : ' termen') +
+              ' uitgezet. De lijst is nu gefilterd binnen wat al was opgehaald.' }),
+            el('button', { type: 'button', class: 'knop knop-stil', onclick: function () {
+              herstart(termen.filter(function (t) { return !aan[t.term]; }).map(function (t) { return t.term; }));
+            } }, ['Opnieuw zoeken zonder deze term' + (uitAantal === 1 ? '' : 'en')]),
+            el('button', { type: 'button', class: 'knop knop-stil', onclick: function () {
+              termen.forEach(function (t) { aan[t.term] = true; });
+              Array.prototype.forEach.call(stapBegrip.el.querySelectorAll('.chip-term'), function (k) { k.setAttribute('aria-pressed', 'true'); });
+              tekenLijst();
+            } }, ['Alles weer aan'])
+          ]) : null
+        ]);
+
+        leeg(lijstDoel);
+        if (!rijen.length) {
+          lijstDoel.appendChild(el('p', { class: 'leeg-melding', text:
+            'Geen specifieke regels voor uw vraag op deze locatie.' }));
+          lijstDoel.appendChild(el('button', { type: 'button', class: 'knop knop-stil', onclick: function () { navigeer({}); } },
+            ['Terug naar de onderwerpen']));
+          return;
+        }
+        var top = rijen[0].score || 1;
+        lijstDoel.appendChild(el('div', { class: 'regel-kop' }, [
+          el('span', { class: 'label', text: 'Regels, meest passend eerst' }),
+          el('button', { type: 'button', class: 'schakel', 'aria-pressed': perDocument ? 'true' : 'false',
+            onclick: function () { perDocument = !perDocument; tekenLijst(); } }, ['Per document'])
+        ]));
+        var zichtbaar = rijen.slice(0, limiet);
+        if (perDocument) {
+          var perReg = [], index = {};
+          zichtbaar.forEach(function (r) {
+            var k = r.hit.regeling_expression || r.hit.regeling || '';
+            if (!index[k]) { index[k] = { hit: r.hit, rijen: [] }; perReg.push(index[k]); }
+            index[k].rijen.push(r);
+          });
+          perReg.forEach(function (g) {
+            var vak = el('div', { class: 'regel-groep' }, [
+              el('div', { class: 'regel-groep-kop' }, [
+                el('span', { class: 'tag tag-ow', text: 'Ow' }),
+                el('span', { class: 'regel-groep-titel', text: g.hit.regeling || '(zonder titel)' }),
+                el('span', { class: 'muted', text: g.rijen.length + (g.rijen.length === 1 ? ' regel' : ' regels') })
+              ])
+            ]);
+            g.rijen.forEach(function (r) { vak.appendChild(regelRij(r, top)); });
+            lijstDoel.appendChild(vak);
+          });
+        } else {
+          zichtbaar.forEach(function (r) { lijstDoel.appendChild(regelRij(r, top, true)); });
+        }
+        if (rijen.length > limiet) {
+          var stap = Math.min(10, rijen.length - limiet);
+          lijstDoel.appendChild(el('button', { type: 'button', class: 'knop knop-stil meer', onclick: function () {
+            limiet += 10; tekenLijst();
+          } }, ['Toon ' + stap + ' meer (' + nl(rijen.length - limiet) + ' resterend)']));
+        }
+        lijstDoel.appendChild(el('p', { class: 'ow-noot', text:
+          'Gevonden met de begrippenlijst en de tekst van de regels; de volgorde is een zoekscore, geen juridische rangorde. Er komt geen taalmodel aan te pas.' }));
+      }
+
+      function regelRij(r, top, metRegeling) {
+        var inhoud = el('div', { class: 'regel-tekst', hidden: true });
+        var pijl = icoon(PAD_RECHTS); pijl.classList.add('art-pijl');
+        var titel = (r.hit.artikel_nummer ? 'Artikel ' + r.hit.artikel_nummer + ' ' : '') +
+          (r.hit.artikel_opschrift || r.hit.artikel || r.hit.activiteit_naam || 'Regel');
+        var geraakt = actieveTermen().filter(function (t) {
+          return raakt([r.hit.artikel, r.hit.artikel_opschrift, r.hit.activiteit_naam, r.hit.inhoud].join(' '), t.term);
+        }).slice(0, 3);
+        var balk = el('span', { class: 'score' }, [el('i')]);
+        balk.firstChild.style.width = Math.max(6, Math.round((r.score / top) * 100)) + '%';
+        var kop = el('button', { type: 'button', class: 'regel-kopknop', 'aria-expanded': 'false' }, [
+          pijl,
+          el('span', { class: 'regel-midden' }, [
+            el('span', { class: 'regel-titel', text: titel }),
+            el('span', { class: 'regel-meta' }, [
+              metRegeling ? el('span', { text: r.hit.regeling || '' }) : null,
+              el('span', { class: 'regel-route', text: ROUTE[r.hit.join_pad] || r.hit.join_pad || '' }),
+              geraakt.length ? el('span', { class: 'muted', text: 'op: ' + geraakt.map(function (t) { return t.term; }).join(', ') }) : null
+            ])
+          ]),
+          balk
+        ]);
+        var wrap = el('div', { class: 'regel' }, [kop, inhoud]);
+        var geladen = false;
+        kop.addEventListener('click', function () {
+          var open = kop.getAttribute('aria-expanded') !== 'true';
+          kop.setAttribute('aria-expanded', open ? 'true' : 'false');
+          wrap.classList.toggle('open', open);
+          inhoud.hidden = !open;
+          if (open && !geladen) {
+            geladen = true;
+            // `inhoud` uit dit endpoint is platte tekst: lijstjes en leden lopen
+            // aan elkaar. De echte STOP-tekst komt van /v1/viewer/teksten, zodat
+            // <ocd-regeltekst> lijsten, tabellen en verwijzingen kan renderen.
+            var plek = el('div');
+            inhoud.appendChild(plek);
+            if (r.hit.wid) {
+              plek.appendChild(el('p', { class: 'laden', text: 'Tekst ophalen…' }));
+              (teksten[r.hit.wid] ? Promise.resolve({ teksten: [teksten[r.hit.wid]] })
+                : api('/v1/viewer/teksten', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ wids: [r.hit.wid] }) })
+              ).then(function (d) {
+                var t = (d.teksten || [])[0];
+                if (t && t.tekst) teksten[t.wid] = t;
+                leeg(plek);
+                plek.appendChild(regeltekstEl(t && t.tekst ? t : { tekst: null }, r.hit.inhoud));
+              }).catch(function () { leeg(plek); plek.appendChild(regeltekstEl({ tekst: null }, r.hit.inhoud)); });
+            } else {
+              plek.appendChild(regeltekstEl({ tekst: null }, r.hit.inhoud));
+            }
+            if (r.hit.regeling_expression) {
+              inhoud.appendChild(el('a', { class: 'art-voet', href: 'https://omgevingsdocumentenregister.nl/document/' +
+                String(r.hit.regeling_expression).replace(/^\//, '') }, ['Dit document in het register']));
+            }
+          }
+        });
+        return wrap;
+      }
+
+      tekenLijst();
+    }
+  }
+
+  /** STOP-tekst als het kan, anders de platte tekst uit de zoek-response. */
+  function regeltekstEl(t, plat) {
+    if (t && t.tekst) {
+      var rt = document.createElement('ocd-regeltekst');
+      rt.setAttribute('weergave', staat.weergave);
+      rt.tekst = t.tekst;
+      if (t.begrijpelijk) rt.begrijpelijk = t.begrijpelijk;
+      return rt;
+    }
+    if (plat) {
+      var blok = el('div', { class: 'platte-tekst' });
+      String(plat).split(/\n+/).forEach(function (deel) { if (deel.trim()) blok.appendChild(el('p', { text: deel.trim() })); });
+      return blok;
+    }
+    return el('p', { class: 'leeg-melding', text: 'Geen tekst beschikbaar.' });
+  }
+
+  /** Eén stap in de feed: kop, status en inhoud. */
+  function stapKaart(titel, onderkop) {
+    var status = el('span', { class: 'stap-status', text: STAP.wacht });
+    var body = el('div', { class: 'stap-body' });
+    var kaart = el('div', { class: 'stap blad' }, [
+      el('div', { class: 'stap-kop' }, [
+        el('span', { class: 'label', text: titel }),
+        el('span', { class: 'muted', text: onderkop }),
+        status
+      ]),
+      body
+    ]);
+    return {
+      el: kaart,
+      bezig: function (tekst) { status.textContent = STAP.bezig; leeg(body); body.appendChild(el('p', { class: 'laden', text: tekst })); },
+      klaar: function () { status.textContent = STAP.klaar; },
+      fout: function () { status.textContent = 'mislukt'; leeg(body); },
+      inhoud: function (kinderen) {
+        leeg(body);
+        kinderen.forEach(function (k) { if (k) body.appendChild(k); });
+      }
+    };
   }
 
   function toonDocumenten(nr) {
