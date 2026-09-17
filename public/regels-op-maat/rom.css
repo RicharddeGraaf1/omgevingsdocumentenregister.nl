@@ -172,3 +172,40 @@ details.sectie > summary { cursor: pointer; list-style-position: outside; }
 .deel-titel:hover { color: var(--acc); text-decoration: underline; }
 .deel-uitleg { font-size: 12.5px; color: var(--inkt-2); }
 :root[data-theme="dark"] .kaart .onderkaart canvas { filter: invert(.9) hue-rotate(180deg) brightness(.95) contrast(.9); }
+
+/* ── Onderwerpen op deze locatie (fase 6) ─────────────── */
+.terug { display: inline-flex; align-items: center; gap: 6px; font-size: 13.5px; text-decoration: none; margin-top: 2px; }
+.terug:hover { text-decoration: underline; }
+.onderwerpen { display: flex; flex-direction: column; gap: 10px; }
+.ow-kopregel { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.ow-kopregel .muted { font-size: 12.5px; }
+.ow-raster { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+@media (max-width: 560px) { .ow-raster { grid-template-columns: 1fr; } }
+.ow-tegel {
+  display: flex; align-items: center; gap: 14px; width: 100%; text-align: left; cursor: pointer;
+  border: 0; padding: 12px 14px; color: inherit; font: inherit;
+}
+.ow-tegel:hover { box-shadow: 0 0 0 1px var(--acc), 0 1px 3px oklch(20% 0.02 262 / .08); }
+.ow-tegel:hover b { color: var(--acc); }
+.ow-tegel > .icoon { color: var(--inkt-3); flex: none; }
+.ow-tegel-icoon { width: 44px; height: 44px; flex: none; display: grid; place-items: center; background: var(--acc-zacht); color: var(--acc); border-radius: 3px; }
+.ow-tegel-tekst { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.ow-tegel-tekst b { font-size: 15px; line-height: 1.25; }
+.ow-tegel-tekst .muted { font-size: 13px; }
+.ow-klein { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 2px; }
+.ow-klein-knop {
+  display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font: inherit; font-size: 13px;
+  padding: 6px 10px; border: 0; border-radius: 3px; background: var(--blad); box-shadow: var(--blad-schaduw); color: var(--inkt-2);
+}
+.ow-klein-knop .ow-icoon { color: var(--inkt-3); }
+.ow-klein-knop b { color: var(--inkt); }
+.ow-klein-knop:hover { color: var(--inkt); box-shadow: 0 0 0 1px var(--acc); }
+.ow-klein-rest { background: none; box-shadow: none; border: 1px dashed var(--lijn); }
+.ow-noot { margin: 2px 0 0; font-size: 12.5px; color: var(--inkt-3); }
+.ow-alles { margin: 0; font-size: 13.5px; }
+.ow-res-kop { justify-content: flex-start; align-items: center; gap: 12px; }
+.chip .ow-icoon { color: var(--inkt-3); flex: none; }
+button.chip[aria-pressed="true"] .ow-icoon { color: var(--blad); }
+.chip-vast { background: var(--acc-zacht); color: var(--acc); }
+.chip-vast .ow-icoon, .chip-vast b { color: var(--acc); }
+.art-icoon { display: flex; flex: none; margin-top: 3px; color: var(--inkt-3); }

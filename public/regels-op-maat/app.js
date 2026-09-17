@@ -19,7 +19,8 @@
   var PDOK = 'https://api.pdok.nl/bzk/locatieserver/search/v3_1';
   var MAX_ART_OPEN_RENDER = 400;   // boven dit aantal artikelen starten hoofdstukken dichtgeklapt
 
-  var staat = { loc: null, weergave: 'juridisch', volgnr: 0 };
+  // view: {} = tussenscherm met onderwerpen · {onderwerp: id} · {alles: true}
+  var staat = { loc: null, weergave: 'juridisch', volgnr: 0, docs: null, view: {} };
   var analyses = {};   // bron_id -> Promise<analyse>
   var bomen = {};      // expr -> Promise<boom|null>
   var teksten = {};    // wid -> tekst-object
@@ -126,6 +127,8 @@
     if (loc) {
       q.set('x', loc.x); q.set('y', loc.y);
       if (loc.label) q.set('locatie', loc.label);
+      if (staat.view.onderwerp) q.set('onderwerp', staat.view.onderwerp);
+      else if (staat.view.alles) q.set('weergave', 'alle-documenten');
     }
     var url = location.pathname + (loc ? '?' + q.toString() : '');
     if (vervang) history.replaceState(loc, '', url); else history.pushState(loc, '', url);
@@ -138,6 +141,14 @@
     // Alleen punten binnen Nederland (RD-bereik) accepteren.
     if (x < -7000 || x > 300000 || y < 289000 || y > 629000) return null;
     return { x: Math.round(x), y: Math.round(y), label: q.get('locatie') || '' };
+  }
+
+  function viewUitUrl() {
+    var q = new URLSearchParams(location.search);
+    var o = q.get('onderwerp');
+    if (o && RomThema.bestaat(o)) return { onderwerp: o };
+    if (q.get('weergave') === 'alle-documenten') return { alles: true };
+    return {};
   }
 
   // ── Zoeken (PDOK Locatieserver) ───────────────────────
@@ -256,6 +267,8 @@
   function kiesLocatie(loc, opties) {
     opties = opties || {};
     staat.loc = loc;
+    staat.docs = null;
+    staat.view = opties.view || {};
     var nr = ++staat.volgnr;
     document.body.classList.add('heeft-locatie');
     $('context').hidden = false;
@@ -315,7 +328,9 @@
     var loc = staat.loc;
     api('/v1/viewer/regelmix?x=' + loc.x + '&y=' + loc.y).then(function (d) {
       if (nr !== staat.volgnr) return;
-      toonDocumenten(d.documenten || [], nr);
+      staat.docs = koppelAanvullend(d.documenten || []);
+      $('context-telling').textContent = staat.docs.length === 1 ? '1 document' : nl(staat.docs.length) + ' documenten';
+      toon(nr);
     }).catch(function (e) {
       if (nr !== staat.volgnr) return;
       leeg(doel);
@@ -362,19 +377,141 @@
     return hoofd;
   }
 
-  function toonDocumenten(alleDocs, nr) {
+  // ── Weergaven ─────────────────────────────────────────
+  /** Naar een andere weergave op dezelfde locatie (zonder opnieuw te laden). */
+  function navigeer(view) {
+    staat.view = view;
+    schrijfUrl({ x: staat.loc.x, y: staat.loc.y, label: staat.loc.label });
+    toon(staat.volgnr);
+    $('lijst').scrollTop = 0;
+    window.scrollTo(0, 0);
+  }
+
+  function toon(nr) {
     var doel = $('resultaat');
     leeg(doel);
-    var docs = koppelAanvullend(alleDocs);
-    $('context-telling').textContent = docs.length === 1 ? '1 document' : nl(docs.length) + ' documenten';
-
-    if (!docs.length) {
+    if (!staat.docs.length) {
       doel.appendChild(el('p', { class: 'leeg-melding', text:
         'Op dit punt vonden we geen omgevingsdocumenten. Ligt het punt in zee of buiten Nederland? Anders ontbreekt hier data in het register.' }));
       return;
     }
+    if (staat.view.alles) toonDocumenten(nr);
+    else if (staat.view.onderwerp) toonOnderwerp(staat.view.onderwerp, nr);
+    else toonOnderwerpen(nr);
+  }
 
-    doel.appendChild(el('div', { class: 'res-kop' }, [el('h1', { text: 'Gevonden op deze locatie' })]));
+  function lokaleDocs() {
+    return staat.docs.filter(function (d) { return d.bron_type === 'ow' && groepVan(d) === 'lokaal'; });
+  }
+
+  /** Analyse per lokaal document (hoofdregeling + aanvullende regels samen); een
+   *  document dat niet laadt valt eruit in plaats van alles te blokkeren. */
+  function analyseerLokaal() {
+    return Promise.all(lokaleDocs().map(function (d) {
+      return Promise.all(delenVan(d).map(analyseer))
+        .then(function (lijst) { return { doc: d, a: voegSamen(lijst) }; })
+        .catch(function () { return null; });
+    })).then(function (r) { return r.filter(Boolean); });
+  }
+
+  function terugLink() {
+    return el('a', { class: 'terug', href: '#', onclick: function (e) { e.preventDefault(); navigeer({}); } }, [
+      icoon('M12 5l-5 5 5 5'), 'Onderwerpen op deze locatie'
+    ]);
+  }
+
+  /** Tussenscherm: welke onderwerpen spelen hier, met iconen. */
+  function toonOnderwerpen(nr) {
+    var doel = $('resultaat');
+    doel.appendChild(el('div', { class: 'res-kop' }, [el('h1', { text: 'Waar bent u naar op zoek?' })]));
+    var blok = el('section', { class: 'onderwerpen', 'aria-labelledby': 'ow-kop' }, [
+      el('div', { class: 'ow-kopregel' }, [
+        el('h2', { class: 'label', id: 'ow-kop', text: 'Onderwerpen op deze locatie' }),
+        el('span', { class: 'muted', text: 'gemeente · provincie · waterschap' })
+      ]),
+      el('p', { class: 'laden', text: 'Onderwerpen tellen…' })
+    ]);
+    doel.appendChild(blok);
+    var alleLink = el('p', { class: 'ow-alles' }, [
+      el('a', { href: '#', onclick: function (e) { e.preventDefault(); navigeer({ alles: true }); } },
+        ['Alle ' + nl(staat.docs.length) + ' documenten op deze locatie'])
+    ]);
+    doel.appendChild(alleLink);
+
+    analyseerLokaal().then(function (res) {
+      if (nr !== staat.volgnr || staat.view.onderwerp || staat.view.alles) return;
+      blok.removeChild(blok.querySelector('.laden'));
+      var tel = {};
+      res.forEach(function (r) { Object.keys(r.a.tegels).forEach(function (k) { tel[k] = (tel[k] || 0) + r.a.tegels[k]; }); });
+      var groot = Object.keys(tel).filter(function (k) { return tel[k] > 0 && !RomThema.isKlein(k); })
+        .sort(function (a, b) { return tel[b] - tel[a]; });
+      var klein = RomThema.ONDERWERPEN.filter(function (o) { return o.klein && tel[o.id] > 0; }).map(function (o) { return o.id; });
+
+      if (!groot.length && !klein.length) {
+        blok.appendChild(el('p', { class: 'leeg-melding', text:
+          'De regels van gemeente, provincie en waterschap op dit punt zijn (nog) niet op onderwerp ingedeeld. Bekijk ze via alle documenten.' }));
+        return;
+      }
+      var raster = el('div', { class: 'ow-raster' });
+      groot.forEach(function (id) {
+        raster.appendChild(el('button', { type: 'button', class: 'ow-tegel blad', onclick: function () { navigeer({ onderwerp: id }); } }, [
+          el('span', { class: 'ow-tegel-icoon' }, [RomThema.icoon(id, 26)]),
+          el('span', { class: 'ow-tegel-tekst' }, [
+            el('b', { text: RomThema.naam(id) }),
+            el('span', { class: 'muted', text: nl(tel[id]) + (tel[id] === 1 ? ' regel' : ' regels') })
+          ]),
+          icoon(PAD_RECHTS)
+        ]));
+      });
+      blok.appendChild(raster);
+      if (klein.length) {
+        var rij = el('div', { class: 'ow-klein' });
+        klein.forEach(function (id) {
+          rij.appendChild(el('button', { type: 'button', class: 'ow-klein-knop' + (id === 'niet-ingedeeld' ? ' ow-klein-rest' : ''),
+            onclick: function () { navigeer({ onderwerp: id }); } }, [
+            RomThema.icoon(id, 18), RomThema.naam(id) + ' ', el('b', { text: nl(tel[id]) })
+          ]));
+        });
+        blok.appendChild(rij);
+      }
+      blok.appendChild(el('p', { class: 'ow-noot', text:
+        'Onderwerpindeling van het register, per artikel. Landelijke regels, beleid en Wro-plannen tellen hier niet mee.' }));
+    });
+  }
+
+  /** Eén onderwerp, over de lokale documenten heen. */
+  function toonOnderwerp(id, nr) {
+    var doel = $('resultaat');
+    doel.appendChild(terugLink());
+    doel.appendChild(el('div', { class: 'res-kop ow-res-kop' }, [
+      el('span', { class: 'ow-tegel-icoon' }, [RomThema.icoon(id, 26)]),
+      el('h1', { text: RomThema.naam(id) })
+    ]));
+    var laden = el('p', { class: 'laden', text: 'Regels over dit onderwerp zoeken…' });
+    doel.appendChild(laden);
+    analyseerLokaal().then(function (res) {
+      if (nr !== staat.volgnr || staat.view.onderwerp !== id) return;
+      doel.removeChild(laden);
+      var met = res.filter(function (r) { return r.a.tegels[id] > 0; });
+      if (!met.length) {
+        doel.appendChild(el('p', { class: 'leeg-melding', text: 'Op deze locatie staan geen regels van gemeente, provincie of waterschap over dit onderwerp.' }));
+        return;
+      }
+      var totaal = met.reduce(function (t, r) { return t + r.a.tegels[id]; }, 0);
+      doel.appendChild(el('p', { class: 'groep-uitleg', text:
+        nl(totaal) + (totaal === 1 ? ' regel' : ' regels') + ' in ' + (met.length === 1 ? '1 document' : met.length + ' documenten') +
+        '. Klap een document open; het staat al gefilterd op dit onderwerp.' }));
+      var sectie = el('section', { class: 'groep' });
+      met.forEach(function (r) { sectie.appendChild(documentKaart(r.doc, 'lokaal', nr, id)); });
+      doel.appendChild(sectie);
+    });
+  }
+
+  function toonDocumenten(nr) {
+    var doel = $('resultaat');
+    var docs = staat.docs;
+    doel.appendChild(terugLink());
+    doel.appendChild(el('div', { class: 'res-kop' }, [el('h1', { text: 'Alle documenten op deze locatie' })]));
 
     GROEPEN.forEach(function (g) {
       var inGroep = docs.filter(function (d) { return groepVan(d) === g.id; });
@@ -388,7 +525,7 @@
     });
   }
 
-  function documentKaart(doc, groep, nr) {
+  function documentKaart(doc, groep, nr, onderwerp) {
     var isWro = doc.bron_type === 'wro';
     var chips = el('div', { class: 'chips doc-chips' });
     var chevron = icoon(PAD_NEER); chevron.classList.add('doc-chevron');
@@ -414,7 +551,7 @@
       kop.setAttribute('aria-expanded', open ? 'true' : 'false');
       kaart.classList.toggle('open', open);
       body.hidden = !open;
-      if (open && !geopend) { geopend = true; vulDocument(doc, groep, body, nr); }
+      if (open && !geopend) { geopend = true; vulDocument(doc, groep, body, nr, onderwerp); }
     });
 
     // Chips vooraf alleen voor de lokale Ow-documenten: klein genoeg, en daar
@@ -424,7 +561,7 @@
       Promise.all(delenVan(doc).map(analyseer)).then(function (lijst) {
         if (nr !== staat.volgnr) return;
         leeg(chips);
-        kopChips(voegSamen(lijst)).forEach(function (c) { chips.appendChild(c); });
+        kopChips(voegSamen(lijst), onderwerp).forEach(function (c) { chips.appendChild(c); });
       }).catch(function () { leeg(chips); });
     } else if (isWro) {
       chips.appendChild(el('span', { class: 'muted', style: 'font-size:12px', text: 'Wro-plannen zijn niet op onderwerp ingedeeld' }));
@@ -486,6 +623,7 @@
           categorie: null, sub: null
         };
         if (artWid && indeling[artWid]) { a.categorie = indeling[artWid].categorie; a.sub = indeling[artWid].sub; }
+        a.onderwerp = RomThema.onderwerpVan(a.categorie, a.sub);
         artikelen.push(a);
       }
       if (r.wid && r.wid !== artWid) a.leden.push({ nummer: r.lid_nummer || '', wid: r.wid });
@@ -500,26 +638,25 @@
       });
     }
 
-    var tellingen = {}, nietIngedeeld = 0;
-    artikelen.forEach(function (a) {
-      if (a.categorie) tellingen[a.categorie] = (tellingen[a.categorie] || 0) + 1;
-      else nietIngedeeld++;
-    });
-    var categorieen = Object.keys(tellingen).sort(function (a, b) { return tellingen[b] - tellingen[a]; })
-      .map(function (c) { return { naam: c, aantal: tellingen[c] }; });
+    var tegels = {};
+    artikelen.forEach(function (a) { tegels[a.onderwerp] = (tegels[a.onderwerp] || 0) + 1; });
 
     return {
-      doc: doc, artikelen: artikelen, categorieen: categorieen,
-      nietIngedeeld: nietIngedeeld, heeftIndeling: heeftIndeling && categorieen.length > 0
+      doc: doc, artikelen: artikelen, tegels: tegels,
+      nietIngedeeld: tegels['niet-ingedeeld'] || 0,
+      heeftIndeling: heeftIndeling && artikelen.some(function (a) { return a.categorie; })
     };
   }
 
-  function chipInhoud(naam, aantal, categorie) {
-    return [
-      el('i', { style: 'background:' + RomThema.kleur(categorie) }),
-      naam + ' ',
-      el('b', { text: nl(aantal) })
-    ];
+  function chipInhoud(id, aantal) {
+    return [RomThema.icoon(id, 15), RomThema.naam(id) + ' ', el('b', { text: nl(aantal) })];
+  }
+
+  /** Onderwerpen gesorteerd op aantal; de kleine tegels (aanvragen, overheid, rest) achteraan. */
+  function gesorteerd(tegels) {
+    return Object.keys(tegels).filter(function (k) { return tegels[k] > 0; }).sort(function (a, b) {
+      return (RomThema.isKlein(a) - RomThema.isKlein(b)) || (tegels[b] - tegels[a]);
+    });
   }
 
   /** Aanvullende regels eerst, zoals in het DSO en de mockup; dan de hoofdregeling. */
@@ -527,36 +664,29 @@
 
   /** Tellingen van meerdere analyses (hoofdregeling + aanvullende regels) samen. */
   function voegSamen(lijst) {
-    var tel = {}, niet = 0, totaal = 0, indeling = false;
+    var tel = {}, totaal = 0, indeling = false;
     lijst.forEach(function (a) {
       totaal += a.artikelen.length;
-      niet += a.nietIngedeeld;
       if (a.heeftIndeling) indeling = true;
-      a.categorieen.forEach(function (c) { tel[c.naam] = (tel[c.naam] || 0) + c.aantal; });
+      Object.keys(a.tegels).forEach(function (k) { tel[k] = (tel[k] || 0) + a.tegels[k]; });
     });
-    return {
-      totaal: totaal, nietIngedeeld: niet, heeftIndeling: indeling,
-      categorieen: Object.keys(tel).sort(function (a, b) { return tel[b] - tel[a]; })
-        .map(function (c) { return { naam: c, aantal: tel[c] }; })
-    };
+    return { totaal: totaal, nietIngedeeld: tel['niet-ingedeeld'] || 0, heeftIndeling: indeling, tegels: tel };
   }
 
-  function kopChips(a) {
+  function kopChips(a, onderwerp) {
+    if (onderwerp) return [el('span', { class: 'chip chip-vast' }, chipInhoud(onderwerp, a.tegels[onderwerp] || 0))];
     if (!a.heeftIndeling) {
       return [el('span', { class: 'muted', style: 'font-size:12px', text: 'Nog niet op onderwerp ingedeeld' })];
     }
-    var MAX = 5, uit = [];
-    a.categorieen.slice(0, MAX).forEach(function (c) {
-      uit.push(el('span', { class: 'chip' }, chipInhoud(RomThema.naam(c.naam), c.aantal, c.naam)));
-    });
-    if (a.categorieen.length > MAX) {
-      uit.push(el('span', { class: 'chip chip-leeg', text: '+' + (a.categorieen.length - MAX) + ' onderwerpen' }));
-    }
+    var ids = gesorteerd(a.tegels).filter(function (k) { return !RomThema.isKlein(k); });
+    var MAX = 4, uit = [];
+    ids.slice(0, MAX).forEach(function (id) { uit.push(el('span', { class: 'chip' }, chipInhoud(id, a.tegels[id]))); });
+    if (ids.length > MAX) uit.push(el('span', { class: 'chip chip-leeg', text: '+' + (ids.length - MAX) + ' onderwerpen' }));
     return uit;
   }
 
   // ── Document openklappen ──────────────────────────────
-  function vulDocument(doc, groep, body, nr) {
+  function vulDocument(doc, groep, body, nr, onderwerp) {
     leeg(body);
     body.appendChild(el('p', { class: 'laden', text: 'Artikelen ophalen…' }));
     var delen = delenVan(doc).map(function (d) {
@@ -568,11 +698,11 @@
     Promise.all(delen).then(function (r) {
       if (nr !== staat.volgnr) return;
       leeg(body);
-      toonArtikelen(r, body);
+      toonArtikelen(r, body, onderwerp);
     }).catch(function (e) {
       if (nr !== staat.volgnr) return;
       leeg(body);
-      body.appendChild(foutBlok(e, function () { vulDocument(doc, groep, body, nr); }));
+      body.appendChild(foutBlok(e, function () { vulDocument(doc, groep, body, nr, onderwerp); }));
     });
   }
 
@@ -586,27 +716,24 @@
   }
 
   /** delen: [{a, boom}] — aanvullende regels eerst, hoofdregeling als laatste. */
-  function toonArtikelen(delen, body) {
+  function toonArtikelen(delen, body, vastOnderwerp) {
     var a = voegSamen(delen.map(function (d) { return d.a; }));
     if (!a.totaal) {
       body.appendChild(el('p', { class: 'leeg-melding', text: 'Geen artikelen gevonden voor dit punt.' }));
       return;
     }
 
-    var actief = {};   // categorie-naam (of '' voor niet ingedeeld) -> true
+    var actief = {};   // onderwerp-id -> true
     var artEls = [];   // [{art, el}]
 
     if (a.heeftIndeling) {
       var rij = el('div', { class: 'chips', role: 'group', 'aria-label': 'Filter op onderwerp' });
-      var knoppen = a.categorieen.map(function (c) {
-        return el('button', { type: 'button', class: 'chip', 'aria-pressed': 'false', 'data-cat': c.naam },
-          chipInhoud(RomThema.naam(c.naam), c.aantal, c.naam));
+      var knoppen = gesorteerd(a.tegels).map(function (id) {
+        return el('button', { type: 'button', class: 'chip' + (id === 'niet-ingedeeld' ? ' chip-leeg' : ''),
+          'aria-pressed': 'false', 'data-cat': id,
+          title: id === 'niet-ingedeeld' ? 'Artikelen waar het register (nog) geen onderwerp voor heeft' : null },
+          chipInhoud(id, a.tegels[id]));
       });
-      if (a.nietIngedeeld) {
-        knoppen.push(el('button', { type: 'button', class: 'chip chip-leeg', 'aria-pressed': 'false', 'data-cat': '',
-          title: 'Artikelen waar het register (nog) geen onderwerp voor heeft' },
-          ['Niet ingedeeld ', el('b', { text: nl(a.nietIngedeeld) })]));
-      }
       knoppen.forEach(function (k) {
         k.addEventListener('click', function () {
           var cat = k.getAttribute('data-cat');
@@ -660,11 +787,18 @@
       body.appendChild(el('a', { class: 'art-voet', href: link }, ['Het hele document in het register']));
     }
 
+    if (vastOnderwerp && a.heeftIndeling) {
+      actief[vastOnderwerp] = true;
+      Array.prototype.forEach.call(body.querySelectorAll('.filter .chip'), function (k) {
+        if (k.getAttribute('data-cat') === vastOnderwerp) k.setAttribute('aria-pressed', 'true');
+      });
+      pasFilterToe();
+    }
+
     function pasFilterToe() {
       var filterAan = Object.keys(actief).length > 0;
       artEls.forEach(function (x) {
-        var cat = x.art.categorie || '';
-        x.el.hidden = filterAan && !actief[cat];
+        x.el.hidden = filterAan && !actief[x.art.onderwerp];
       });
       // Secties zonder zichtbaar artikel verbergen.
       Array.prototype.slice.call(lijst.querySelectorAll('.sectie, .deel')).reverse().forEach(function (s) {
@@ -742,7 +876,7 @@
   function artikelElement(art, doc) {
     var inhoud = el('div', { class: 'art-inhoud', hidden: true });
     var dot = el('span', { class: 'art-dot', 'aria-hidden': 'true' });
-    if (art.categorie) { dot.style.background = RomThema.kleur(art.categorie); dot.style.border = '0'; }
+    if (art.categorie) { dot.className = 'art-icoon'; dot.appendChild(RomThema.icoon(art.onderwerp, 15)); dot.title = RomThema.naam(art.onderwerp); }
     var pijl = icoon(PAD_RECHTS); pijl.classList.add('art-pijl');
 
     var titel = el('span', { class: 'art-titel' });
@@ -846,12 +980,17 @@
     initWeergave();
 
     var uitUrl = leesUrl();
-    if (uitUrl) kiesLocatie(uitUrl, { uitUrl: true });
+    if (uitUrl) kiesLocatie(uitUrl, { uitUrl: true, view: viewUitUrl() });
 
     window.addEventListener('popstate', function () {
       var loc = leesUrl();
-      if (loc) kiesLocatie(loc, { uitUrl: true });
-      else location.reload();
+      if (!loc) { location.reload(); return; }
+      if (staat.loc && staat.docs && loc.x === staat.loc.x && loc.y === staat.loc.y) {
+        staat.view = viewUitUrl();
+        toon(staat.volgnr);
+      } else {
+        kiesLocatie(loc, { uitUrl: true, view: viewUitUrl() });
+      }
     });
   }
 
