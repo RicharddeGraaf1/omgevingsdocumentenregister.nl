@@ -153,7 +153,15 @@
       }),
       url: '/api/v1/tiles/locaties/{z}/{x}/{y}.mvt'
     });
-    werkLaag = new ol.layer.VectorTile({ className: 'werking', source: werkBron, renderMode: 'vector', style: werkStijl });
+    // Alleen laden als het nodig is. Een onzichtbare laag haalt geen tegels op,
+    // en onder z9 (≈ 7 m/px) ook niet: een tegel op z4 bestrijkt een groot deel
+    // van het land en is een zware query. Zonder deze twee grenzen liet elke
+    // bezoeker de OCD-database die tegels uitrekenen, ook zonder open artikel —
+    // dat trok op 2026-09-18 de hele API in time-outs (landelijk beeld gaf 500).
+    werkLaag = new ol.layer.VectorTile({
+      className: 'werking', source: werkBron, renderMode: 'vector', style: werkStijl,
+      visible: false, minZoom: 9
+    });
     return werkLaag;
   }
 
@@ -184,7 +192,10 @@
         dekkend: String(l.id).indexOf('.ambtsgebied.') >= 0
       };
     });
-    if (werkLaag) werkLaag.changed();
+    if (werkLaag) {
+      werkLaag.setVisible(Object.keys(werking).length > 0);
+      werkLaag.changed();
+    }
   }
 
   /** Perceelgrens als WKT in RD (zoals de Locatieserver hem levert). */
