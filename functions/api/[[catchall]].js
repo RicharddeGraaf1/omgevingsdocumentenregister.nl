@@ -8,7 +8,8 @@
 // Whitelist: alleen de paden die dit register gebruikt. Zonder whitelist is
 // dit een open proxy op de hele OCD-API.
 //
-// Caching: uitsluitend via `Cache-Control` response-headers. Bewust GEEN
+// Caching: alleen browser-caching via `Cache-Control` (zie de noot bij s-maxage
+// hieronder: de edge cachet Function-antwoorden niet vanzelf). Bewust GEEN
 // `caches.default.put` en geen `cf: { cacheTtl }` — die twee lagen zijn niet
 // via zone-Purge-Everything te legen, waardoor een foute response uren blijft
 // hangen (geleerd op omgevingsvergunningenregister.nl, 2026-06-01).
@@ -71,7 +72,11 @@ export async function onRequest({ request, env, params }) {
   // Alleen geslaagde GET's cachen. Een fout antwoord mag niet blijven plakken.
   if (request.method === 'GET' && response.ok) {
     const headers = new Headers(response.headers);
-    // browser 5 min · CDN 24 u — bij een data-update: Purge Everything.
+    // browser 5 min. De s-maxage staat erbij, maar LET OP: antwoorden van een
+    // Pages Function komen NIET vanzelf in de edge-cache van Cloudflare — elke
+    // bezoeker raakt OCD. Gemeten 2026-09-18: landelijk beeld deed twee keer
+    // achter elkaar 30 s. Reken bij een traag endpoint dus niet op deze header;
+    // maak het endpoint zelf snel (zie OCD p2p.mv_regeling_omvang).
     headers.set('Cache-Control', 'public, max-age=300, s-maxage=86400');
     return new Response(response.body, {
       status: response.status,
