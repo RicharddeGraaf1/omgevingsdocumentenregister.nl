@@ -538,8 +538,12 @@
     analyseerLokaal().then(function (res) {
       if (nr !== staat.volgnr || staat.view.onderwerp || staat.view.alles) return;
       blok.removeChild(blok.querySelector('.laden'));
-      var tel = {};
-      res.forEach(function (r) { Object.keys(r.a.tegels).forEach(function (k) { tel[k] = (tel[k] || 0) + r.a.tegels[k]; }); });
+      var tel = {}, annot = {}, herkomst = { pad: 0, annotatie: 0, geen: 0 };
+      res.forEach(function (r) {
+        Object.keys(r.a.tegels).forEach(function (k) { tel[k] = (tel[k] || 0) + r.a.tegels[k]; });
+        Object.keys(r.a.viaAnnotatie || {}).forEach(function (k) { annot[k] = (annot[k] || 0) + r.a.viaAnnotatie[k]; });
+        Object.keys(herkomst).forEach(function (k) { herkomst[k] += (r.a.herkomst || {})[k] || 0; });
+      });
       // Alleen de onderwerpen waar een bezoeker naar op zoek is. Aanvragen en
       // vergunningen, regels voor de overheid en niet-ingedeelde artikelen staan
       // hier niet meer als tegel (gebruikersbesluit 2026-09-17); ze blijven
@@ -554,16 +558,27 @@
       }
       var raster = el('div', { class: 'ow-raster' });
       groot.forEach(function (id) {
-        raster.appendChild(el('button', { type: 'button', class: 'ow-tegel blad', onclick: function () { navigeer({ onderwerp: id }); } }, [
+        var viaA = annot[id] || 0;
+        raster.appendChild(el('button', { type: 'button', class: 'ow-tegel blad', onclick: function () { navigeer({ onderwerp: id }); },
+          title: viaA ? nl(tel[id] - viaA) + ' via het opschriftpad, ' + nl(viaA) + ' via de IMOW-annotatie' : null }, [
           el('span', { class: 'ow-tegel-icoon' }, [RomThema.icoon(id, 26)]),
           el('span', { class: 'ow-tegel-tekst' }, [
             el('b', { text: RomThema.naam(id) }),
-            el('span', { class: 'muted', text: nl(tel[id]) + (tel[id] === 1 ? ' regel' : ' regels') })
+            el('span', { class: 'muted', text: nl(tel[id]) + (tel[id] === 1 ? ' regel' : ' regels') +
+              (viaA ? ' · ' + nl(viaA) + ' via annotatie' : '') }),
+            herkomstBalk({ pad: tel[id] - viaA, annotatie: viaA, geen: 0 }, true)
           ]),
           icoon(PAD_RECHTS)
         ]));
       });
       blok.appendChild(raster);
+      blok.appendChild(el('section', { class: 'hk-blok', 'aria-labelledby': 'hk-kop' }, [
+        el('h2', { class: 'label', id: 'hk-kop', text: 'Waar komt de indeling vandaan?' }),
+        herkomstBalk(herkomst),
+        el('p', { class: 'ow-noot', text:
+          'Het register leest het onderwerp eerst uit de kopjes boven een artikel (het opschriftpad): dat levert onderwerp én subcategorie. ' +
+          'Zwijgen de kopjes, dan neemt het het thema dat de overheid zelf aan de regel heeft gegeven (de IMOW-annotatie) — alleen een onderwerp, zonder subcategorie.' })
+      ]));
       blok.appendChild(el('p', { class: 'ow-noot', text:
         'Onderwerpindeling van het register, per artikel. Landelijke regels, beleid en Wro-plannen tellen hier niet mee.' }));
     });
@@ -1042,8 +1057,11 @@
     var loc = staat.loc;
     var q = '?x=' + loc.x + '&y=' + loc.y + '&bron=' + encodeURIComponent(doc.bron_id) + '&bron_type=' + doc.bron_type;
     var rijen = api('/v1/viewer/regelmix/document' + q);
+    // met_annotatie: waar het opschriftpad zwijgt, vult het IMOW-thema van de
+    // juridische regels het onderwerp aan — en het antwoord zegt per artikel
+    // welke route het was. Zonder subcategorie: IMOW-thema's hebben geen tweede niveau.
     var onderwerpen = doc.bron_type === 'ow'
-      ? api('/v1/viewer/regeling/' + encodeURIComponent(doc.bron_id) + '/onderwerpen').catch(function () { return null; })
+      ? api('/v1/viewer/regeling/' + encodeURIComponent(doc.bron_id) + '/onderwerpen?met_annotatie=true').catch(function () { return null; })
       : Promise.resolve(null);
     // De boom levert twee dingen: leden bij hun artikel (zie artikelWid) en de
     // locaties waar een artikel geldt. Overslaan alleen voor de grote landelijke
@@ -1061,11 +1079,13 @@
   function bouwAnalyse(doc, rijen, ond, boom) {
     var ouder = boom ? ouderArtikelen(boom) : {};
     var locatiesPerArtikel = boom ? locatiesUitBoom(boom) : {};
-    // wid -> {categorie, sub}
+    // wid -> {categorie, sub, herkomst}
     var indeling = {}, heeftIndeling = !!(ond && ond.categorieen);
+    var themas = (ond && ond.annotatie_themas) || {};
     if (heeftIndeling) {
       ond.categorieen.forEach(function (c) {
-        c.wids.forEach(function (w) { indeling[w] = { categorie: c.naam, sub: null }; });
+        c.wids.forEach(function (w) { indeling[w] = { categorie: c.naam, sub: null, herkomst: 'pad' }; });
+        (c.wids_annotatie || []).forEach(function (w) { if (indeling[w]) indeling[w].herkomst = 'annotatie'; });
         (c.sub || []).forEach(function (s) {
           s.wids.forEach(function (w) { if (indeling[w]) indeling[w].sub = s.naam; });
         });
@@ -1089,9 +1109,14 @@
           opschrift: r.artikel_opschrift || r.artikel || '',
           hoofdstuk: r.hoofdstuk_nummer || '',
           leden: [], inhoud: r.inhoud || null,
-          categorie: null, sub: null
+          categorie: null, sub: null, herkomst: null, themas: null,
+          indelingBekend: heeftIndeling   // false = onderwerpen niet opgehaald; dan zeggen we niets
         };
-        if (artWid && indeling[artWid]) { a.categorie = indeling[artWid].categorie; a.sub = indeling[artWid].sub; }
+        if (artWid && indeling[artWid]) {
+          a.categorie = indeling[artWid].categorie; a.sub = indeling[artWid].sub;
+          a.herkomst = indeling[artWid].herkomst;
+          if (a.herkomst === 'annotatie') a.themas = themas[artWid] || [a.categorie];
+        }
         a.onderwerp = RomThema.onderwerpVan(a.categorie, a.sub);
         var vak = (artWid && locatiesPerArtikel[artWid]) || null;
         a.locaties = vak ? vak.locaties : [];
@@ -1110,11 +1135,16 @@
       });
     }
 
-    var tegels = {};
-    artikelen.forEach(function (a) { tegels[a.onderwerp] = (tegels[a.onderwerp] || 0) + 1; });
+    var tegels = {}, viaAnnotatie = {};
+    var herkomst = { pad: 0, annotatie: 0, geen: 0 };
+    artikelen.forEach(function (a) {
+      tegels[a.onderwerp] = (tegels[a.onderwerp] || 0) + 1;
+      if (a.herkomst === 'annotatie') viaAnnotatie[a.onderwerp] = (viaAnnotatie[a.onderwerp] || 0) + 1;
+      herkomst[a.herkomst || 'geen']++;
+    });
 
     return {
-      doc: doc, artikelen: artikelen, tegels: tegels,
+      doc: doc, artikelen: artikelen, tegels: tegels, viaAnnotatie: viaAnnotatie, herkomst: herkomst,
       nietIngedeeld: tegels['niet-ingedeeld'] || 0,
       heeftIndeling: heeftIndeling && artikelen.some(function (a) { return a.categorie; })
     };
@@ -1136,13 +1166,40 @@
 
   /** Tellingen van meerdere analyses (hoofdregeling + aanvullende regels) samen. */
   function voegSamen(lijst) {
-    var tel = {}, totaal = 0, indeling = false;
+    var tel = {}, annot = {}, totaal = 0, indeling = false;
+    var herkomst = { pad: 0, annotatie: 0, geen: 0 };
     lijst.forEach(function (a) {
       totaal += a.artikelen.length;
       if (a.heeftIndeling) indeling = true;
       Object.keys(a.tegels).forEach(function (k) { tel[k] = (tel[k] || 0) + a.tegels[k]; });
+      Object.keys(a.viaAnnotatie || {}).forEach(function (k) { annot[k] = (annot[k] || 0) + a.viaAnnotatie[k]; });
+      if (a.herkomst) Object.keys(herkomst).forEach(function (k) { herkomst[k] += a.herkomst[k]; });
     });
-    return { totaal: totaal, nietIngedeeld: tel['niet-ingedeeld'] || 0, heeftIndeling: indeling, tegels: tel };
+    return { totaal: totaal, nietIngedeeld: tel['niet-ingedeeld'] || 0, heeftIndeling: indeling, tegels: tel,
+      viaAnnotatie: annot, herkomst: herkomst };
+  }
+
+  // ── Herkomst van het onderwerp: opschriftpad of IMOW-annotatie ──
+  /** Balk + telling: hoeveel onderwerpen komen uit het pad, hoeveel uit de annotatie. */
+  function herkomstBalk(h, kort) {
+    var n = h.pad + h.annotatie + h.geen;
+    if (!n) return null;
+    function deel(k) { return (100 * h[k] / n).toFixed(1) + '%'; }
+    function pct(k) { return Math.round(100 * h[k] / n) + '%'; }
+    var balk = el('span', { class: 'hk-balk', role: 'img',
+      'aria-label': h.pad + ' via het opschriftpad, ' + h.annotatie + ' via de annotatie, ' + h.geen + ' niet ingedeeld' }, [
+      el('i', { class: 'hk-pad', style: 'width:' + deel('pad') }),
+      el('i', { class: 'hk-annot', style: 'width:' + deel('annotatie') })
+    ]);
+    if (kort) return balk;
+    return el('div', { class: 'hk' }, [
+      balk,
+      el('div', { class: 'hk-legenda' }, [
+        el('span', {}, [el('i', { class: 'hk-pad' }), el('b', { text: nl(h.pad) }), ' via het opschriftpad (' + pct('pad') + ')']),
+        el('span', {}, [el('i', { class: 'hk-annot' }), el('b', { text: nl(h.annotatie) }), ' via de IMOW-annotatie (' + pct('annotatie') + ')']),
+        h.geen ? el('span', {}, [el('i', { class: 'hk-geen' }), el('b', { text: nl(h.geen) }), ' niet ingedeeld']) : null
+      ])
+    ]);
   }
 
   function kopChips(a, onderwerp) {
@@ -1195,8 +1252,58 @@
       return;
     }
 
-    var actief = {};   // onderwerp-id -> true
-    var artEls = [];   // [{art, el}]
+    var actief = {};      // onderwerp-id -> true
+    var actiefSub = {};   // "categorie > subcategorie" -> true
+    var artEls = [];      // [{art, el}]
+
+    // Tweede as: de subcategorie van het register (milieu > geur, water > lozen).
+    // Alleen zichtbaar zodra er een onderwerp aanstaat — anders zijn het tientallen
+    // chips zonder richting. De sleutel draagt de categorie mee, want dezelfde
+    // subnaam kan onder twee categorieën hangen.
+    var subRij = el('div', { class: 'chips sub-chips', role: 'group', 'aria-label': 'Filter op subonderwerp', hidden: true });
+
+    function subSleutel(art) {
+      return (art.categorie || '') + ' > ' + (art.sub || '');
+    }
+
+    function tekenSubs() {
+      var opOnderwerp = Object.keys(actief).length > 0;
+      leeg(subRij);
+      if (!opOnderwerp) {
+        subRij.hidden = true;
+        actiefSub = {};
+        return;
+      }
+      // Tellen binnen wat het onderwerp- en herkomstfilter overlaat.
+      var tel = {}, labels = {};
+      artEls.forEach(function (x) {
+        var art = x.art;
+        if (!actief[art.onderwerp]) return;
+        if (herkomstActief && art.herkomst !== herkomstActief) return;
+        var sleutel = subSleutel(art);
+        tel[sleutel] = (tel[sleutel] || 0) + 1;
+        labels[sleutel] = art.sub || 'zonder subonderwerp';
+      });
+      var sleutels = Object.keys(tel).sort(function (x, y) { return tel[y] - tel[x]; });
+      // Subs die niet meer bestaan (ander onderwerp gekozen) vallen uit het filter.
+      Object.keys(actiefSub).forEach(function (k) { if (!tel[k]) delete actiefSub[k]; });
+      if (sleutels.length < 2) { subRij.hidden = true; return; }   // één sub zegt niets
+      subRij.hidden = false;
+      subRij.appendChild(el('span', { class: 'sub-label', text: 'Subonderwerp' }));
+      sleutels.forEach(function (sleutel) {
+        var leeg2 = !labels[sleutel] || labels[sleutel] === 'zonder subonderwerp';
+        var k = el('button', { type: 'button', class: 'chip chip-sub' + (leeg2 ? ' chip-leeg' : ''),
+          'aria-pressed': actiefSub[sleutel] ? 'true' : 'false',
+          title: sleutel.split(' > ')[0] ? 'categorie: ' + sleutel.split(' > ')[0] : null },
+          [labels[sleutel] + ' ', el('b', { text: nl(tel[sleutel]) })]);
+        k.addEventListener('click', function () {
+          if (actiefSub[sleutel]) delete actiefSub[sleutel]; else actiefSub[sleutel] = true;
+          k.setAttribute('aria-pressed', actiefSub[sleutel] ? 'true' : 'false');
+          pasFilterToe(true);
+        });
+        subRij.appendChild(k);
+      });
+    }
 
     if (a.heeftIndeling) {
       var rij = el('div', { class: 'chips', role: 'group', 'aria-label': 'Filter op onderwerp' });
@@ -1217,12 +1324,34 @@
         rij.appendChild(k);
       });
       var ingedeeld = a.totaal - a.nietIngedeeld;
+      var hkRij = null;
+      if (a.herkomst.annotatie) {
+        hkRij = el('div', { class: 'chips hk-chips', role: 'group', 'aria-label': 'Filter op herkomst van het onderwerp' });
+        [['pad', 'Via het opschriftpad', a.herkomst.pad], ['annotatie', 'Via de annotatie', a.herkomst.annotatie]]
+          .forEach(function (h) {
+            var k = el('button', { type: 'button', class: 'chip chip-hk chip-hk-' + h[0], 'aria-pressed': 'false' },
+              [el('i', { class: h[0] === 'pad' ? 'hk-pad' : 'hk-annot' }), h[1] + ' ', el('b', { text: nl(h[2]) })]);
+            k.addEventListener('click', function () {
+              herkomstActief = herkomstActief === h[0] ? null : h[0];
+              Array.prototype.forEach.call(hkRij.children, function (b) {
+                b.setAttribute('aria-pressed', b === k && herkomstActief ? 'true' : 'false');
+              });
+              pasFilterToe();
+            });
+            hkRij.appendChild(k);
+          });
+      }
       body.appendChild(el('div', { class: 'filter' }, [
         rij,
+        subRij,
         el('span', { class: 'filter-uitleg', text:
-          'Onderwerpindeling van het register · ' + nl(ingedeeld) + ' van ' + nl(a.totaal) + ' artikelen ingedeeld' })
+          'Onderwerpindeling van het register · ' + nl(ingedeeld) + ' van ' + nl(a.totaal) + ' artikelen ingedeeld' +
+          (a.herkomst.annotatie ? ', waarvan ' + nl(a.herkomst.annotatie) + ' via de IMOW-annotatie' : '') }),
+        a.herkomst.annotatie ? herkomstBalk(a.herkomst, true) : null,
+        hkRij
       ]));
     }
+    var herkomstActief = null;   // null | 'pad' | 'annotatie'
 
     var lijst = el('div', { class: 'artikelen' });
     body.appendChild(lijst);
@@ -1267,10 +1396,16 @@
       pasFilterToe();
     }
 
-    function pasFilterToe() {
-      var filterAan = Object.keys(actief).length > 0;
+    /** behoudSubs: true vanuit een sub-chip zelf, anders wordt de rij hertekend. */
+    function pasFilterToe(behoudSubs) {
+      if (!behoudSubs) tekenSubs();
+      var opOnderwerp = Object.keys(actief).length > 0;
+      var opSub = Object.keys(actiefSub).length > 0;
+      var filterAan = opOnderwerp || opSub || !!herkomstActief;
       artEls.forEach(function (x) {
-        x.el.hidden = filterAan && !actief[x.art.onderwerp];
+        x.el.hidden = (opOnderwerp && !actief[x.art.onderwerp]) ||
+                      (opSub && !actiefSub[subSleutel(x.art)]) ||
+                      (!!herkomstActief && x.art.herkomst !== herkomstActief);
       });
       // Secties zonder zichtbaar artikel verbergen.
       Array.prototype.slice.call(lijst.querySelectorAll('.sectie, .deel')).reverse().forEach(function (s) {
@@ -1357,7 +1492,11 @@
 
     var kop = el('button', { type: 'button', class: 'art-kop', 'aria-expanded': 'false' }, [
       pijl, dot, titel,
-      art.categorie ? el('span', { class: 'art-onderwerp', text: art.sub || art.categorie }) : null
+      art.categorie ? (art.herkomst === 'annotatie'
+        ? el('span', { class: 'art-onderwerp art-onderwerp-annot',
+            title: 'Onderwerp uit de IMOW-annotatie van de regel, niet uit de kopjes: ' + (art.themas || []).join(', ') },
+            [el('i', { class: 'hk-annot', 'aria-hidden': 'true' }), art.categorie])
+        : el('span', { class: 'art-onderwerp', text: art.sub || art.categorie })) : null
     ]);
     var wrap = el('div', { class: 'art' }, [kop, inhoud]);
     var geladen = false;
@@ -1453,6 +1592,19 @@
     function vul() {
       var lijst = el('dl', { class: 'kenmerken-lijst' });
       body.appendChild(lijst);
+
+      // Onderwerp en waar het vandaan komt.
+      if (art.categorie) {
+        var viaAnnot = art.herkomst === 'annotatie';
+        rij('Onderwerp', art.categorie + (art.sub ? ' › ' + art.sub : ''), [
+          el('span', { class: 'muted', text: viaAnnot
+            ? ' — uit de IMOW-annotatie' + ((art.themas || []).length > 1 ? ' (thema’s: ' + art.themas.join(', ') + ')' : '') + ', geen subcategorie'
+            : ' — uit de kopjes boven dit artikel' })
+        ]).forEach(function (n) { lijst.appendChild(n); });
+      } else if (art.indelingBekend) {
+        rij('Onderwerp', 'niet ingedeeld', [el('span', { class: 'muted', text: ' — geen onderwerp in de kopjes en geen thema in de annotatie' })])
+          .forEach(function (n) { lijst.appendChild(n); });
+      }
 
       // Werkingsgebied (fase 8): waar geldt dit artikel?
       if (art.locaties.length) {

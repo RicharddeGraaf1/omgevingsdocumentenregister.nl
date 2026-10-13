@@ -304,3 +304,36 @@ button.chip-groep[aria-pressed="true"] { background: var(--acc-zacht); color: va
 .kenmerken-lijst .muted { font-size: 12.5px; }
 .norm-waarde { font-family: var(--mono); font-size: 13px; }
 .kw { display: inline-block; font-size: 11.5px; padding: 2px 6px; margin-left: 6px; border-radius: 3px; background: var(--acc-zacht); color: var(--acc); }
+
+/* ── Herkomst van het onderwerp: opschriftpad of IMOW-annotatie ──
+   Pad = het accent (dezelfde blauw als de rest van de indeling), annotatie =
+   amber (--at), niet ingedeeld = de lege baan. Eén kleurpaar overal: tegel,
+   documentfilter, artikel. */
+.hk-pad   { background: var(--acc); }
+.hk-annot { background: var(--at); }
+.hk-geen  { background: var(--lijn); }
+.hk-balk { display: flex; width: 100%; height: 6px; border-radius: 2px; overflow: hidden; background: var(--lijn); }
+.hk-balk i { display: block; height: 100%; }
+.hk { display: flex; flex-direction: column; gap: 8px; }
+.hk-legenda { display: flex; flex-wrap: wrap; gap: 4px 18px; font-size: 13px; color: var(--inkt-2); }
+.hk-legenda span { display: inline-flex; align-items: center; gap: 6px; }
+.hk-legenda i { display: inline-block; width: 9px; height: 9px; border-radius: 2px; }
+.hk-legenda b { color: var(--inkt); font-variant-numeric: tabular-nums; }
+.hk-blok { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--lijn-2); }
+.ow-tegel-tekst .hk-balk { height: 4px; max-width: 132px; margin-top: 6px; }
+.filter .hk-balk { height: 5px; max-width: 280px; }
+.chip-hk { cursor: pointer; }
+.chip-hk i { display: inline-block; width: 8px; height: 8px; border-radius: 2px; flex: none; }
+.art-onderwerp-annot { display: inline-flex; align-items: center; gap: 5px; color: var(--at); }
+.art-onderwerp-annot i { display: inline-block; width: 7px; height: 7px; border-radius: 2px; }
+/* De algemene chipstijl kleurt een <i> in de chip; hier moet het kleurblokje winnen. */
+.chip-hk i.hk-pad   { background: var(--acc); }
+.chip-hk i.hk-annot { background: var(--at); }
+
+/* Tweede filteras: subonderwerp (subcategorie van het register) */
+.sub-chips { align-items: center; margin-top: 2px; padding-left: 10px; border-left: 2px solid var(--lijn); }
+.sub-chips[hidden] { display: none; }
+.sub-label { font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--inkt-3); margin-right: 2px; }
+button.chip-sub { font-size: 12px; padding: 2px 8px; }
+button.chip-sub[aria-pressed="true"] { background: var(--acc); color: var(--blad); }
+button.chip-sub[aria-pressed="true"] b { color: var(--blad); }
