@@ -1079,7 +1079,15 @@
         kopChips(voegSamen(lijst), onderwerp).forEach(function (c) { chips.appendChild(c); });
       }).catch(function () { leeg(chips); });
     } else if (isWro) {
-      chips.appendChild(el('span', { class: 'muted', style: 'font-size:12px', text: 'Wro-plannen zijn niet op onderwerp ingedeeld' }));
+      // Sinds de Wro-indeling (bestemmingshoofdgroep -> onderwerp): chips als de API
+      // ze levert, anders de oude melding.
+      chips.appendChild(el('span', { class: 'muted', style: 'font-size:12px', text: 'onderwerpen ophalen…' }));
+      analyseer(doc).then(function (a) {
+        if (nr !== staat.volgnr) return;
+        leeg(chips);
+        if (a.heeftIndeling) kopChips(voegSamen([a]), onderwerp).forEach(function (c) { chips.appendChild(c); });
+        else chips.appendChild(el('span', { class: 'muted', style: 'font-size:12px', text: 'Wro-plannen zijn niet op onderwerp ingedeeld' }));
+      }).catch(function () { leeg(chips); });
     }
     return kaart;
   }
@@ -1122,6 +1130,10 @@
     // Beide routes ruw per artikel-wid; welke telt beslist indelen().
     // Pad: de categorieën minus wat de API via de annotatie aanvulde.
     var padIndeling = {}, indelingOpgehaald = !!(ond && ond.categorieen);
+    // Wro: de indeling zit per rij in de regelmix (categorie/subcategorie uit
+    // v2a.wro_artikel_indeling, sinds OCD 2026-10-24). Geen rij met een categorie
+    // = deze API kent de Wro-indeling (nog) niet: dan zeggen we niets, net als vroeger.
+    if (doc.bron_type === 'wro') indelingOpgehaald = rijen.some(function (r) { return !!r.categorie; });
     // imow_themas dekt alle artikelen; annotatie_themas alleen de gaten van het
     // pad (terugval voor een API van vóór 2026-10-23).
     var imow = (ond && (ond.imow_themas || ond.annotatie_themas)) || {};
@@ -1153,7 +1165,9 @@
           opschrift: r.artikel_opschrift || r.artikel || '',
           hoofdstuk: r.hoofdstuk_nummer || '',
           leden: [], inhoud: r.inhoud || null,
-          pad: (artWid && padIndeling[artWid]) || null,
+          pad: doc.bron_type === 'wro'
+            ? (r.categorie ? { categorie: r.categorie, sub: r.subcategorie || null } : null)
+            : ((artWid && padIndeling[artWid]) || null),
           imow: (artWid && imow[artWid]) || null,
           // Gezet door indelen(), per gekozen indeling:
           categorie: null, sub: null, herkomst: null, themas: null, onderwerpen: [], onderwerp: null,
