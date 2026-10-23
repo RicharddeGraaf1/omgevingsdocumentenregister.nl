@@ -7,7 +7,8 @@
  * indelen: elk artikel houdt zijn categorie uit het register.
  *
  * Keuzes (gebruikersbesluit 2026-09-16, REALISATIEPLAN fase 6):
- *  - water is gesplitst: lozen/afvalwater vs. waterkeringen en grondwater
+ *  - water is gesplitst: lozen/afvalwater vs. waterkeringen en grondwater;
+ *    water zonder subcategorie krijgt een neutrale tegel (besluit 2026-10-23)
  *  - geur hoort bij geluid (hinder), energie bij bedrijven
  *  - instructieregels binden de overheid, niet de bezoeker: eigen kleine tegel
  *
@@ -23,6 +24,12 @@
     { id: 'riolering', naam: 'Riolering en lozen', paden: [
       'M3 5h9a5 5 0 0 1 5 5v2', 'M3 9h9a1 1 0 0 1 1 1v2', 'M12 12h6',
       'M15 15.2c-1.3 1.7-1.9 2.7-1.9 3.5a1.9 1.9 0 0 0 3.8 0c0-.8-.6-1.8-1.9-3.5z'] },
+    // Water zonder subcategorie: zonder sub valt niet te zeggen of het om lozen
+    // of om keringen gaat. Komt vooral via de IMOW-annotatie (geen tweede niveau).
+    { id: 'water', naam: 'Water', paden: [
+      'M3 8c1.5-1.2 3-1.2 4.5 0s3 1.2 4.5 0 3-1.2 4.5 0 3 1.2 4.5 0',
+      'M3 12.5c1.5-1.2 3-1.2 4.5 0s3 1.2 4.5 0 3-1.2 4.5 0 3 1.2 4.5 0',
+      'M3 17c1.5-1.2 3-1.2 4.5 0s3 1.2 4.5 0 3-1.2 4.5 0 3 1.2 4.5 0'] },
     { id: 'waterkering', naam: 'Waterkeringen en grondwater', paden: [
       'M7.5 17.5l5-9h3l5 9', 'M2 17.5h20', 'M2 12.5c1-.8 2-.8 3 0s2 .8 3 0',
       { d: 'M4 21h16', dash: '1.5 2.5' }] },
@@ -63,7 +70,9 @@
   function onderwerpVan(categorie, sub) {
     if (!categorie) return 'niet-ingedeeld';
     switch (categorie) {
-      case 'water': return /lozen|afvalwater/.test(sub || '') ? 'riolering' : 'waterkering';
+      case 'water':
+        if (!sub) return 'water';   // gebruikersbesluit 2026-10-23: niet gokken op keringen
+        return /lozen|afvalwater/.test(sub) ? 'riolering' : 'waterkering';
       case 'geluid': return 'geluid';
       case 'milieu': return sub === 'geur' ? 'geluid' : 'bedrijven';
       case 'economie': case 'lucht': case 'energie': case 'duurzaamheid': case 'gezondheid': case 'veiligheid':

@@ -33,6 +33,12 @@ body { display: flex; flex-direction: column; min-height: 100vh; }
 .context-pil b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .pil-knop { display: grid; place-items: center; width: 28px; height: 28px; border: 0; background: none; color: var(--inkt-3); border-radius: 3px; cursor: pointer; }
 .pil-knop:hover { background: var(--grond); color: var(--inkt); }
+.indeling-pil { padding-right: 6px; cursor: pointer; }
+.indeling-pil select {
+  font: inherit; font-weight: 700; color: var(--inkt); background: none; border: 0;
+  padding: 3px 2px; max-width: 290px; cursor: pointer; border-radius: 3px;
+}
+.indeling-pil select:hover { background: var(--grond); }
 .weergave { margin-left: auto; display: inline-flex; border-bottom: 1px solid var(--lijn); }
 .weergave-knop { border: 0; background: none; padding: 5px 10px; color: var(--inkt-2); cursor: pointer; margin-bottom: -1px; border-bottom: 2px solid transparent; }
 .weergave-knop[aria-pressed="true"] { color: var(--inkt); font-weight: 700; border-bottom-color: var(--inkt); }
