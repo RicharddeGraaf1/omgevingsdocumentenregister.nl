@@ -163,12 +163,11 @@ Bekende beperkingen van de set zelf:
 - **Punt of perceel.** RoM vraagt alles op het punt op (de centroïde van het adres).
   Het Excel kijkt soms naar het hele perceel (case 3: zeven bouwhoogtes; op het punt ligt er één).
 - **Ontwerpen** (Nota Ruimte, 37/38) staan niet in het register, want dat toont de geldende situatie.
-- **Wro: lokaal en productie kunnen verschillen.** Sinds 2026-10-24 leest de API de
-  Wro-teksten uit `wro.wro_tekst_object_v2` zodra een plan daar staat (OCD
+- **Wro-teksten v2.** Sinds 2026-10-24 leest de API de Wro-teksten uit
+  `wro.wro_tekst_object_v2` zodra een plan daar staat (OCD
   `docs/wro-teksten-herstel-plan.md`), en geeft dan per punt alleen de artikelen van de
-  bestemmingen op dat punt. Lokaal staan alle plannen in v2, op productie (nog) alleen
-  de benchmark-bronhouders. Een Wro-vraag buiten die bronhouders scoort op productie
-  dus anders dan lokaal.
+  bestemmingen op dat punt. Sinds 24-10, 11:31 staan alle plannen ook op productie in v2;
+  lokaal en productie scoren de Wro-vragen gelijk.
 - **Wro en de tegels.** Het Excel noemt bij geen enkele Wro-vraag een tegel (kolom M),
   dus de toegang-via-onderwerp-score kan voor Wro niet stijgen. De runner leest wel de
   Wro-indeling per rij (`categorie`), zoals de frontend-branch `wro-onderwerpen`.
