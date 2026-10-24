@@ -12,6 +12,11 @@
  *  - geur hoort bij geluid (hinder), energie bij bedrijven
  *  - instructieregels binden de overheid, niet de bezoeker: eigen kleine tegel
  *
+ * Tweede tegelset, `stelsel` (variant E, proef sinds 2026-10-24): de negen
+ * categorieën uit het voorstel van Brigitte (22-10-2026). Een artikel staat daar
+ * onder élke tegel waarover het iets regelt — zie stelselVan(). Zelfde logica als
+ * variant E in tests/rom-benchmark/run_benchmark.py; wijzig ze samen.
+ *
  * Iconen: eigen set, 24px-raster, lijngetekend, geen vullingen, lijndikte 1,25
  * (de dunste variant uit het ontwerpcanvas "Onderwerp-iconen Regels op maat").
  */
@@ -63,8 +68,148 @@
       { d: 'M12 3.5a8.5 8.5 0 1 1 0 17 8.5 8.5 0 0 1 0-17z', dash: '2 2.3' },
       'M9.8 9.6a2.3 2.3 0 1 1 3.3 2.1c-.7.3-1.1.8-1.1 1.5v.4', 'M12 16.3v.1'] }
   ];
+  // Tegelset `stelsel`. Iconen waar het kan gedeeld met de site-tegels; energie en
+  // milieu krijgen een eigen icoon (bliksem, schild).
+  function paden(id) {
+    for (var i = 0; i < ONDERWERPEN.length; i++) if (ONDERWERPEN[i].id === id) return ONDERWERPEN[i].paden;
+  }
+  var STELSEL = [
+    { id: 'd-bouwen', naam: 'Bouwen en gebruik', paden: paden('bouwen') },
+    { id: 'd-werken', naam: 'Werken en recreëren', paden: paden('bedrijven') },
+    { id: 'd-landbouw', naam: 'Landbouw en veehouderij', paden: paden('landbouw') },
+    { id: 'd-erfgoed', naam: 'Erfgoed', paden: paden('erfgoed') },
+    { id: 'd-natuur', naam: 'Natuur en landschap', paden: paden('natuur') },
+    { id: 'd-bodem-water', naam: 'Bodem en water', paden: paden('waterkering') },
+    { id: 'd-milieu', naam: 'Milieu, gezondheid en veiligheid', paden: [
+      'M12 3l7 3v5c0 4.5-3 8-7 9.5C8 19 5 15.5 5 11V6z', 'M9 12l2 2 4-4'] },
+    { id: 'd-energie', naam: 'Energie en klimaat', paden: ['M13 2.5L5.5 13.5H11l-1 8 7.5-11H12z'] },
+    { id: 'd-verkeer', naam: 'Verkeer en infrastructuur', paden: paden('openbare-ruimte') }
+  ];
+  var SET = { site: {}, stelsel: {} };
+  ONDERWERPEN.forEach(function (o) { SET.site[o.id] = true; if (o.klein) SET.stelsel[o.id] = true; });
+  STELSEL.forEach(function (o) { SET.stelsel[o.id] = true; });
+
   var PER_ID = {};
-  ONDERWERPEN.forEach(function (o) { PER_ID[o.id] = o; });
+  ONDERWERPEN.concat(STELSEL).forEach(function (o) { PER_ID[o.id] = o; });
+
+  // ── Variant E: een artikel onder elke stelseltegel waarover het iets regelt ──
+  // Register-categorie of IMOW-thema -> stelseltegel.
+  var THEMA_D = {
+    'bouwen': 'd-bouwen', 'wonen': 'd-bouwen', 'planologisch gebruik': 'd-bouwen',
+    'economie': 'd-werken', 'recreatie': 'd-werken', 'landbouw': 'd-landbouw', 'erfgoed': 'd-erfgoed',
+    'natuur': 'd-natuur', 'landschap': 'd-natuur', 'bodem': 'd-bodem-water', 'water': 'd-bodem-water',
+    'milieu': 'd-milieu', 'geluid': 'd-milieu', 'lucht': 'd-milieu', 'veiligheid': 'd-milieu', 'gezondheid': 'd-milieu',
+    'energie': 'd-energie', 'duurzaamheid': 'd-energie', 'infrastructuur': 'd-verkeer', 'mobiliteit': 'd-verkeer'
+  };
+  // TypeGebiedsaanwijzing -> tegel. Functie, ruimtelijk gebruik en beperkingengebied zeggen
+  // wat voor juridisch gebied het is, niet waar het over gaat: geen tegel.
+  var GA_TYPE_D = {
+    'water en watersysteem': 'd-bodem-water', 'bodem': 'd-bodem-water', 'mijnbouw': 'd-bodem-water',
+    'natuur': 'd-natuur', 'landschap': 'd-natuur', 'energievoorziening': 'd-energie', 'erfgoed': 'd-erfgoed',
+    'bouw': 'd-bouwen', 'geluid': 'd-milieu', 'lucht': 'd-milieu', 'geur': 'd-milieu',
+    'externe veiligheid': 'd-milieu', 'defensie': 'd-milieu', 'verkeer': 'd-verkeer', 'leiding': 'd-verkeer',
+    'recreatie': 'd-werken'
+  };
+  // Waardelijst Activiteitengroep (IMOW 5.1.0) -> thema, zoals de waardelijst zelf indeelt.
+  var ACTGROEP_THEMA = {};
+  var GROEPEN_PER_THEMA = {
+    'bodem': ['bodemactiviteit', 'mijnbouwlocatieactiviteit', 'ontgrondingsactiviteit'],
+    'bouwen': ['bouwactiviteit ruimtelijk', 'bouwactiviteit technisch', 'gebruiken-van-bouwwerkenactiviteit',
+               'in-stand-houden-van-bouwwerkenactiviteit', 'sloopactiviteit'],
+    'economie': ['cultuuractiviteit', 'dienstverleningsactiviteit', 'evenementactiviteit', 'exploitatieactiviteit bedrijf',
+                 'exploitatieactiviteit detailhandel', 'exploitatieactiviteit horeca', 'exploitatieactiviteit kantoor',
+                 'festiviteitactiviteit', 'maatschappelijke activiteit', 'reclameactiviteit', 'standplaatsactiviteit'],
+    'erfgoed': ['cultureel-erfgoedactiviteit', 'monumentenactiviteit', 'rijksmonumentenactiviteit', 'werelderfgoedactiviteit'],
+    'infrastructuur': ['aansluitactiviteit', 'beperkingengebiedactiviteit m.b.t. een leiding'],
+    'landbouw': ['agrarische activiteit', 'landinrichtingsactiviteit'],
+    'milieu': ['lozingsactiviteit', 'milieubelastende activiteit', 'milieubelastende activiteit met beperkt effect',
+               'milieubelastende activiteit overig', 'opslagactiviteit', 'stortingsactiviteit'],
+    'mobiliteit': ['beperkingengebiedactiviteit m.b.t. een luchthaven', 'beperkingengebiedactiviteit m.b.t. een spoorweg',
+                   'beperkingengebiedactiviteit m.b.t. een weg', 'parkeeractiviteit', 'uitritactiviteit', 'wegactiviteit'],
+    'natuur': ['dierenactiviteit', 'flora- en fauna-activiteit', 'jachtgeweeractiviteit', 'kapactiviteit',
+               'natura 2000-activiteit', 'natuuractiviteit', 'toegangsactiviteit', 'valkeniersactiviteit'],
+    'planologisch gebruik': ['herstructureringsactiviteit', 'moderniseringsactiviteit', 'planologische gebruiksactiviteit'],
+    'recreatie': ['gelegenheid-tot-zwemmen-en-baden-biedenactiviteit', 'kampeeractiviteit', 'ontspanningsactiviteit',
+                  'recreatieactiviteit', 'sportactiviteit'],
+    'veiligheid': ['alarminstallatieactiviteit'],
+    'water': ['beperkingengebiedactiviteit m.b.t. een bergingsgebied',
+              'beperkingengebiedactiviteit m.b.t. een installatie in een waterstaatswerk',
+              'beperkingengebiedactiviteit m.b.t. een oppervlaktewaterlichaam',
+              'beperkingengebiedactiviteit m.b.t. een waterkering', 'beperkingengebiedactiviteit m.b.t. een waterstaatswerk',
+              'beperkingengebiedactiviteit m.b.t. een zuiveringtechnisch werk', 'beperkingengebiedactiviteit m.b.t. grondwater',
+              'beperkingengebiedactiviteit m.b.t. zeegebied', 'grondwateractiviteit', 'hemelwateractiviteit',
+              'noordzee-activiteit', 'wateronttrekkingsactiviteit', 'waterstaatswerkenactiviteit'],
+    'wonen': ['ligplaatsactiviteit', 'woonactiviteit']
+  };
+  Object.keys(GROEPEN_PER_THEMA).forEach(function (t) {
+    GROEPEN_PER_THEMA[t].forEach(function (g) { ACTGROEP_THEMA[g] = t; });
+  });
+  // Wro: functies uit het hoofddeel van de bestemmingsomschrijving (vóór "ondergeschikt").
+  var FUNCTIE_E = [
+    [/bedrij|winkel|detailhandel|horeca|kantoor|dienstverlen|verhuur|pension|bed (?:en|&) breakfast|logies/, 'd-werken'],
+    [/recreati|sport|kampe|jachthaven|ligplaats/, 'd-werken'],
+    [/agrari|landbouw|veehouder|glastuin|paardenhouder/, 'd-landbouw'],
+    [/natuur|bos\b|landschapswaarde/, 'd-natuur'],
+    [/waterstaat|waterkering|waterberging/, 'd-bodem-water'],
+    [/verkeer|parkeer|spoor/, 'd-verkeer'],
+    [/archeolog|monument|cultuurhistor/, 'd-erfgoed'],
+    [/energie|windturbine|zonne/, 'd-energie'],
+    [/wonen|woning/, 'd-bouwen']
+  ];
+  // Naam van de activiteit of gebiedsaanwijzing: zegt vaak een tweede onderwerp
+  // ("Bodemenergiesystemen aanleggen in boringsvrije zones" -> ook energie).
+  var NAAM_E = [
+    [/energie|warmte|zonne|windturbine|windpark|laadpaal/, 'd-energie'],
+    [/monument/, 'd-bouwen'],                     // wie een monument verbouwt, bouwt
+    [/(?<!niet zijnde )\bbouw(?:en|werk|activiteit)|\bverbouw|\bslopen/, 'd-bouwen'],
+    [/archeolog|monument|cultuurhistor|erfgoed/, 'd-erfgoed'],
+    [/\bkap(?:pen)?\b|houtopstand|\bbomen\b|flora|fauna|natura 2000|natuurnetwerk/, 'd-natuur'],
+    [/grondwater|onttrek|boringsvrij|oppervlaktewater|waterkering|\bgraven\b/, 'd-bodem-water'],
+    [/\buitweg|parkeer|\bweg(?:en)?\b|spoorweg/, 'd-verkeer'],
+    [/veehouderij|landbouw|agrari|mest/, 'd-landbouw']
+  ];
+  var KOEPEL = { 'milieu': 1, 'procedures': 1, 'planologisch gebruik': 1 };
+
+  /** Zoals norm() in de runner: zonder accenten, kleine letters, enkele spaties, zonder komma's. */
+  function klein(s) {
+    return String(s || '').normalize('NFKD').replace(/[̀-ͯ]/g, '').toLowerCase()
+      .replace(/[‘’“”'"]/g, '').replace(/\s+/g, ' ').trim();
+  }
+
+  /** Register-categorie -> stelseltegel; procedures blijven de kleine tegels. */
+  function tegelD(categorie, sub) {
+    if (!categorie) return null;
+    if (categorie === 'procedures') return sub === 'instructieregels' ? 'overheid' : 'aanvragen';
+    return THEMA_D[categorie] || null;
+  }
+
+  /** Variant E voor één artikel: {ids, herkomst: 'pad'|'annotatie'|null}.
+   *  art: {pad: {categorie, sub}|null, imow: [thema's]|null,
+   *        kenmerken: {activiteiten, gebiedsaanwijzingen}|null, opschrift, inhoud}. */
+  function stelselVan(art) {
+    var uit = [], herkomst = null;
+    function voeg(t, h) { if (t && uit.indexOf(t) < 0) { uit.push(t); herkomst = herkomst || h; } }
+    var themas = art.imow || [];
+    if (art.pad) {
+      voeg(tegelD(art.pad.categorie, art.pad.sub), 'pad');
+    } else {
+      var specifiek = themas.filter(function (t) { return !KOEPEL[t]; });
+      (specifiek.length ? specifiek : themas).forEach(function (t) { voeg(THEMA_D[t], 'annotatie'); });
+    }
+    var k = art.kenmerken || {};
+    (k.gebiedsaanwijzingen || []).forEach(function (g) { voeg(GA_TYPE_D[klein(g.type)], 'annotatie'); });
+    (k.activiteiten || []).forEach(function (a) { voeg(THEMA_D[ACTGROEP_THEMA[klein(a.groep)]], 'annotatie'); });
+    themas.forEach(function (t) { voeg(THEMA_D[t], 'annotatie'); });
+    if (/bestemmingsomschrijving/i.test(art.opschrift || '') && art.inhoud) {
+      var hoofd = String(art.inhoud).split(/ondergeschikt/i)[0].toLowerCase();
+      FUNCTIE_E.forEach(function (f) { if (f[0].test(hoofd)) voeg(f[1], 'pad'); });
+    }
+    (k.activiteiten || []).concat(k.gebiedsaanwijzingen || []).forEach(function (x) {
+      var n = klein(x.naam);
+      NAAM_E.forEach(function (f) { if (f[0].test(n)) voeg(f[1], 'annotatie'); });
+    });
+    return { ids: uit.length ? uit : ['niet-ingedeeld'], herkomst: herkomst };
+  }
 
   /** Categorie (+ subcategorie) van het register → onderwerp-id. */
   function onderwerpVan(categorie, sub) {
@@ -113,7 +258,10 @@
   function isKlein(id) { return !!(PER_ID[id] && PER_ID[id].klein); }
 
   global.RomThema = {
-    ONDERWERPEN: ONDERWERPEN, onderwerpVan: onderwerpVan, icoon: icoon, naam: naam, isKlein: isKlein,
-    bestaat: function (id) { return !!PER_ID[id]; }
+    ONDERWERPEN: ONDERWERPEN, STELSEL: STELSEL, onderwerpVan: onderwerpVan, stelselVan: stelselVan,
+    icoon: icoon, naam: naam, isKlein: isKlein,
+    bestaat: function (id) { return !!PER_ID[id]; },
+    /** Hoort deze tegel bij de tegelset ('site' of 'stelsel')? */
+    inSet: function (id, set) { return !!(SET[set] && SET[set][id]); }
   };
 })(window);

@@ -105,6 +105,13 @@ tegel staat waar het iets over regelt. Die tegels komen uit:
 
 Het risico zijn vollere tegels en dus een lagere weging. De benchmark meet die prijs mee.
 
+**Op de site sinds 2026-10-24.** Kies bij Indeling *Stelsel, meervoudig (proef)*
+(`?indeling=meervoudig`). De logica staat in `public/regels-op-maat/thema.js` (`stelselVan`) en
+is dezelfde als in `tegels_e` hier: wijzig ze samen. Op niveau 2 toont de site het subonderwerp,
+de activiteiten en de gebiedsaanwijzingen. Bij meer dan 17 chips zijn dat de eerste 15, met een
+zoekveld en "+N meer". De benchmark telt de best passende chip die de bezoeker herkent aan een
+woord uit zijn vraag (`D_TERMEN`); op de site doet het zoekveld dat.
+
 ### Tegelkeuze per tegelset (2026-10-24)
 
 Een variant bestaat uit een tegelset en een indeling. De bezoeker kiest per vraag een

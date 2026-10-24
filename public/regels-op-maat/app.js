@@ -30,7 +30,11 @@
   //   pad      alleen de kopjes boven het artikel — onderwerp én subcategorie
   //   imow     alleen het IMOW-thema van de juridische regels — geen subcategorie
   //   hybride  het pad, en waar dat zwijgt het IMOW-thema (de standaard)
-  var INDELINGEN = { hybride: 1, pad: 1, imow: 1 };
+  //   meervoudig  variant E (proef, 2026-10-24): de stelseltegels, en een artikel staat
+  //            onder elke tegel waarover het iets regelt (RomThema.stelselVan); chips
+  //            op niveau 2 zijn subonderwerp, activiteit en gebiedsaanwijzing
+  var INDELINGEN = { hybride: 1, pad: 1, imow: 1, meervoudig: 1 };
+  function tegelset() { return staat.indeling === 'meervoudig' ? 'stelsel' : 'site'; }
   // Koepelthema's tellen alleen mee als een artikel geen specifieker thema heeft:
   // "milieu" hangt naast bijna alles. Zelfde lijst als _KOEPELTHEMAS in de OCD-API.
   var KOEPELTHEMAS = { 'milieu': 1, 'procedures': 1, 'planologisch gebruik': 1 };
@@ -495,10 +499,12 @@
   /** De documenten achter de tegels: de lokale Ow-regels plus de Wro-plannen die hier
    *  onder het overgangsrecht nog gelden (sinds 2026-10-24). Een bezoeker die bij Bouwen
    *  zoekt, weet niet of zijn perceel al onder het omgevingsplan valt of nog onder een
-   *  bestemmingsplan. Een Wro-plan zonder indeling (oudere API) telt vanzelf niet mee. */
+   *  bestemmingsplan. Een Wro-plan zonder indeling (oudere API) telt vanzelf niet mee.
+   *  Wro-structuurvisies niet: dat is beleid, net als de Ow-visies die hier ook buiten blijven. */
   function lokaleDocs() {
     return staat.docs.filter(function (d) {
-      return d.bron_type === 'wro' || (d.bron_type === 'ow' && groepVan(d) === 'lokaal');
+      if (d.bron_type === 'wro') return !/structuurvisie/i.test(d.documenttype || '');
+      return d.bron_type === 'ow' && groepVan(d) === 'lokaal';
     });
   }
 
@@ -584,7 +590,8 @@
           pad: 'De kopjes boven de artikelen van gemeente, provincie en waterschap leveren op dit punt geen onderwerp op. ' +
                'Kies bij Indeling de IMOW-annotatie of hybride, of bekijk de regels via alle documenten.',
           imow: 'Gemeente, provincie en waterschap hebben op dit punt geen IMOW-thema aan hun regels gegeven. ' +
-                'Gemeenten doen dat zelden. Kies bij Indeling het opschriftpad of hybride, of bekijk de regels via alle documenten.'
+                'Gemeenten doen dat zelden. Kies bij Indeling het opschriftpad of hybride, of bekijk de regels via alle documenten.',
+          meervoudig: 'De regels op dit punt zijn (nog) niet op onderwerp ingedeeld. Bekijk ze via alle documenten.'
         }[staat.indeling] }));
         return;
       }
@@ -613,10 +620,13 @@
           meervoudigTekst(meervoudig) })
       ] : [
         el('h2', { class: 'label', id: 'hk-kop', text: 'Waar komt de indeling vandaan?' }),
-        el('p', { class: 'ow-noot', text: dekkingTekst(herkomst) + ' ' + (staat.indeling === 'pad'
-          ? 'Alleen de kopjes boven een artikel tellen; de IMOW-annotatie blijft buiten beschouwing.'
-          : 'Alleen het thema dat de overheid zelf aan haar regels gaf telt; de kopjes blijven buiten beschouwing. Zonder subcategorie.') +
-          meervoudigTekst(meervoudig) })
+        el('p', { class: 'ow-noot', text: dekkingTekst(herkomst) + ' ' + ({
+          pad: 'Alleen de kopjes boven een artikel tellen; de IMOW-annotatie blijft buiten beschouwing.',
+          imow: 'Alleen het thema dat de overheid zelf aan haar regels gaf telt; de kopjes blijven buiten beschouwing. Zonder subcategorie.',
+          meervoudig: 'Proef (variant E): de negen tegels uit het voorstel voor een thema- en activiteitindeling. Een regel staat onder ' +
+            'elke tegel waarover hij iets regelt — uit de kopjes, de IMOW-thema’s, de gebiedsaanwijzingen, de activiteitengroep en ' +
+            'de naam van de activiteit. Binnen een tegel kiest u een subonderwerp, activiteit of gebiedsaanwijzing.'
+        }[staat.indeling]) + meervoudigTekst(meervoudig) })
       ]));
       blok.appendChild(el('p', { class: 'ow-noot', text:
         'Onderwerpindeling van het register, per artikel. Bestemmingsplannen die hier onder het overgangsrecht nog gelden tellen mee; ' +
@@ -1212,6 +1222,28 @@
     if (an.modus === modus) return an;
     var tegels = {}, viaAnnotatie = {}, herkomst = { pad: 0, annotatie: 0, geen: 0 }, meervoudig = 0;
     an.artikelen.forEach(function (a) {
+      a.subs = null;
+      if (modus === 'meervoudig') {
+        var e = RomThema.stelselVan(a);
+        a.onderwerpen = e.ids; a.herkomst = e.herkomst; a.themas = a.imow;
+        // Zonder pad: het label van de eerste stelseltegel, zodat het artikel iets toont.
+        a.categorie = a.pad ? a.pad.categorie : (e.herkomst ? RomThema.naam(e.ids[0]).toLowerCase() : null);
+        a.sub = a.pad ? a.pad.sub : null;
+        // Niveau 2: subonderwerp uit het pad, plus elke activiteit en gebiedsaanwijzing.
+        var k = a.kenmerken || {};
+        a.subs = (a.sub ? [{ sleutel: (a.categorie || '') + ' > ' + a.sub, label: a.sub, soort: 'categorie: ' + a.categorie }] : [])
+          .concat((k.activiteiten || []).map(function (x) { return { sleutel: 'act > ' + x.naam, label: x.naam, soort: 'activiteit' }; }))
+          .concat((k.gebiedsaanwijzingen || []).map(function (x) { return { sleutel: 'ga > ' + x.naam, label: x.naam, soort: 'gebiedsaanwijzing' }; }))
+          .filter(function (x, i, l) { return x.label && l.findIndex(function (y) { return y.sleutel === x.sleutel; }) === i; });
+        a.onderwerp = a.onderwerpen[0];
+        if (a.onderwerpen.length > 1) meervoudig++;
+        a.onderwerpen.forEach(function (id) {
+          tegels[id] = (tegels[id] || 0) + 1;
+          if (a.herkomst === 'annotatie') viaAnnotatie[id] = (viaAnnotatie[id] || 0) + 1;
+        });
+        herkomst[a.herkomst || 'geen']++;
+        return;
+      }
       var pad = modus !== 'imow' ? a.pad : null;
       var themas = (modus === 'imow' || (modus === 'hybride' && !pad)) ? a.imow : null;
       a.categorie = null; a.sub = null; a.herkomst = null; a.themas = null;
@@ -1282,7 +1314,8 @@
   }
 
   // ── Teksten die van de gekozen indeling afhangen ──
-  var ROUTE = { pad: 'het opschriftpad', imow: 'de IMOW-annotatie' };
+  var ROUTE = { pad: 'het opschriftpad', imow: 'de IMOW-annotatie',
+    meervoudig: 'het opschriftpad, de annotaties en de namen van activiteiten en gebiedsaanwijzingen' };
 
   /** Eén regel dekking voor de pure varianten: hoeveel artikelen kregen een onderwerp. */
   function dekkingTekst(h) {
@@ -1292,14 +1325,20 @@
   }
 
   function meervoudigTekst(m) {
-    return m ? ' ' + nl(m) + (m === 1 ? ' artikel heeft meer dan één IMOW-thema en telt'
-                                      : ' artikelen hebben meer dan één IMOW-thema en tellen') +
-      ' in elke tegel mee; de tegels tellen daarom niet op.' : '';
+    if (!m) return '';
+    if (staat.indeling === 'meervoudig') {
+      return ' ' + nl(m) + (m === 1 ? ' artikel staat' : ' artikelen staan') +
+        ' onder meer dan één tegel; de tegels tellen daarom niet op.';
+    }
+    return ' ' + nl(m) + (m === 1 ? ' artikel heeft meer dan één IMOW-thema en telt'
+                                  : ' artikelen hebben meer dan één IMOW-thema en tellen') +
+      ' in elke tegel mee; de tegels tellen daarom niet op.';
   }
 
   function nietIngedeeldTekst() {
     if (staat.indeling === 'pad') return 'geen onderwerp in de kopjes boven dit artikel';
     if (staat.indeling === 'imow') return 'geen IMOW-thema in de annotatie van de regels';
+    if (staat.indeling === 'meervoudig') return 'geen onderwerp in de kopjes, de annotaties of de namen van activiteiten';
     return 'geen onderwerp in de kopjes en geen thema in de annotatie';
   }
 
@@ -1332,7 +1371,8 @@
       return [el('span', { class: 'muted', style: 'font-size:12px', text: {
         hybride: 'Nog niet op onderwerp ingedeeld',
         pad: 'Geen onderwerp uit de kopjes',
-        imow: 'Geen IMOW-thema geannoteerd'
+        imow: 'Geen IMOW-thema geannoteerd',
+        meervoudig: 'Nog niet op onderwerp ingedeeld'
       }[staat.indeling] })];
     }
     var ids = gesorteerd(a.tegels).filter(function (k) { return !RomThema.isKlein(k); });
@@ -1395,6 +1435,14 @@
     function subSleutel(art) {
       return art.sub ? (art.categorie || '') + ' > ' + art.sub : ' > ';
     }
+    /** Variant E: een artikel kan meer subonderwerpen hebben (pad, activiteit, gebiedsaanwijzing). */
+    function subsVan(art) {
+      if (art.subs) return art.subs.length ? art.subs : [{ sleutel: ' > ', label: 'zonder subonderwerp', soort: null }];
+      var s = subSleutel(art);
+      return [{ sleutel: s, label: art.sub || 'zonder subonderwerp', soort: s.split(' > ')[0] ? 'categorie: ' + s.split(' > ')[0] : null }];
+    }
+    var MAX_SUBS = 15;     // variant E: tientallen activiteiten per tegel (G-169); de rest achter een knop
+    var alleSubs = false, subZoek = '';
 
     /** Een artikel kan via de annotatie onder meerdere onderwerpen vallen. */
     function opActiefOnderwerp(art) {
@@ -1410,34 +1458,66 @@
         return;
       }
       // Tellen binnen wat het onderwerp- en herkomstfilter overlaat.
-      var tel = {}, labels = {};
+      var tel = {}, labels = {}, soorten = {};
       artEls.forEach(function (x) {
         var art = x.art;
         if (!opActiefOnderwerp(art)) return;
         if (herkomstActief && art.herkomst !== herkomstActief) return;
-        var sleutel = subSleutel(art);
-        tel[sleutel] = (tel[sleutel] || 0) + 1;
-        labels[sleutel] = art.sub || 'zonder subonderwerp';
+        subsVan(art).forEach(function (s) {
+          tel[s.sleutel] = (tel[s.sleutel] || 0) + 1;
+          labels[s.sleutel] = s.label;
+          soorten[s.sleutel] = s.soort;
+        });
       });
       var sleutels = Object.keys(tel).sort(function (x, y) { return tel[y] - tel[x]; });
+      // Variant E: de lege bak achteraan, anders staat hij tussen tientallen activiteiten.
+      if (staat.indeling === 'meervoudig') sleutels.sort(function (x, y) { return (x === ' > ') - (y === ' > '); });
       // Subs die niet meer bestaan (ander onderwerp gekozen) vallen uit het filter.
       Object.keys(actiefSub).forEach(function (k) { if (!tel[k]) delete actiefSub[k]; });
       if (sleutels.length < 2) { subRij.hidden = true; return; }   // één sub zegt niets
       subRij.hidden = false;
       subRij.appendChild(el('span', { class: 'sub-label', text: 'Subonderwerp' }));
-      sleutels.forEach(function (sleutel) {
+      // Variant E geeft tientallen chips per tegel (G-169): dan de eerste MAX_SUBS, een
+      // zoekveld (de bezoeker herkent een chip aan een woord uit zijn vraag) en "+N meer".
+      // Alleen verbergen, niet opnieuw tekenen: zo houdt het zoekveld zijn focus.
+      var veel = sleutels.length > MAX_SUBS + 2;
+      var subKnoppen = [];
+      var zoekVeld = veel ? el('input', { type: 'search', class: 'sub-zoek', value: subZoek,
+        placeholder: 'zoek, bv. warmtepomp of dakkapel', 'aria-label': 'Zoek een subonderwerp, activiteit of gebiedsaanwijzing' }) : null;
+      if (zoekVeld) subRij.appendChild(zoekVeld);
+      sleutels.forEach(function (sleutel, i) {
         var leeg2 = !labels[sleutel] || labels[sleutel] === 'zonder subonderwerp';
         var k = el('button', { type: 'button', class: 'chip chip-sub' + (leeg2 ? ' chip-leeg' : ''),
           'aria-pressed': actiefSub[sleutel] ? 'true' : 'false',
-          title: sleutel.split(' > ')[0] ? 'categorie: ' + sleutel.split(' > ')[0] : null },
+          title: soorten[sleutel] || null },
           [labels[sleutel] + ' ', el('b', { text: nl(tel[sleutel]) })]);
         k.addEventListener('click', function () {
           if (actiefSub[sleutel]) delete actiefSub[sleutel]; else actiefSub[sleutel] = true;
           k.setAttribute('aria-pressed', actiefSub[sleutel] ? 'true' : 'false');
           pasFilterToe(true);
         });
+        subKnoppen.push({ k: k, sleutel: sleutel, label: String(labels[sleutel] || '').toLowerCase(), i: i });
         subRij.appendChild(k);
       });
+      var meer = veel ? el('button', { type: 'button', class: 'chip chip-leeg', onclick: function () {
+        alleSubs = true; zichtbaarheid();
+      } }) : null;
+      if (meer) subRij.appendChild(meer);
+      function zichtbaarheid() {
+        var q = subZoek.trim().toLowerCase(), verborgen = 0;
+        subKnoppen.forEach(function (x) {
+          // Aangezette chips blijven altijd zichtbaar.
+          var toon = !veel || actiefSub[x.sleutel] || (q ? x.label.indexOf(q) >= 0 : (alleSubs || x.i < MAX_SUBS));
+          x.k.hidden = !toon;
+          if (!toon) verborgen++;
+        });
+        if (meer) {
+          meer.hidden = !!q || alleSubs || !verborgen;
+          meer.textContent = '+' + nl(verborgen) + ' meer';
+        }
+      }
+      if (zoekVeld) zoekVeld.addEventListener('input', function () { subZoek = zoekVeld.value; zichtbaarheid(); });
+      zichtbaarheid();
     }
 
     if (a.heeftIndeling) {
@@ -1542,7 +1622,7 @@
       var filterAan = opOnderwerp || opSub || !!herkomstActief;
       artEls.forEach(function (x) {
         x.el.hidden = (opOnderwerp && !opActiefOnderwerp(x.art)) ||
-                      (opSub && !actiefSub[subSleutel(x.art)]) ||
+                      (opSub && !subsVan(x.art).some(function (s) { return actiefSub[s.sleutel]; })) ||
                       (!!herkomstActief && x.art.herkomst !== herkomstActief);
       });
       // Secties zonder zichtbaar artikel verbergen.
@@ -1880,6 +1960,8 @@
     keuze.value = staat.indeling;
     keuze.addEventListener('change', function () {
       staat.indeling = INDELINGEN[keuze.value] ? keuze.value : 'hybride';
+      // Andere tegelset: een gekozen tegel bestaat daar niet, dus terug naar het overzicht.
+      if (staat.view.onderwerp && !RomThema.inSet(staat.view.onderwerp, tegelset())) staat.view = {};
       if (!staat.loc) return;
       schrijfUrl({ x: staat.loc.x, y: staat.loc.y, label: staat.loc.label }, true);
       if (staat.docs) toon(staat.volgnr);
