@@ -73,7 +73,7 @@ C = {
           kenmerk=dict(soort="wro", naam="parkeernormen 2018", object_type="Gebiedsaanduiding")),
  15: dict(sub_fijn="dakkapellen, dakopbouwen en dakterrassen", loc=("pdok", "3453MD 30", "Does 30"), docs=[dict(titel=["omgevingsplan gemeente utrecht"], type="ow", match=[{"artikel": "4.26"}])],   # Excel: 4.22 (versie 2024-12-27); geldend 2026-08-19: 4.26
           kenmerk=dict(soort="activiteit", naam="dakopbouw")),
- 16: dict(toeleiding_agent="Erfgoed en monumenten", loc=("pdok", "7941LC 3", "Vledderstraat 3"),
+ 16: dict(toeleiding_agent="Bouwen en wonen; bouwen en verbouwen", sub_fijn="dakkapellen, dakopbouwen en dakterrassen", loc=("pdok", "7941LC 3", "Vledderstraat 3"),
           docs=[dict(titel=["omgevingsplan gemeente meppel"], type="ow", match=[{"sectie": "8.3"}]),
                 dict(titel=["voorbereidingsbesluit", "monumenten"], type="ow", match=[{"artikel": "2.2"}])],
           kenmerk=dict(soort="activiteit", naam="monument")),
@@ -143,7 +143,36 @@ D_UIT_M = {"bouwen": "d-bouwen", "bedrijven": "d-werken", "bodem": "d-bodem-wate
 # zonder te weten waar het artikel staat. Alleen waar D/E een tegel heeft die beter bij de vraag past dan
 # de vertaling van kolom M: 39 (broeikasgassen) -> Energie en klimaat, 26 (aalscholver, wilde vogel) ->
 # Natuur en landschap. 20 (warmtepomp "in de bodem") blijft Bodem en water.
-D_TEGEL = {26: "d-natuur", 39: "d-energie"}
+D_TEGEL = {26: "d-natuur", 39: "d-energie"}   # vervangen door TEGEL_STELSEL hieronder (2026-10-24)
+
+# ── Tegelkeuze per tegelset (2026-10-24, gebruiker: "tegels afhankelijk van variant") ──
+# Een variant = een tegelset + een indeling. Per tegelset kiest de bezoeker per vraag zelf een tegel, op
+# grond van de vraag, zonder te weten waar het artikel staat.
+#   site     (A, B, C): de tegels van Regels op maat (thema.js) — kolom M, of toeleiding_agent
+#   stelsel  (D, E):    de negen tegels van het voorstel van Brigitte (22-10-2026)
+# Hieronder de stelselkeuze per vraag, met herkomst: "brigitte" = haar tabel; "agent" = curatie 24-10
+# waar de stelseltegel beter bij de vraag past dan de vertaling van de sitetegel; "vertaald" = gelijk aan
+# D_UIT_M[sitetegel]. Alleen vragen die ook een sitetegel hebben, zodat de varianten dezelfde vragen tellen.
+TEGEL_STELSEL = {
+    3: ("d-bouwen", "vertaald"), 5: ("d-bouwen", "vertaald"), 7: ("d-bouwen", "vertaald"),
+    8: ("d-werken", "vertaald"), 9: ("d-werken", "vertaald"), 10: ("d-werken", "vertaald"),
+    11: ("d-werken", "vertaald"), 12: ("d-werken", "vertaald"), 13: ("d-werken", "vertaald"),
+    14: ("d-verkeer", "vertaald"),
+    15: ("d-bouwen", "vertaald"), 16: ("d-bouwen", "vertaald"), 18: ("d-bouwen", "vertaald"),
+    19: ("d-bouwen", "vertaald"),
+    20: ("d-energie", "brigitte"),       # warmtepomp/bodemenergie
+    21: ("d-bodem-water", "vertaald"), 22: ("d-bodem-water", "vertaald"),
+    23: ("d-werken", "vertaald"),        # datacenter: een bedrijf, ook al noemt de vraag 10 MVA
+    24: ("d-natuur", "vertaald"),
+    26: ("d-natuur", "brigitte"),        # aalscholver: wilde vogel, geen landbouwdier
+    28: ("d-bodem-water", "vertaald"), 29: ("d-bodem-water", "vertaald"), 30: ("d-bodem-water", "vertaald"),
+    31: ("d-bodem-water", "vertaald"), 32: ("d-bodem-water", "vertaald"), 33: ("d-bodem-water", "vertaald"),
+    34: ("d-bodem-water", "vertaald"),
+    35: ("d-natuur", "vertaald"), 36: ("d-natuur", "vertaald"),
+    37: ("d-verkeer", "vertaald"), 38: ("d-verkeer", "vertaald"),
+    39: ("d-energie", "agent"),          # broeikasgassen: het stelsel heeft een eigen tegel Energie en klimaat
+    40: ("d-energie", "brigitte"),       # windpark
+}
 # Niveau 2 van D: de chips (subonderwerp uit het pad, activiteitnaam, naam van de gebiedsaanwijzing).
 # De bezoeker herkent een chip aan een woord uit zijn eigen vraag; alleen woorden die (als stam) in de
 # vraag staan. Het meetpunt is optimistisch: matchen meerdere chips, dan kiest hij de beste.
@@ -151,7 +180,7 @@ D_TERMEN = {
  # Wro-vragen (2026-10-24, agent; zelfde regel: alleen woorden uit de vraag)
  5: ["bouwhoogte"], 7: ["bebouwingspercentage"], 8: ["winkel"], 9: ["winkel"], 11: ["houtzagerij"],
  12: ["houtzagerij"], 13: ["boten", "verhuur"], 14: ["parkeer"], 39: ["broeikas"],
- 15: ["dakopbouw"], 18: ["dakkapel"], 19: ["dakterras"], 20: ["warmtepomp", "bodem"],
+ 15: ["dakopbouw"], 16: ["dakopbouw"], 18: ["dakkapel"], 19: ["dakterras"], 20: ["warmtepomp", "bodem"],
  21: ["grondwater", "onttrek", "besproei", "gewas"], 22: ["onttrek"], 23: ["datacenter"], 24: ["damhert", "doden"],
  26: ["aalscholver", "diersoort", "beschermd"], 28: ["overstroming"], 29: ["overstroming"],
  30: ["overstroming"], 31: ["wateroverlast"], 32: ["wateroverlast"], 33: ["wateroverlast"],
@@ -204,12 +233,22 @@ for r in excel:
         "id": r["nr"], "vraag": r["vraag"].strip(), "locatie": loc, "documenten": c["docs"],
         "kenmerk": c.get("kenmerk"), "negatief": c.get("negatief", False),
         "onderwerp": t and t["tegel"], "sub": t and t["sub"], "sub_fijn": c.get("sub_fijn"), "toeleiding_bron": t_bron, "buiten_scope": c.get("buiten_scope"),
-        "onderwerp_d": t and D_TEGEL.get(r["nr"], D_UIT_M[t["tegel"]]), "termen_d": D_TERMEN.get(r["nr"], []),
+        "onderwerp_d": t and TEGEL_STELSEL[r["nr"]][0], "onderwerp_d_bron": t and TEGEL_STELSEL[r["nr"]][1],
+        "termen_d": D_TERMEN.get(r["nr"], []),
         "benchmark30": r["nr"] in BENCHMARK_30,
         "excel_n": r["nr"] in EXCEL_N_JA, "excel_o": r["nr"] in EXCEL_O_JA,
         "excel": {k: r[k] for k in ("locatie", "bevoegd_gezag", "type_bron", "im", "bron", "datum_bron",
                                      "verwacht_antwoord", "annotatie_toeleiding", "annotatie_naam",
                                      "filter_op_kenmerken", "toeleiding", "opschriftpad", "annotatie", "vraag_route")},
     })
+for c in uit:
+    if c["onderwerp"]:
+        d, bron = TEGEL_STELSEL[c["id"]]
+        if bron == "vertaald" and d != D_UIT_M[c["onderwerp"]]:
+            raise SystemExit("stelseltegel %s bij %s heet 'vertaald' maar wijkt af van D_UIT_M" % (d, c["id"]))
+        if bron != "vertaald":
+            print("  stelseltegel %2d: %s (%s), vertaling zou %s zijn" % (c["id"], d, bron, D_UIT_M[c["onderwerp"]]))
+    elif c["id"] in TEGEL_STELSEL:
+        raise SystemExit("vraag %s heeft een stelseltegel maar geen sitetegel" % c["id"])
 json.dump(uit, open(doel, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
 print(len(uit), "cases")

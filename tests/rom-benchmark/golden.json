@@ -30,6 +30,7 @@
   "toeleiding_bron": null,
   "buiten_scope": null,
   "onderwerp_d": null,
+  "onderwerp_d_bron": null,
   "termen_d": [],
   "benchmark30": false,
   "excel_n": false,
@@ -82,6 +83,7 @@
   "toeleiding_bron": null,
   "buiten_scope": null,
   "onderwerp_d": null,
+  "onderwerp_d_bron": null,
   "termen_d": [],
   "benchmark30": false,
   "excel_n": false,
@@ -138,6 +140,7 @@
   "toeleiding_bron": "excel",
   "buiten_scope": null,
   "onderwerp_d": "d-bouwen",
+  "onderwerp_d_bron": "vertaald",
   "termen_d": [],
   "benchmark30": false,
   "excel_n": false,
@@ -187,6 +190,7 @@
   "toeleiding_bron": null,
   "buiten_scope": null,
   "onderwerp_d": null,
+  "onderwerp_d_bron": null,
   "termen_d": [],
   "benchmark30": false,
   "excel_n": false,
@@ -240,6 +244,7 @@
   "toeleiding_bron": "excel",
   "buiten_scope": null,
   "onderwerp_d": "d-bouwen",
+  "onderwerp_d_bron": "vertaald",
   "termen_d": [
    "bouwhoogte"
   ],
@@ -292,6 +297,7 @@
   "toeleiding_bron": null,
   "buiten_scope": null,
   "onderwerp_d": null,
+  "onderwerp_d_bron": null,
   "termen_d": [],
   "benchmark30": false,
   "excel_n": false,
@@ -341,6 +347,7 @@
   "toeleiding_bron": "agent",
   "buiten_scope": null,
   "onderwerp_d": "d-bouwen",
+  "onderwerp_d_bron": "vertaald",
   "termen_d": [
    "bebouwingspercentage"
   ],
@@ -396,6 +403,7 @@
   "toeleiding_bron": "agent",
   "buiten_scope": null,
   "onderwerp_d": "d-werken",
+  "onderwerp_d_bron": "vertaald",
   "termen_d": [
    "winkel"
   ],
@@ -451,6 +459,7 @@
   "toeleiding_bron": "agent",
   "buiten_scope": null,
   "onderwerp_d": "d-werken",
+  "onderwerp_d_bron": "vertaald",
   "termen_d": [
    "winkel"
   ],
@@ -500,6 +509,7 @@
   "toeleiding_bron": "excel",
   "buiten_scope": null,
   "onderwerp_d": "d-werken",
+  "onderwerp_d_bron": "vertaald",
   "termen_d": [],
   "benchmark30": false,
   "excel_n": false,
@@ -554,6 +564,7 @@
   "toeleiding_bron": "agent",
   "buiten_scope": null,
   "onderwerp_d": "d-werken",
+  "onderwerp_d_bron": "vertaald",
   "termen_d": [
    "houtzagerij"
   ],
@@ -613,6 +624,7 @@
   "toeleiding_bron": "agent",
   "buiten_scope": null,
   "onderwerp_d": "d-werken",
+  "onderwerp_d_bron": "vertaald",
   "termen_d": [
    "houtzagerij"
   ],
@@ -669,6 +681,7 @@
   "toeleiding_bron": "agent",
   "buiten_scope": null,
   "onderwerp_d": "d-werken",
+  "onderwerp_d_bron": "vertaald",
   "termen_d": [
    "boten",
    "verhuur"
@@ -726,6 +739,7 @@
   "toeleiding_bron": "agent",
   "buiten_scope": null,
   "onderwerp_d": "d-verkeer",
+  "onderwerp_d_bron": "vertaald",
   "termen_d": [
    "parkeer"
   ],
@@ -780,6 +794,7 @@
   "toeleiding_bron": "excel",
   "buiten_scope": null,
   "onderwerp_d": "d-bouwen",
+  "onderwerp_d_bron": "vertaald",
   "termen_d": [
    "dakopbouw"
   ],
@@ -840,13 +855,16 @@
    "naam": "monument"
   },
   "negatief": false,
-  "onderwerp": "erfgoed",
-  "sub": null,
-  "sub_fijn": null,
+  "onderwerp": "bouwen",
+  "sub": "bouwen en verbouwen",
+  "sub_fijn": "dakkapellen, dakopbouwen en dakterrassen",
   "toeleiding_bron": "agent",
   "buiten_scope": null,
-  "onderwerp_d": "d-erfgoed",
-  "termen_d": [],
+  "onderwerp_d": "d-bouwen",
+  "onderwerp_d_bron": "vertaald",
+  "termen_d": [
+   "dakopbouw"
+  ],
   "benchmark30": true,
   "excel_n": false,
   "excel_o": false,
@@ -893,6 +911,7 @@
   "toeleiding_bron": null,
   "buiten_scope": null,
   "onderwerp_d": null,
+  "onderwerp_d_bron": null,
   "termen_d": [],
   "benchmark30": true,
   "excel_n": false,
@@ -945,6 +964,7 @@
   "toeleiding_bron": "excel",
   "buiten_scope": null,
   "onderwerp_d": "d-bouwen",
+  "onderwerp_d_bron": "vertaald",
   "termen_d": [
    "dakkapel"
   ],
@@ -999,6 +1019,7 @@
   "toeleiding_bron": "excel",
   "buiten_scope": null,
   "onderwerp_d": "d-bouwen",
+  "onderwerp_d_bron": "vertaald",
   "termen_d": [
    "dakterras"
   ],
@@ -1053,7 +1074,8 @@
   "sub_fijn": null,
   "toeleiding_bron": "excel",
   "buiten_scope": null,
-  "onderwerp_d": "d-bodem-water",
+  "onderwerp_d": "d-energie",
+  "onderwerp_d_bron": "brigitte",
   "termen_d": [
    "warmtepomp",
    "bodem"
@@ -1137,6 +1159,7 @@
   "toeleiding_bron": "excel",
   "buiten_scope": null,
   "onderwerp_d": "d-bodem-water",
+  "onderwerp_d_bron": "vertaald",
   "termen_d": [
    "grondwater",
    "onttrek",
@@ -1197,6 +1220,7 @@
   "toeleiding_bron": "agent",
   "buiten_scope": null,
   "onderwerp_d": "d-bodem-water",
+  "onderwerp_d_bron": "vertaald",
   "termen_d": [
    "onttrek"
   ],
@@ -1251,6 +1275,7 @@
   "toeleiding_bron": "excel",
   "buiten_scope": null,
   "onderwerp_d": "d-werken",
+  "onderwerp_d_bron": "vertaald",
   "termen_d": [
    "datacenter"
   ],
@@ -1308,6 +1333,7 @@
   "toeleiding_bron": "excel",
   "buiten_scope": null,
   "onderwerp_d": "d-natuur",
+  "onderwerp_d_bron": "vertaald",
   "termen_d": [
    "damhert",
    "doden"
@@ -1358,6 +1384,7 @@
   "toeleiding_bron": null,
   "buiten_scope": null,
   "onderwerp_d": null,
+  "onderwerp_d_bron": null,
   "termen_d": [],
   "benchmark30": true,
   "excel_n": false,
@@ -1410,6 +1437,7 @@
   "toeleiding_bron": "excel",
   "buiten_scope": null,
   "onderwerp_d": "d-natuur",
+  "onderwerp_d_bron": "brigitte",
   "termen_d": [
    "aalscholver",
    "diersoort",
@@ -1462,6 +1490,7 @@
   "toeleiding_bron": null,
   "buiten_scope": null,
   "onderwerp_d": null,
+  "onderwerp_d_bron": null,
   "termen_d": [],
   "benchmark30": true,
   "excel_n": false,
@@ -1514,6 +1543,7 @@
   "toeleiding_bron": "excel",
   "buiten_scope": null,
   "onderwerp_d": "d-bodem-water",
+  "onderwerp_d_bron": "vertaald",
   "termen_d": [
    "overstroming"
   ],
@@ -1568,6 +1598,7 @@
   "toeleiding_bron": "excel",
   "buiten_scope": null,
   "onderwerp_d": "d-bodem-water",
+  "onderwerp_d_bron": "vertaald",
   "termen_d": [
    "overstroming"
   ],
@@ -1617,6 +1648,7 @@
   "toeleiding_bron": "excel",
   "buiten_scope": null,
   "onderwerp_d": "d-bodem-water",
+  "onderwerp_d_bron": "vertaald",
   "termen_d": [
    "overstroming"
   ],
@@ -1671,6 +1703,7 @@
   "toeleiding_bron": "excel",
   "buiten_scope": null,
   "onderwerp_d": "d-bodem-water",
+  "onderwerp_d_bron": "vertaald",
   "termen_d": [
    "wateroverlast"
   ],
@@ -1725,6 +1758,7 @@
   "toeleiding_bron": "excel",
   "buiten_scope": null,
   "onderwerp_d": "d-bodem-water",
+  "onderwerp_d_bron": "vertaald",
   "termen_d": [
    "wateroverlast"
   ],
@@ -1777,6 +1811,7 @@
   "toeleiding_bron": "excel",
   "buiten_scope": null,
   "onderwerp_d": "d-bodem-water",
+  "onderwerp_d_bron": "vertaald",
   "termen_d": [
    "wateroverlast"
   ],
@@ -1828,6 +1863,7 @@
   "toeleiding_bron": "excel",
   "buiten_scope": null,
   "onderwerp_d": "d-bodem-water",
+  "onderwerp_d_bron": "vertaald",
   "termen_d": [
    "hoogwater"
   ],
@@ -1880,6 +1916,7 @@
   "toeleiding_bron": "excel",
   "buiten_scope": null,
   "onderwerp_d": "d-natuur",
+  "onderwerp_d_bron": "vertaald",
   "termen_d": [
    "subsidie",
    "beheer"
@@ -1935,6 +1972,7 @@
   "toeleiding_bron": "agent",
   "buiten_scope": null,
   "onderwerp_d": "d-natuur",
+  "onderwerp_d_bron": "vertaald",
   "termen_d": [
    "subsidie",
    "beheer"
@@ -1987,6 +2025,7 @@
   "toeleiding_bron": "excel",
   "buiten_scope": "ontwerp (Nota Ruimte) — het register toont alleen geldende documenten",
   "onderwerp_d": "d-verkeer",
+  "onderwerp_d_bron": "vertaald",
   "termen_d": [
    "spoor"
   ],
@@ -2039,6 +2078,7 @@
   "toeleiding_bron": "excel",
   "buiten_scope": null,
   "onderwerp_d": "d-verkeer",
+  "onderwerp_d_bron": "vertaald",
   "termen_d": [
    "betuwelijn"
   ],
@@ -2090,6 +2130,7 @@
   "toeleiding_bron": "agent",
   "buiten_scope": null,
   "onderwerp_d": "d-energie",
+  "onderwerp_d_bron": "agent",
   "termen_d": [
    "broeikas"
   ],
@@ -2136,7 +2177,8 @@
   "sub_fijn": null,
   "toeleiding_bron": "excel",
   "buiten_scope": "procedure-informatie (einde inzagetermijn) — staat in geen regel",
-  "onderwerp_d": "d-werken",
+  "onderwerp_d": "d-energie",
+  "onderwerp_d_bron": "brigitte",
   "termen_d": [
    "windpark",
    "zienswijze"

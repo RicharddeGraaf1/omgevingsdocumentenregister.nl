@@ -92,7 +92,10 @@ def main():
             TEGELNAAM.get(c.get("onderwerp"), c.get("onderwerp")) if c.get("onderwerp") else None,
             c.get("sub"), c.get("sub_fijn"),
             {"excel": "Excel kolom M", "agent": "agent (24-10-2026)"}.get(c.get("toeleiding_bron")),
-            D_NAAM.get(c.get("onderwerp_d")), ", ".join(c.get("termen_d") or []) or None,
+            D_NAAM.get(c.get("onderwerp_d")),
+            {"vertaald": "vertaald uit sitetegel", "brigitte": "tabel Brigitte (22-10)", "agent": "agent (24-10-2026)"}.get(
+                c.get("onderwerp_d_bron")),
+            ", ".join(c.get("termen_d") or []) or None,
             (k.get("soort", "") + ": " + k.get("naam", "")) if k else None,
             "ja" if c.get("negatief") else None,
             c.get("buiten_scope"),
@@ -104,13 +107,17 @@ def main():
             agent_rijen.append(len(rijen) + 1)
     blad(ws, ["nr", "vraag", "locatie (Excel)", "locatie (opgelost, PDOK)", "bevoegd gezag", "type bron", "IM",
               "bron (document)", "verwacht antwoord", "verwacht artikel / sectie",
-              "tegel (toeleiding)", "subonderwerp", "fijne chip", "herkomst tegel",
-              "tegel variant D/E", "zoekwoorden chips D/E", "kenmerk op het punt", "negatieve vraag",
+              "tegel site (A/B/C)", "subonderwerp", "fijne chip", "herkomst sitetegel",
+              "tegel stelsel (D/E)", "herkomst stelseltegel", "zoekwoorden chips D/E", "kenmerk op het punt", "negatieve vraag",
               "buiten bereik", "in Excel-set (30)", "handmatig N (opschriftpad)", "handmatig O (annotatie)"],
-         rijen, [5, 34, 22, 26, 18, 8, 6, 26, 34, 18, 22, 20, 22, 14, 18, 16, 26, 9, 22, 9, 10, 10])
+         rijen, [5, 34, 22, 26, 18, 8, 6, 26, 34, 18, 22, 20, 22, 14, 20, 16, 16, 26, 9, 22, 9, 10, 10])
     for r in agent_rijen:
         for col in (11, 12, 14):
             ws.cell(row=r, column=col).fill = AGENT
+    for i, c in enumerate(golden, 2):   # stelseltegel die niet uit de vertaling komt
+        if c.get("onderwerp_d_bron") in ("agent", "brigitte"):
+            for col in (15, 16):
+                ws.cell(row=i, column=col).fill = AGENT
 
     # ── Scores ──
     ws2 = wb.create_sheet("Scores")
@@ -186,8 +193,11 @@ def main():
         ("E · meervoudig", "Simulatie (24-10-2026): de tegels en chips van D, maar een artikel staat onder élke tegel "
                            "waarover het iets regelt: opschriftpad, alle IMOW-thema's, gebiedsaanwijzingen, "
                            "activiteitengroepen, en bij Wro de functies uit het hoofddeel van de bestemmingsomschrijving."),
-        ("Tegelkeuze per variant", "D en E bieden andere tegels; bij 26 (aalscholver) en 39 (broeikasgassen) kiest de "
-                                   "bezoeker daar Natuur en landschap resp. Energie en klimaat (curatie 24-10, akkoord gebruiker)."),
+        ("Tegelkeuze per tegelset", "Een variant = een tegelset + een indeling. Per tegelset kiest de bezoeker per vraag "
+                                    "zelf een tegel, op grond van de vraag en zonder te weten waar het artikel staat. "
+                                    "Site (A/B/C): kolom M of agent. Stelsel (D/E): vertaald uit de sitetegel, behalve 20 en "
+                                    "40 (Energie en klimaat) en 26 (Natuur en landschap) uit de tabel van Brigitte, en 39 "
+                                    "(Energie en klimaat, agent). Geel = niet uit het Excel of de vertaling."),
         ("Negatieve vragen", "4, 6, 17, 25, 27, 30: er is geen artikel om te vinden. In 'haalbaar' tellen ze als goed als het "
                              "kenmerk binnen het verwachte document terecht ontbreekt."),
         ("Buiten bereik", "37 (ontwerp-Nota Ruimte: het register toont alleen geldende documenten) en 40 (einde "
