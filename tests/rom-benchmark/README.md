@@ -88,7 +88,28 @@ landschap*, *Bodem en water*, *Milieu, gezondheid en veiligheid*, *Energie en kl
   een thema): Brigittes letterlijke "activiteitengroep i.c.m. thema" op niveau 1, apart
   gemeten.
 
-De D-tegel volgt strikt kolom M (`D_UIT_M`), net als A/B/C. De weging is dezelfde.
+De weging is dezelfde als bij A/B/C.
+
+### Tegelkeuze per tegelset (2026-10-24)
+
+Een variant bestaat uit een tegelset en een indeling. De bezoeker kiest per vraag een
+tegel uit de set die die variant aanbiedt. Hij kiest op grond van de vraag en weet
+niet waar het artikel staat.
+
+| Tegelset | Varianten | Keuze per vraag | Veld in `golden.json` |
+|---|---|---|---|
+| site (`thema.js`) | A, B, C | kolom M, anders `toeleiding_agent` | `onderwerp`, `toeleiding_bron` |
+| stelsel (Brigitte) | D, D′, E | `TEGEL_STELSEL` in `bouw_golden.py` | `onderwerp_d`, `onderwerp_d_bron` |
+
+Herkomst van de stelseltegel:
+
+- `vertaald`: de sitetegel via `D_UIT_M`. Het script controleert dat die echt gelijk zijn.
+- `brigitte`: overgenomen uit haar tabel (20, 26, 40).
+- `agent`: gecureerd (39).
+
+Daardoor kan een vraag in de ene tegelset slagen en in de andere niet. Een voorbeeld is
+vraag 20 (warmtepomp): in het stelsel kiest de bezoeker *Energie en klimaat*, maar de
+regel over de boringsvrije zone staat onder *Bodem en water*.
 
 **Versieverschil.** Het Excel is gescoord op de site van 20-10 (`bd1ffb9`). Sinds
 23-10 (`a021cb2`) gaat `water` zonder subcategorie naar een neutrale tegel *Water*
