@@ -368,14 +368,21 @@ def boom_index(boom):
     return ouder, secties, nummers, ann
 
 
-def raakt_matcher(m, nummer, wid, secties):
+def raakt_matcher(m, nummer, wid, secties, opschrift=None):
     if "artikel" in m:
         return norm_nr(nummer) == norm_nr(m["artikel"])
     if "sectie" in m:
         s = m["sectie"]
         if wid and s in (secties.get(wid) or []):
             return True
-        return bool(wid and re.search(r"_(?:chp|subchp|subsec|sec|para|dvs|div)_%s(?:__|$)" % re.escape(s), wid))
+        if wid and re.search(r"_(?:chp|subchp|subsec|sec|para|dvs|div)_%s(?:__|$)" % re.escape(s), wid):
+            return True
+        # Wro-rijen hebben geen wId: een lid hoort bij de sectie als zijn nummer ermee begint (29.1 -> 29)
+        n = norm_nr(nummer)
+        return bool(not wid and n and (n == norm_nr(s) or n.startswith(norm_nr(s) + ".")))
+    if "opschrift" in m:
+        # tekstdelen zonder nummer (structuurvisies, programma's): het opschrift begint met deze tekst
+        return norm(opschrift).startswith(norm(m["opschrift"]))
     raise ValueError(m)
 
 
@@ -463,7 +470,7 @@ def toets_vraag(api, loc, vraag, gevonden_docs, specs):
             if not zelfde:
                 continue
             eerste_doc = eerste_doc or i + 1
-            if eerste_art is None and any(raakt_matcher(m, h.get("artikel_nummer"), h.get("wid"), {}) for m in spec.get("match") or []):
+            if eerste_art is None and any(raakt_matcher(m, h.get("artikel_nummer"), h.get("wid"), {}, h.get("artikel_opschrift") or h.get("artikel")) for m in spec.get("match") or []):
                 eerste_art = i + 1
     return {"aantal": len(hits), "rang_artikel": eerste_art, "rang_document": eerste_doc, "top5": top,
             "begrippen": [c.get("naam") for c in d.get("matched_concepts") or []]}
@@ -632,7 +639,7 @@ def draai_case(api, c, met_vraag=True):
         an = analyseer_document(api, loc, doc)
         du["artikelen_op_punt"] = len(an["artikelen"])
         raak = [a for a in an["artikelen"]
-                if any(raakt_matcher(m, a["nummer"], w, an["secties"]) for m in spec["match"] for w in (a["rij_wids"] or [a["wid"]]))]
+                if any(raakt_matcher(m, a["nummer"], w, an["secties"], a["opschrift"]) for m in spec["match"] for w in (a["rij_wids"] or [a["wid"]]))]
         du["geraakt"] = [a["nummer"] or a["opschrift"] or (a["wid"] or "").split("__")[-1] for a in raak]
         if raak:
             art_st.append("PASS")
@@ -656,8 +663,11 @@ def draai_case(api, c, met_vraag=True):
                     du["uitleg"] = "Wro: regelmix/document levert %d rijen, artikel zit er niet bij" % an["rijen"]
             else:
                 du["uitleg"] = "niet bij de artikelen op dit punt"
-        if doc["bron_type"] != "ow" or not raak:
+        if not raak:
             continue
+        # Wro telt sinds 2026-10-24 mee: het onderwerp per rij komt uit de Wro-indeling
+        # (OCD v2a.wro_artikel_indeling), zoals de register-branch wro-onderwerpen het toont.
+        # Een Wro-plan heeft geen IMOW-annotatie, dus variant B vindt daar niets — terecht.
         alle = list(an["artikelen"])
         for v in aanvullend_bij(docs, doc):
             alle += analyseer_document(api, loc, v)["artikelen"]

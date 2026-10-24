@@ -32,6 +32,10 @@ def lees_excel(pad):
 # docs: lijst van {titel: [fragmenten, alle verplicht], type: ow|wro, match: [matchers]}
 #   bron: fragment dat in het bron_id moet staan (bv. "/pv23/" — Overijssel heet kaal "Omgevingsverordening provincie")
 #   afwezig: True = het document hoort hier juist NIET (negatieve case)
+# toeleiding_agent: de tegel (in de vorm van kolom M) die een bezoeker bij deze vraag kiest, voor de
+#   Wro-vragen waar kolom M leeg is (2026-10-24, curatie van de agent, NIET uit het Excel). Zelfde lezing
+#   als de tester bij de Ow-vragen: "winkel beginnen" -> Bedrijven, energie en milieu; detailhandel (vraag 10).
+#   De artikelen bij 5, 11, 12, 13 en 39 komen uit de data: de bestemming op het punt (wro_tekst_link).
 # sub_fijn: de fijne subonderwerp-chip die een bezoeker bij deze vraag kiest (curatie van de agent,
 #   2026-10-23, NIET uit het Excel — kolom M kende alleen het brede subonderwerp). Staat het artikel
 #   in een andere chip, dan vindt de bezoeker het daar niet en telt de hele tegel.
@@ -47,25 +51,25 @@ C = {
          kenmerk=dict(soort="normwaarde", naam="maximale bouwhoogte", waarden=[5, 6, 8, 10, 11, 25, 55])),
  4: dict(loc=("rd", 154737, 466858), docs=[dict(titel=["omgevingsplan gemeente amersfoort"], type="ow")],
          kenmerk=dict(soort="normwaarde", naam="maximale bouwhoogte"), negatief=True),
- 5: dict(loc=("pdok", "3811GN 32", "Boldershof 32"), docs=[dict(titel=["binnenstad"], type="wro")],
+ 5: dict(loc=("pdok", "3811GN 32", "Boldershof 32"), docs=[dict(titel=["binnenstad"], type="wro", match=[{"sectie": "25"}])],
          kenmerk=dict(soort="wro", naam="bouwhoogte", object_type="Maatvoering")),
  6: dict(loc=("rd", 155143, 463394), docs=[dict(titel=["binnenstad"], type="wro")],
          kenmerk=dict(soort="wro", naam="bouwhoogte", object_type="Maatvoering"), negatief=True),
- 7: dict(loc=("pdok", "9264TS 3", "De Reidt"), docs=[dict(titel=["earnew", "2013"], type="wro")],
+ 7: dict(toeleiding_agent="Bouwen en wonen; bouwen en verbouwen", loc=("pdok", "9264TS 3", "De Reidt"), docs=[dict(titel=["earnew", "2013"], type="wro")],
          kenmerk=dict(soort="wro", naam="bebouwingspercentage", object_type="Maatvoering")),
- 8: dict(loc=("pdok", "1211BN 9", "s-Gravelandseweg 9"), docs=[dict(titel=["binnenstad 2013"], type="wro", match=[{"artikel": "11.1"}])],
+ 8: dict(toeleiding_agent="Bedrijven, energie en milieu; detailhandel", loc=("pdok", "1211BN 9", "s-Gravelandseweg 9"), docs=[dict(titel=["binnenstad 2013"], type="wro", match=[{"artikel": "11.1"}])],
          kenmerk=dict(soort="wro", naam="dienstverlening", object_type="Enkelbestemming")),
- 9: dict(loc=("pdok", "9712CA 7", "Vismarkt 7"), docs=[dict(titel=["binnenstad"], type="wro", match=[{"artikel": "4.1"}])],
+ 9: dict(toeleiding_agent="Bedrijven, energie en milieu; detailhandel", loc=("pdok", "9712CA 7", "Vismarkt 7"), docs=[dict(titel=["binnenstad"], type="wro", match=[{"artikel": "4.1"}])],
          kenmerk=dict(soort="wro", naam="centrum - 1", object_type="Enkelbestemming")),
  10: dict(loc=("pdok", "9713ED 237", "Damsterdiep 237"), docs=[dict(titel=["omgevingsplan gemeente groningen"], type="ow")],
           kenmerk=dict(soort="activiteit", naam="detailhandel")),
- 11: dict(loc=("pdok", "9264TE 9", "9264TE"), docs=[dict(titel=["earnew", "2013"], type="wro")],
+ 11: dict(toeleiding_agent="Bedrijven, energie en milieu; bedrijven", loc=("pdok", "9264TE 9", "9264TE"), docs=[dict(titel=["earnew", "2013"], type="wro", match=[{"sectie": "29"}])],
           kenmerk=dict(soort="wro", naam="wonen - a1", object_type="Enkelbestemming")),
- 12: dict(loc=("pdok", "9264TK 17", "Smidspaed 17"), docs=[dict(titel=["earnew", "2013"], type="wro")],
+ 12: dict(toeleiding_agent="Bedrijven, energie en milieu; bedrijven", loc=("pdok", "9264TK 17", "Smidspaed 17"), docs=[dict(titel=["earnew", "2013"], type="wro", match=[{"sectie": "22"}, {"sectie": "28"}])],
           kenmerk=dict(soort="wro", naam="recreatie - 1a", object_type="Enkelbestemming")),
- 13: dict(loc=("pdok", "9264TG 5", "Tsjerkepaed 5"), docs=[dict(titel=["earnew", "2013"], type="wro")],
+ 13: dict(toeleiding_agent="Bedrijven, energie en milieu; bedrijven", loc=("pdok", "9264TG 5", "Tsjerkepaed 5"), docs=[dict(titel=["earnew", "2013"], type="wro", match=[{"sectie": "29"}])],
           kenmerk=dict(soort="wro", naam="wonen - a1", object_type="Enkelbestemming")),
- 14: dict(loc=("pdok", "1211JA 13", "Torenlaan 13"), docs=[dict(titel=["noordwestelijk villagebied", "parkeernormen"], type="wro", match=[{"artikel": "4.1"}])],
+ 14: dict(toeleiding_agent="Openbare ruimte en verkeer; parkeren", loc=("pdok", "1211JA 13", "Torenlaan 13"), docs=[dict(titel=["noordwestelijk villagebied", "parkeernormen"], type="wro", match=[{"sectie": "4.1"}])],   # 4.1 Parkeren heeft zelf geen tekst: 4.1.1/4.1.2
           kenmerk=dict(soort="wro", naam="parkeernormen 2018", object_type="Gebiedsaanduiding")),
  15: dict(sub_fijn="dakkapellen, dakopbouwen en dakterrassen", loc=("pdok", "3453MD 30", "Does 30"), docs=[dict(titel=["omgevingsplan gemeente utrecht"], type="ow", match=[{"artikel": "4.26"}])],   # Excel: 4.22 (versie 2024-12-27); geldend 2026-08-19: 4.26
           kenmerk=dict(soort="activiteit", naam="dakopbouw")),
@@ -112,7 +116,8 @@ C = {
  36: dict(loc=("rd", 170239, 489741), docs=[dict(titel=["natuurbeheerplan", "flevoland"], type="ow", match=[{"sectie": "4"}])]),
  37: dict(loc=("pdok", "9263RB 23", "Inialoane 23"), docs=[dict(titel=["nota ruimte"], type="ow", match=[{"sectie": "9.5"}])]),
  38: dict(loc=("pdok", "Saneringsweg 3a IJzendoorn", "Saneringsweg 3A"), docs=[dict(titel=["omgevingsvisie", "neder-betuwe"], type="ow")]),
- 39: dict(loc=("pdok", "7334DP 701", "Laan van Westenenk 701"), docs=[dict(titel=["gaaf gelderland"], type="wro")]),
+ 39: dict(toeleiding_agent="Bedrijven, energie en milieu", loc=("pdok", "7334DP 701", "Laan van Westenenk 701"),
+          docs=[dict(titel=["gaaf gelderland"], type="wro", match=[{"opschrift": "§ 1 Energietransitie"}])]),
  40: dict(loc=("pdok", "Saneringsweg 3a IJzendoorn", "Saneringsweg 3A"), docs=[dict(titel=["windpark", "echteld"], type="ow")]),
 }
 
@@ -137,6 +142,9 @@ D_TEGEL = {}
 # De bezoeker herkent een chip aan een woord uit zijn eigen vraag; alleen woorden die (als stam) in de
 # vraag staan. Het meetpunt is optimistisch: matchen meerdere chips, dan kiest hij de beste.
 D_TERMEN = {
+ # Wro-vragen (2026-10-24, agent; zelfde regel: alleen woorden uit de vraag)
+ 5: ["bouwhoogte"], 7: ["bebouwingspercentage"], 8: ["winkel"], 9: ["winkel"], 11: ["houtzagerij"],
+ 12: ["houtzagerij"], 13: ["boten", "verhuur"], 14: ["parkeer"], 39: ["broeikas"],
  15: ["dakopbouw"], 18: ["dakkapel"], 19: ["dakterras"], 20: ["warmtepomp", "bodem"],
  21: ["grondwater", "onttrek", "besproei", "gewas"], 23: ["datacenter"], 24: ["damhert", "doden"],
  26: ["aalscholver", "diersoort", "beschermd"], 28: ["overstroming"], 29: ["overstroming"],
@@ -183,10 +191,13 @@ for r in excel:
     kind = c["loc"][0]
     loc = {"rd": [c["loc"][1], c["loc"][2]]} if kind == "rd" else {"pdok_q": c["loc"][1], "verwacht": c["loc"][2]}
     t = toeleiding(r.get("toeleiding"), per_nr, r["nr"])
+    t_bron = "excel" if t else None
+    if not t and c.get("toeleiding_agent"):
+        t, t_bron = toeleiding(c["toeleiding_agent"], per_nr, r["nr"]), "agent"
     uit.append({
         "id": r["nr"], "vraag": r["vraag"].strip(), "locatie": loc, "documenten": c["docs"],
         "kenmerk": c.get("kenmerk"), "negatief": c.get("negatief", False),
-        "onderwerp": t and t["tegel"], "sub": t and t["sub"], "sub_fijn": c.get("sub_fijn"),
+        "onderwerp": t and t["tegel"], "sub": t and t["sub"], "sub_fijn": c.get("sub_fijn"), "toeleiding_bron": t_bron,
         "onderwerp_d": t and D_TEGEL.get(r["nr"], D_UIT_M[t["tegel"]]), "termen_d": D_TERMEN.get(r["nr"], []),
         "benchmark30": r["nr"] in BENCHMARK_30,
         "excel_n": r["nr"] in EXCEL_N_JA, "excel_o": r["nr"] in EXCEL_O_JA,

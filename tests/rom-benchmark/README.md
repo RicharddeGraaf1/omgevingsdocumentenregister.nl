@@ -136,6 +136,13 @@ Bekende beperkingen van de set zelf:
 - **Wro en de tegels.** Het Excel noemt bij geen enkele Wro-vraag een tegel (kolom M),
   dus de toegang-via-onderwerp-score kan voor Wro niet stijgen. De runner leest wel de
   Wro-indeling per rij (`categorie`), zoals de frontend-branch `wro-onderwerpen`.
+- **Wro-tegels (`toeleiding_agent`, 2026-10-24).** Waar kolom M leeg is (Wro-vragen 7, 8, 9,
+  11–14, 39), staat in `bouw_golden.py` de tegel die een bezoeker bij de vraag kiest, gelezen
+  zoals de tester de Ow-vragen las ("winkel beginnen" → *Bedrijven, energie en milieu;
+  detailhandel*, net als vraag 10). De verwachte artikelen bij 5, 11, 12, 13 en 39 komen uit de
+  data (de bestemming op het punt). `golden.json` draagt per vraag `toeleiding_bron`
+  (`excel` of `agent`). De Wro-tegels meten de register-branch `wro-onderwerpen`: de site
+  toont Wro-onderwerpen nog niet.
 - **Sub-chips (`sub_fijn`).** Voor 15, 18, 19 en 24 staat in `bouw_golden.py` welke fijne
   chip een bezoeker kiest; dat is curatie van de agent, niet uit het Excel.
 
@@ -144,6 +151,13 @@ De curatie staat in `bouw_golden.py` (dict `C`, één regel per case) en wordt n
 
 ```bash
 python bouw_golden.py "C:/Testbestanden/Lokaal/Testsets-OZON/RoM-benchmark/Testvragen AI experiment - RoM - EL - 20-10-2026.xlsx"
+```
+
+Een slanke Excel met alleen wat de benchmark gebruikt, plus de scores van één run, maak je met
+`exporteer_excel.py` (schrijft nooit over een bestaand bestand heen):
+
+```bash
+python exporteer_excel.py runs/<run> "C:/Testbestanden/Lokaal/Testsets-OZON/RoM-benchmark/RoM-benchmark testset v2 - <datum>.xlsx"
 ```
 
 Komt er een nieuwe versie van het Excel met extra regels, dan stopt het script bij de

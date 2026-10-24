@@ -27,6 +27,7 @@
   "onderwerp": null,
   "sub": null,
   "sub_fijn": null,
+  "toeleiding_bron": null,
   "onderwerp_d": null,
   "termen_d": [],
   "benchmark30": false,
@@ -77,6 +78,7 @@
   "onderwerp": null,
   "sub": null,
   "sub_fijn": null,
+  "toeleiding_bron": null,
   "onderwerp_d": null,
   "termen_d": [],
   "benchmark30": false,
@@ -131,6 +133,7 @@
   "onderwerp": "bouwen",
   "sub": "bouwen en verbouwen",
   "sub_fijn": null,
+  "toeleiding_bron": "excel",
   "onderwerp_d": "d-bouwen",
   "termen_d": [],
   "benchmark30": false,
@@ -178,6 +181,7 @@
   "onderwerp": null,
   "sub": null,
   "sub_fijn": null,
+  "toeleiding_bron": null,
   "onderwerp_d": null,
   "termen_d": [],
   "benchmark30": false,
@@ -212,7 +216,12 @@
     "titel": [
      "binnenstad"
     ],
-    "type": "wro"
+    "type": "wro",
+    "match": [
+     {
+      "sectie": "25"
+     }
+    ]
    }
   ],
   "kenmerk": {
@@ -224,8 +233,11 @@
   "onderwerp": "bouwen",
   "sub": "bouwen en verbouwen",
   "sub_fijn": null,
+  "toeleiding_bron": "excel",
   "onderwerp_d": "d-bouwen",
-  "termen_d": [],
+  "termen_d": [
+   "bouwhoogte"
+  ],
   "benchmark30": false,
   "excel_n": false,
   "excel_o": false,
@@ -272,6 +284,7 @@
   "onderwerp": null,
   "sub": null,
   "sub_fijn": null,
+  "toeleiding_bron": null,
   "onderwerp_d": null,
   "termen_d": [],
   "benchmark30": false,
@@ -316,11 +329,14 @@
    "object_type": "Maatvoering"
   },
   "negatief": false,
-  "onderwerp": null,
-  "sub": null,
+  "onderwerp": "bouwen",
+  "sub": "bouwen en verbouwen",
   "sub_fijn": null,
-  "onderwerp_d": null,
-  "termen_d": [],
+  "toeleiding_bron": "agent",
+  "onderwerp_d": "d-bouwen",
+  "termen_d": [
+   "bebouwingspercentage"
+  ],
   "benchmark30": false,
   "excel_n": false,
   "excel_o": false,
@@ -367,11 +383,14 @@
    "object_type": "Enkelbestemming"
   },
   "negatief": false,
-  "onderwerp": null,
-  "sub": null,
+  "onderwerp": "bedrijven",
+  "sub": "detailhandel",
   "sub_fijn": null,
-  "onderwerp_d": null,
-  "termen_d": [],
+  "toeleiding_bron": "agent",
+  "onderwerp_d": "d-werken",
+  "termen_d": [
+   "winkel"
+  ],
   "benchmark30": false,
   "excel_n": false,
   "excel_o": false,
@@ -418,11 +437,14 @@
    "object_type": "Enkelbestemming"
   },
   "negatief": false,
-  "onderwerp": null,
-  "sub": null,
+  "onderwerp": "bedrijven",
+  "sub": "detailhandel",
   "sub_fijn": null,
-  "onderwerp_d": null,
-  "termen_d": [],
+  "toeleiding_bron": "agent",
+  "onderwerp_d": "d-werken",
+  "termen_d": [
+   "winkel"
+  ],
   "benchmark30": false,
   "excel_n": false,
   "excel_o": false,
@@ -466,6 +488,7 @@
   "onderwerp": "bedrijven",
   "sub": "detailhandel",
   "sub_fijn": null,
+  "toeleiding_bron": "excel",
   "onderwerp_d": "d-werken",
   "termen_d": [],
   "benchmark30": false,
@@ -501,7 +524,12 @@
      "earnew",
      "2013"
     ],
-    "type": "wro"
+    "type": "wro",
+    "match": [
+     {
+      "sectie": "29"
+     }
+    ]
    }
   ],
   "kenmerk": {
@@ -510,11 +538,14 @@
    "object_type": "Enkelbestemming"
   },
   "negatief": false,
-  "onderwerp": null,
-  "sub": null,
+  "onderwerp": "bedrijven",
+  "sub": "bedrijven",
   "sub_fijn": null,
-  "onderwerp_d": null,
-  "termen_d": [],
+  "toeleiding_bron": "agent",
+  "onderwerp_d": "d-werken",
+  "termen_d": [
+   "houtzagerij"
+  ],
   "benchmark30": true,
   "excel_n": false,
   "excel_o": false,
@@ -548,7 +579,15 @@
      "earnew",
      "2013"
     ],
-    "type": "wro"
+    "type": "wro",
+    "match": [
+     {
+      "sectie": "22"
+     },
+     {
+      "sectie": "28"
+     }
+    ]
    }
   ],
   "kenmerk": {
@@ -557,11 +596,14 @@
    "object_type": "Enkelbestemming"
   },
   "negatief": false,
-  "onderwerp": null,
-  "sub": null,
+  "onderwerp": "bedrijven",
+  "sub": "bedrijven",
   "sub_fijn": null,
-  "onderwerp_d": null,
-  "termen_d": [],
+  "toeleiding_bron": "agent",
+  "onderwerp_d": "d-werken",
+  "termen_d": [
+   "houtzagerij"
+  ],
   "benchmark30": true,
   "excel_n": false,
   "excel_o": false,
@@ -595,7 +637,12 @@
      "earnew",
      "2013"
     ],
-    "type": "wro"
+    "type": "wro",
+    "match": [
+     {
+      "sectie": "29"
+     }
+    ]
    }
   ],
   "kenmerk": {
@@ -604,11 +651,15 @@
    "object_type": "Enkelbestemming"
   },
   "negatief": false,
-  "onderwerp": null,
-  "sub": null,
+  "onderwerp": "bedrijven",
+  "sub": "bedrijven",
   "sub_fijn": null,
-  "onderwerp_d": null,
-  "termen_d": [],
+  "toeleiding_bron": "agent",
+  "onderwerp_d": "d-werken",
+  "termen_d": [
+   "boten",
+   "verhuur"
+  ],
   "benchmark30": true,
   "excel_n": false,
   "excel_o": false,
@@ -645,7 +696,7 @@
     "type": "wro",
     "match": [
      {
-      "artikel": "4.1"
+      "sectie": "4.1"
      }
     ]
    }
@@ -656,11 +707,14 @@
    "object_type": "Gebiedsaanduiding"
   },
   "negatief": false,
-  "onderwerp": null,
-  "sub": null,
+  "onderwerp": "openbare-ruimte",
+  "sub": "parkeren",
   "sub_fijn": null,
-  "onderwerp_d": null,
-  "termen_d": [],
+  "toeleiding_bron": "agent",
+  "onderwerp_d": "d-verkeer",
+  "termen_d": [
+   "parkeer"
+  ],
   "benchmark30": true,
   "excel_n": false,
   "excel_o": false,
@@ -709,6 +763,7 @@
   "onderwerp": "bouwen",
   "sub": "bouwen en verbouwen",
   "sub_fijn": "dakkapellen, dakopbouwen en dakterrassen",
+  "toeleiding_bron": "excel",
   "onderwerp_d": "d-bouwen",
   "termen_d": [
    "dakopbouw"
@@ -773,6 +828,7 @@
   "onderwerp": null,
   "sub": null,
   "sub_fijn": null,
+  "toeleiding_bron": null,
   "onderwerp_d": null,
   "termen_d": [],
   "benchmark30": true,
@@ -815,6 +871,7 @@
   "onderwerp": null,
   "sub": null,
   "sub_fijn": null,
+  "toeleiding_bron": null,
   "onderwerp_d": null,
   "termen_d": [],
   "benchmark30": true,
@@ -865,6 +922,7 @@
   "onderwerp": "bouwen",
   "sub": "bouwen en verbouwen",
   "sub_fijn": "dakkapellen, dakopbouwen en dakterrassen",
+  "toeleiding_bron": "excel",
   "onderwerp_d": "d-bouwen",
   "termen_d": [
    "dakkapel"
@@ -917,6 +975,7 @@
   "onderwerp": "bouwen",
   "sub": "bouwen en verbouwen",
   "sub_fijn": "dakkapellen, dakopbouwen en dakterrassen",
+  "toeleiding_bron": "excel",
   "onderwerp_d": "d-bouwen",
   "termen_d": [
    "dakterras"
@@ -970,6 +1029,7 @@
   "onderwerp": "bodem",
   "sub": "warmtepomp",
   "sub_fijn": null,
+  "toeleiding_bron": "excel",
   "onderwerp_d": "d-bodem-water",
   "termen_d": [
    "warmtepomp",
@@ -1051,6 +1111,7 @@
   "onderwerp": "waterkering",
   "sub": "grondwater onttrekking",
   "sub_fijn": null,
+  "toeleiding_bron": "excel",
   "onderwerp_d": "d-bodem-water",
   "termen_d": [
    "grondwater",
@@ -1109,6 +1170,7 @@
   "onderwerp": null,
   "sub": null,
   "sub_fijn": null,
+  "toeleiding_bron": null,
   "onderwerp_d": null,
   "termen_d": [],
   "benchmark30": true,
@@ -1159,6 +1221,7 @@
   "onderwerp": "bedrijven",
   "sub": "datacenters",
   "sub_fijn": null,
+  "toeleiding_bron": "excel",
   "onderwerp_d": "d-werken",
   "termen_d": [
    "datacenter"
@@ -1214,6 +1277,7 @@
   "onderwerp": "natuur",
   "sub": "natuur en bomen",
   "sub_fijn": "flora en fauna",
+  "toeleiding_bron": "excel",
   "onderwerp_d": "d-natuur",
   "termen_d": [
    "damhert",
@@ -1262,6 +1326,7 @@
   "onderwerp": null,
   "sub": null,
   "sub_fijn": null,
+  "toeleiding_bron": null,
   "onderwerp_d": null,
   "termen_d": [],
   "benchmark30": true,
@@ -1312,6 +1377,7 @@
   "onderwerp": "landbouw",
   "sub": null,
   "sub_fijn": null,
+  "toeleiding_bron": "excel",
   "onderwerp_d": "d-landbouw",
   "termen_d": [
    "aalscholver",
@@ -1362,6 +1428,7 @@
   "onderwerp": null,
   "sub": null,
   "sub_fijn": null,
+  "toeleiding_bron": null,
   "onderwerp_d": null,
   "termen_d": [],
   "benchmark30": true,
@@ -1412,6 +1479,7 @@
   "onderwerp": "waterkering",
   "sub": null,
   "sub_fijn": null,
+  "toeleiding_bron": "excel",
   "onderwerp_d": "d-bodem-water",
   "termen_d": [
    "overstroming"
@@ -1464,6 +1532,7 @@
   "onderwerp": "waterkering",
   "sub": null,
   "sub_fijn": null,
+  "toeleiding_bron": "excel",
   "onderwerp_d": "d-bodem-water",
   "termen_d": [
    "overstroming"
@@ -1511,6 +1580,7 @@
   "onderwerp": "waterkering",
   "sub": null,
   "sub_fijn": null,
+  "toeleiding_bron": "excel",
   "onderwerp_d": "d-bodem-water",
   "termen_d": [
    "overstroming"
@@ -1563,6 +1633,7 @@
   "onderwerp": "waterkering",
   "sub": null,
   "sub_fijn": null,
+  "toeleiding_bron": "excel",
   "onderwerp_d": "d-bodem-water",
   "termen_d": [
    "wateroverlast"
@@ -1615,6 +1686,7 @@
   "onderwerp": "waterkering",
   "sub": null,
   "sub_fijn": null,
+  "toeleiding_bron": "excel",
   "onderwerp_d": "d-bodem-water",
   "termen_d": [
    "wateroverlast"
@@ -1665,6 +1737,7 @@
   "onderwerp": "waterkering",
   "sub": null,
   "sub_fijn": null,
+  "toeleiding_bron": "excel",
   "onderwerp_d": "d-bodem-water",
   "termen_d": [
    "wateroverlast"
@@ -1714,6 +1787,7 @@
   "onderwerp": "waterkering",
   "sub": null,
   "sub_fijn": null,
+  "toeleiding_bron": "excel",
   "onderwerp_d": "d-bodem-water",
   "termen_d": [
    "hoogwater"
@@ -1764,6 +1838,7 @@
   "onderwerp": "natuur",
   "sub": null,
   "sub_fijn": null,
+  "toeleiding_bron": "excel",
   "onderwerp_d": "d-natuur",
   "termen_d": [
    "subsidie",
@@ -1817,6 +1892,7 @@
   "onderwerp": null,
   "sub": null,
   "sub_fijn": null,
+  "toeleiding_bron": null,
   "onderwerp_d": null,
   "termen_d": [],
   "benchmark30": true,
@@ -1864,6 +1940,7 @@
   "onderwerp": "openbare-ruimte",
   "sub": null,
   "sub_fijn": null,
+  "toeleiding_bron": "excel",
   "onderwerp_d": "d-verkeer",
   "termen_d": [
    "spoor"
@@ -1909,6 +1986,7 @@
   "onderwerp": "openbare-ruimte",
   "sub": null,
   "sub_fijn": null,
+  "toeleiding_bron": "excel",
   "onderwerp_d": "d-verkeer",
   "termen_d": [
    "betuwelijn"
@@ -1945,16 +2023,24 @@
     "titel": [
      "gaaf gelderland"
     ],
-    "type": "wro"
+    "type": "wro",
+    "match": [
+     {
+      "opschrift": "§ 1 Energietransitie"
+     }
+    ]
    }
   ],
   "kenmerk": null,
   "negatief": false,
-  "onderwerp": null,
+  "onderwerp": "bedrijven",
   "sub": null,
   "sub_fijn": null,
-  "onderwerp_d": null,
-  "termen_d": [],
+  "toeleiding_bron": "agent",
+  "onderwerp_d": "d-werken",
+  "termen_d": [
+   "broeikas"
+  ],
   "benchmark30": true,
   "excel_n": false,
   "excel_o": false,
@@ -1996,6 +2082,7 @@
   "onderwerp": "bedrijven",
   "sub": null,
   "sub_fijn": null,
+  "toeleiding_bron": "excel",
   "onderwerp_d": "d-werken",
   "termen_d": [
    "windpark",
