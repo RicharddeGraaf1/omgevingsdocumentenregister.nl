@@ -609,6 +609,22 @@ FUNCTIE_E = [
 ]
 
 
+# Naam van de activiteit of gebiedsaanwijzing (2026-10-24, gebruiker: "maak maar dat het onder meer tegels
+# valt"). De activiteitengroep legt een activiteit op één thema ("Bodemenergiesystemen aanleggen in boringsvrije
+# zones" -> milieu), maar de naam zegt vaak over welk onderwerp nog meer. Een bezoeker die bij energie zoekt,
+# moet die regel ook daar vinden. Monument -> ook Bouwen: wie een monument verbouwt, bouwt.
+NAAM_E = [
+    (r"energie|warmte|zonne|windturbine|windpark|laadpaal", "d-energie"),
+    (r"monument", "d-bouwen"),
+    (r"(?<!niet zijnde )\bbouw(?:en|werk|activiteit)|\bverbouw|\bslopen", "d-bouwen"),
+    (r"archeolog|monument|cultuurhistor|erfgoed", "d-erfgoed"),
+    (r"\bkap(?:pen)?\b|houtopstand|\bbomen\b|flora|fauna|natura 2000|natuurnetwerk", "d-natuur"),
+    (r"grondwater|onttrek|boringsvrij|oppervlaktewater|waterkering|\bgraven\b", "d-bodem-water"),
+    (r"\buitweg|parkeer|\bweg(?:en)?\b|spoorweg", "d-verkeer"),
+    (r"veehouderij|landbouw|agrari|mest", "d-landbouw"),
+]
+
+
 def tegels_e(a):
     """Variant E: (tegels, chips, herkomst)."""
     uit, chips, herkomst = tegels_d(a, True)
@@ -624,6 +640,11 @@ def tegels_e(a):
             if re.search(patroon, hoofd) and t not in uit:
                 uit.append(t)
                 herkomst = herkomst or "bestemmingsomschrijving"
+    for naam in [x["naam"] for x in a["ann"]["act"]] + [x["naam"] for x in a["ann"]["ga"]]:
+        for patroon, t in NAAM_E:
+            if re.search(patroon, norm(naam)) and t not in uit:
+                uit.append(t)
+                herkomst = herkomst or "naam activiteit/gebiedsaanwijzing"
     return uit or ["niet-ingedeeld"], chips, herkomst
 
 

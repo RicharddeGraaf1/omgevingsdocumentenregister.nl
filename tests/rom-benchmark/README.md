@@ -90,6 +90,21 @@ landschap*, *Bodem en water*, *Milieu, gezondheid en veiligheid*, *Energie en kl
 
 De weging is dezelfde als bij A/B/C.
 
+### Variant E: meervoudig (modus `meervoudig`)
+
+E gebruikt dezelfde tegels en chips als D′. Het verschil is dat een artikel onder elke
+tegel staat waar het iets over regelt. Die tegels komen uit:
+
+- het opschriftpad;
+- alle IMOW-thema's, ook die naast het pad;
+- elke gebiedsaanwijzing en activiteitengroep;
+- bij Wro de functies uit het hoofddeel van de bestemmingsomschrijving (`FUNCTIE_E`);
+- de naam van de activiteit of gebiedsaanwijzing (`NAAM_E`, sinds 2026-10-24). Voorbeelden:
+  - "Bodemenergiesystemen aanleggen in boringsvrije zones" valt ook onder *Energie en klimaat*;
+  - alles met "monument" valt ook onder *Bouwen en gebruik*, want wie een monument verbouwt, bouwt.
+
+Het risico zijn vollere tegels en dus een lagere weging. De benchmark meet die prijs mee.
+
 ### Tegelkeuze per tegelset (2026-10-24)
 
 Een variant bestaat uit een tegelset en een indeling. De bezoeker kiest per vraag een
