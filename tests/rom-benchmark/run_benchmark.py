@@ -97,7 +97,7 @@ def onderwerpen_uit_themas(themas):
 #   (aanvulling 2026-10-23). Het artikel krijgt zijn tegel uit het pad, anders uit de annotatie
 #   (zoals C), plus een tegel per gebiedsaanwijzing van een onderwerpstype.
 # Niveau 2: chips — subonderwerp uit het pad, activiteitnaam, naam van de gebiedsaanwijzing.
-# D' (stelsel_act) voegt daarbovenop een tegel per activiteitengroep toe: Brigittes letterlijke
+# F (stelsel_act; tot 24-10 'D′') voegt daarbovenop een tegel per activiteitengroep toe: Brigittes letterlijke
 #   lezing "activiteitengroep i.c.m. thema" op niveau 1, om dat effect apart te meten.
 TEGELS_D = {
     "d-bouwen": "Bouwen en gebruik", "d-werken": "Werken en recreëren", "d-landbouw": "Landbouw en veehouderij",
@@ -850,8 +850,8 @@ def samen(lijst):
 
 # ── rapport ──
 KOLOMMEN = [("locatie", "Loc"), ("document", "Doc"), ("kenmerk", "Kenmerk"), ("artikel", "Artikel"),
-            ("pad", "Opschriftpad"), ("imow", "Annotatie"), ("hybride", "Hybride"), ("stelsel", "Thema+act"),
-            ("stelsel_act", "Thema+actgroep"), ("meervoudig", "Meervoudig"), ("vraag", "Vraag")]
+            ("pad", "A-kopjes"), ("imow", "B-label"), ("hybride", "C-kopjes/label"), ("stelsel", "D-negen"),
+            ("meervoudig", "E-alle"), ("stelsel_act", "F-soort-act"), ("vraag", "Vraag")]
 
 
 def excel_ja(v):
@@ -864,9 +864,12 @@ def excel_ja(v):
     return True
 
 
-VARIANTEN = [("pad", "A · opschriftpad"), ("imow", "B · annotatie"), ("hybride", "C · hybride"),
-             ("stelsel", "D · thema-en-activiteitindeling"), ("stelsel_act", "D′ · + activiteitengroep als tegel"),
-             ("meervoudig", "E · meervoudig (D + meer tegels per artikel)")]
+# Eén letter per variant (gebruiker 2026-10-24). F heette tot dan D′. De zin per variant staat in
+# de README onder "De varianten in één zin".
+VARIANTEN = [("pad", "A · kopjes (opschriftpad)"), ("imow", "B · label van de overheid (IMOW-annotatie)"),
+             ("hybride", "C · kopjes, anders label (hybride, site-standaard)"),
+             ("stelsel", "D · negen tegels"), ("meervoudig", "E · negen tegels, onder elke passende tegel"),
+             ("stelsel_act", "F · negen tegels + soort activiteit")]
 
 
 def toegang_cel(t):
@@ -914,8 +917,8 @@ def toegang_sectie(resultaten, g):
     r += ["", "### Variant D — thema-en-activiteitindeling", "",
           "Tegel = Brigittes categorie (via kolom M, afwijkingen in `bouw_golden.py` `D_TEGEL`); chip = een label van "
           "het artikel (subonderwerp, activiteit, gebiedsaanwijzing) met een woord uit de vraag (`D_TERMEN`). "
-          "D′ zet daarbij elke activiteitengroep als extra tegel.", "",
-          "| # | D-tegel | woorden | C · hybride | D · thema en activiteit | D′ · + activiteitengroep |", "|---|---|---|---|---|---|"]
+          "F zet daarbij elke activiteitengroep als extra tegel.", "",
+          "| # | D-tegel | woorden | C · kopjes, anders label | D · negen tegels | F · + soort activiteit |", "|---|---|---|---|---|---|"]
     for x in rij:
         c, t = g[x["id"]], x.get("toegang") or {}
         r.append("| %d | %s | %s | %s | %s | %s |" % (

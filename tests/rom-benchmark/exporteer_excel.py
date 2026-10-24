@@ -32,8 +32,9 @@ D_NAAM = {
     "d-milieu": "Milieu, gezondheid en veiligheid", "d-energie": "Energie en klimaat",
     "d-verkeer": "Verkeer en infrastructuur",
 }
-VARIANTEN = [("pad", "A · opschriftpad"), ("imow", "B · annotatie"), ("hybride", "C · hybride"),
-             ("stelsel", "D · thema-en-activiteit"), ("meervoudig", "E · meervoudig")]
+VARIANTEN = [("pad", "A · kopjes"), ("imow", "B · label overheid"), ("hybride", "C · kopjes, anders label"),
+             ("stelsel", "D · negen tegels"), ("meervoudig", "E · negen tegels, alle passende"),
+             ("stelsel_act", "F · negen tegels + soort activiteit")]
 KOP = Font(bold=True, color="FFFFFF")
 KOPVULLING = PatternFill("solid", fgColor="2F5D62")
 AGENT = PatternFill("solid", fgColor="FFF2CC")
@@ -181,18 +182,26 @@ def main():
         ("Score per vraag", "Valt het verwachte artikel onder de tegel, en tussen hoeveel artikelen staat het daar? "
                             "Met het verwachte (of fijne) subonderwerp telt dat subonderwerp, anders de hele tegel. "
                             "≤10 artikelen 100%, ≤20 90%, ≤30 70%, meer 50%; niet gevonden 0%."),
-        ("A · opschriftpad", "Onderwerp uit de kopjes boven het artikel (OCD v2a.artikel_indeling; Wro: "
+        ("A · kopjes", "De bezoeker kiest een tegel; daaronder staan de artikelen waarvan de kopjes erboven "
+                       "(hoofdstuk, afdeling, paragraaf) over dat onderwerp gaan. Technisch: het opschriftpad "
+                       "(OCD v2a.artikel_indeling; Wro: "
                              "v2a.wro_artikel_indeling via de bestemmingshoofdgroep)."),
-        ("B · annotatie", "Alleen het IMOW-thema van de juridische regels. Wro heeft geen IMOW-annotatie."),
-        ("C · hybride", "Opschriftpad, en waar dat zwijgt het IMOW-thema (de standaard op de site)."),
-        ("D · thema-en-activiteit", "Simulatie van de parallelle sessie (voorstel Brigitte 22-10-2026): acht "
-                                    "themategels plus chips uit subonderwerp, activiteit en gebiedsaanwijzing. "
-                                    "Bestaat (nog) niet op de site."),
-        ("Wro op de site", "De Wro-onderwerpen staan op productie in de API, maar de site toont ze pas met de "
-                           "register-branch wro-onderwerpen (niet live). De Wro-scores meten dus die branch."),
-        ("E · meervoudig", "Simulatie (24-10-2026): de tegels en chips van D, maar een artikel staat onder élke tegel "
-                           "waarover het iets regelt: opschriftpad, alle IMOW-thema's, gebiedsaanwijzingen, "
-                           "activiteitengroepen, en bij Wro de functies uit het hoofddeel van de bestemmingsomschrijving."),
+        ("B · label overheid", "Alleen het thema dat de overheid zelf als label aan haar regel hing (IMOW-annotatie) "
+                               "telt; de kopjes niet. Gemeenten doen dat zelden; Wro heeft geen labels."),
+        ("C · kopjes, anders label", "Eerst de kopjes; zeggen die niets, dan het label van de overheid. "
+                                     "De standaard op de site (indeling hybride)."),
+        ("D · negen tegels", "Een andere, grovere set van negen tegels (voorstel Brigitte 22-10-2026, bv. Bouwen en "
+                             "gebruik, Energie en klimaat). Een artikel staat onder de tegel van zijn kopjes of label, "
+                             "plus een tegel voor het soort gebied dat het aanwijst (boringsvrije zone -> Bodem en water). "
+                             "Daaronder chips: subonderwerp, activiteit, gebiedsaanwijzing. Niet op de site."),
+        ("Wro op de site", "Sinds 24-10 live: Wro-plannen tellen mee in de tegels van de site."),
+        ("E · negen tegels, alle passende", "Als F, en daarnaast onder elke tegel die de naam van de activiteit, het "
+                                            "gebied of de bestemming noemt: een regel over bodemenergie in een "
+                                            "boringsvrije zone staat onder Bodem en water én Energie en klimaat. "
+                                            "Op de site als indeling 'Stelsel, meervoudig (proef)'."),
+        ("F · negen tegels + soort activiteit", "Als D, en ook de soort activiteit telt als tegel (de activiteitengroep "
+                                                "uit de waardelijst): een regel bij een monumentenactiviteit komt ook "
+                                                "onder Erfgoed. Heette tot 24-10 D′. Niet op de site."),
         ("Tegelkeuze per tegelset", "Een variant = een tegelset + een indeling. Per tegelset kiest de bezoeker per vraag "
                                     "zelf een tegel, op grond van de vraag en zonder te weten waar het artikel staat. "
                                     "Site (A/B/C): kolom M of agent. Stelsel (D/E): vertaald uit de sitetegel, behalve 20 en "

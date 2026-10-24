@@ -64,7 +64,23 @@ kolom M, negatieve vragen en vragen zonder verwacht artikel tellen als 0, net al
 het Excel. De lezing van N en O (vrije tekst → ja/nee) staat met de twijfelgevallen
 in `bouw_golden.py` (`EXCEL_N_JA`, `EXCEL_O_JA`).
 
-### Variant D: thema-en-activiteitindeling (bestaat nog niet op de site)
+### De varianten in één zin
+
+Wat de bezoeker merkt; de techniek staat in de secties hieronder.
+
+| | Variant | Wat de bezoeker merkt | Op de site |
+|---|---|---|---|
+| A | kopjes | Onder een tegel staan de artikelen waarvan de kopjes erboven (hoofdstuk, afdeling, paragraaf) over dat onderwerp gaan. | indeling *Opschriftpad* |
+| B | label van de overheid | Alleen het thema dat de overheid zelf als label aan haar regel hing telt. Gemeenten doen dat zelden. | indeling *IMOW-annotatie* |
+| C | kopjes, anders label | Eerst de kopjes; zeggen die niets, dan het label van de overheid. | indeling *Hybride* (standaard) |
+| D | negen tegels | Een grovere set van negen tegels (voorstel Brigitte), bijvoorbeeld *Bouwen en gebruik* en *Energie en klimaat*. Een artikel staat onder de tegel van zijn kopjes of label, plus een tegel voor het soort gebied dat het aanwijst (een boringsvrije zone valt onder *Bodem en water*). | nee |
+| E | negen tegels, onder elke passende tegel | Als F, en daarnaast onder elke tegel die de naam van de activiteit, het gebied of de bestemming noemt. Een regel over bodemenergie in een boringsvrije zone staat dan onder *Bodem en water* én *Energie en klimaat*. | indeling *Stelsel, meervoudig (proef)* |
+| F | negen tegels + soort activiteit | Als D, en ook de soort activiteit telt. Een regel bij een monumentenactiviteit komt dan ook onder *Erfgoed*. Heette tot 24-10 D′. | nee |
+
+"Stelsel" is de werktitel in de code voor de negen tegels van D, E en F (modi `stelsel`,
+`stelsel_act` en `meervoudig`).
+
+### Variant D: negen tegels (thema-en-activiteitindeling; bestaat niet op de site)
 
 In de code heet de modus `stelsel` (werktitel van de eerste runs, 2026-10-23).
 
@@ -84,7 +100,7 @@ landschap*, *Bodem en water*, *Milieu, gezondheid en veiligheid*, *Energie en kl
   dan telt de chip met de minste artikelen. Dat is **optimistisch**: een tegel heeft
   10–141 chips, dus als platte lijst is dit niet bruikbaar. Het meet wat de chips
   bereikbaar maken, niet hoe makkelijk ze te vinden zijn.
-- **D′** voegt per activiteitengroep een tegel toe (de waardelijst deelt de groep in bij
+- **F** (tot 24-10 *D′*) voegt per activiteitengroep een tegel toe (de waardelijst deelt de groep in bij
   een thema): Brigittes letterlijke "activiteitengroep i.c.m. thema" op niveau 1, apart
   gemeten.
 
@@ -92,7 +108,7 @@ De weging is dezelfde als bij A/B/C.
 
 ### Variant E: meervoudig (modus `meervoudig`)
 
-E gebruikt dezelfde tegels en chips als D′. Het verschil is dat een artikel onder elke
+E gebruikt dezelfde tegels en chips als F. Het verschil is dat een artikel onder elke
 tegel staat waar het iets over regelt. Die tegels komen uit:
 
 - het opschriftpad;
@@ -121,7 +137,7 @@ niet waar het artikel staat.
 | Tegelset | Varianten | Keuze per vraag | Veld in `golden.json` |
 |---|---|---|---|
 | site (`thema.js`) | A, B, C | kolom M, anders `toeleiding_agent` | `onderwerp`, `toeleiding_bron` |
-| stelsel (Brigitte) | D, D′, E | `TEGEL_STELSEL` in `bouw_golden.py` | `onderwerp_d`, `onderwerp_d_bron` |
+| stelsel (Brigitte) | D, E, F | `TEGEL_STELSEL` in `bouw_golden.py` | `onderwerp_d`, `onderwerp_d_bron` |
 
 Herkomst van de stelseltegel:
 
