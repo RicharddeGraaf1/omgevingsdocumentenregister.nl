@@ -1,0 +1,570 @@
+{
+ "meta": {
+  "start": "2026-10-23 13:36",
+  "api": "https://omgevingsdocumentenregister.nl/api",
+  "aanroepen": 24,
+  "duur": 27.118852,
+  "golden": "C:\\GIT\\omgevingsdocumentenregister.nl\\tests\\rom-benchmark\\golden.json",
+  "cases": 3
+ },
+ "resultaten": [
+  {
+   "id": 15,
+   "vraag": "Mag ik hier een dakopbouw bouwen?",
+   "routes": {
+    "locatie": "PASS",
+    "kenmerk": "PASS",
+    "document": "PASS",
+    "artikel": "PASS",
+    "pad": "PASS",
+    "imow": "FAIL",
+    "hybride": "PASS"
+   },
+   "documenten": [
+    {
+     "spec": [
+      "omgevingsplan gemeente utrecht"
+     ],
+     "gevonden": true,
+     "afwezig": false,
+     "regeling": "Omgevingsplan gemeente Utrecht",
+     "bron_id": "/akn/nl/act/gm0344/2020/omgevingsplan/nld@2026-08-19;09031012",
+     "via": "regel",
+     "aantal": 763,
+     "artikelen_op_punt": 376,
+     "geraakt": [
+      "4.26"
+     ],
+     "aanvullend": 7,
+     "toegang": {
+      "pad": {
+       "gevonden": true,
+       "artikel": "4.26",
+       "n": 60,
+       "via": "subonderwerp",
+       "score": 0.5
+      },
+      "imow": {
+       "gevonden": false,
+       "score": 0.0,
+       "uitleg": "artikel valt onder niet-ingedeeld"
+      },
+      "hybride": {
+       "gevonden": true,
+       "artikel": "4.26",
+       "n": 60,
+       "via": "subonderwerp",
+       "score": 0.5
+      }
+     },
+     "indeling": {
+      "pad": [
+       {
+        "artikel": "4.26",
+        "tegels": [
+         "bouwen"
+        ],
+        "sub": "bouwen en verbouwen",
+        "herkomst": "pad"
+       }
+      ],
+      "imow": [
+       {
+        "artikel": "4.26",
+        "tegels": [
+         "niet-ingedeeld"
+        ],
+        "sub": null,
+        "herkomst": null
+       }
+      ],
+      "hybride": [
+       {
+        "artikel": "4.26",
+        "tegels": [
+         "bouwen"
+        ],
+        "sub": "bouwen en verbouwen",
+        "herkomst": "pad"
+       }
+      ]
+     }
+    }
+   ],
+   "locatie": {
+    "x": 128983,
+    "y": 455222,
+    "label": "Does 30, 3453MD De Meern",
+    "ok": true,
+    "melding": null
+   },
+   "documenten_op_punt": 34,
+   "kenmerk": {
+    "status": "PASS",
+    "gevonden": [
+     "dakopbouw of bijzondere bouwlaag bouwen"
+    ]
+   },
+   "toegang": {
+    "pad": {
+     "gevonden": true,
+     "artikel": "4.26",
+     "n": 60,
+     "via": "subonderwerp",
+     "score": 0.5
+    },
+    "imow": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "artikel valt onder niet-ingedeeld"
+    },
+    "hybride": {
+     "gevonden": true,
+     "artikel": "4.26",
+     "n": 60,
+     "via": "subonderwerp",
+     "score": 0.5
+    }
+   }
+  },
+  {
+   "id": 21,
+   "vraag": "Welke regels gelden hier voor het onttrekken van grondwater voor besproeien van gewassen?",
+   "routes": {
+    "locatie": "PASS",
+    "kenmerk": "PASS",
+    "document": "PASS",
+    "artikel": "PASS",
+    "pad": "PASS",
+    "imow": "FAIL",
+    "hybride": "PASS"
+   },
+   "documenten": [
+    {
+     "spec": [
+      "waterschapsverordening",
+      "frysl"
+     ],
+     "gevonden": true,
+     "afwezig": false,
+     "regeling": "Waterschapsverordening Wetterskip Fryslân",
+     "bron_id": "/akn/nl/act/ws0653/2023-12-05/fdff9a72-7954-4b22-b34f-2494735c70f5/nld@2026-08-13;13442367",
+     "via": "regel",
+     "aantal": 117,
+     "artikelen_op_punt": 86,
+     "geraakt": [
+      "3.10",
+      "3.11",
+      "3.12",
+      "3.13",
+      "3.14",
+      "3.15",
+      "3.16",
+      "3.8",
+      "3.9"
+     ],
+     "aanvullend": 0,
+     "toegang": {
+      "pad": {
+       "gevonden": true,
+       "artikel": "3.10",
+       "n": 10,
+       "via": "subonderwerp",
+       "score": 1.0
+      },
+      "imow": {
+       "gevonden": false,
+       "score": 0.0,
+       "uitleg": "artikel valt onder niet-ingedeeld"
+      },
+      "hybride": {
+       "gevonden": true,
+       "artikel": "3.10",
+       "n": 10,
+       "via": "subonderwerp",
+       "score": 1.0
+      }
+     },
+     "indeling": {
+      "pad": [
+       {
+        "artikel": "3.10",
+        "tegels": [
+         "waterkering"
+        ],
+        "sub": "grondwateronttrekking",
+        "herkomst": "pad"
+       },
+       {
+        "artikel": "3.11",
+        "tegels": [
+         "waterkering"
+        ],
+        "sub": "grondwateronttrekking",
+        "herkomst": "pad"
+       },
+       {
+        "artikel": "3.12",
+        "tegels": [
+         "waterkering"
+        ],
+        "sub": "grondwateronttrekking",
+        "herkomst": "pad"
+       },
+       {
+        "artikel": "3.13",
+        "tegels": [
+         "waterkering"
+        ],
+        "sub": "grondwateronttrekking",
+        "herkomst": "pad"
+       },
+       {
+        "artikel": "3.14",
+        "tegels": [
+         "waterkering"
+        ],
+        "sub": "grondwateronttrekking",
+        "herkomst": "pad"
+       },
+       {
+        "artikel": "3.15",
+        "tegels": [
+         "waterkering"
+        ],
+        "sub": "grondwateronttrekking",
+        "herkomst": "pad"
+       },
+       {
+        "artikel": "3.16",
+        "tegels": [
+         "waterkering"
+        ],
+        "sub": "grondwateronttrekking",
+        "herkomst": "pad"
+       },
+       {
+        "artikel": "3.8",
+        "tegels": [
+         "waterkering"
+        ],
+        "sub": "grondwateronttrekking",
+        "herkomst": "pad"
+       },
+       {
+        "artikel": "3.9",
+        "tegels": [
+         "waterkering"
+        ],
+        "sub": "grondwateronttrekking",
+        "herkomst": "pad"
+       }
+      ],
+      "imow": [
+       {
+        "artikel": "3.10",
+        "tegels": [
+         "niet-ingedeeld"
+        ],
+        "sub": null,
+        "herkomst": null
+       },
+       {
+        "artikel": "3.11",
+        "tegels": [
+         "niet-ingedeeld"
+        ],
+        "sub": null,
+        "herkomst": null
+       },
+       {
+        "artikel": "3.12",
+        "tegels": [
+         "niet-ingedeeld"
+        ],
+        "sub": null,
+        "herkomst": null
+       },
+       {
+        "artikel": "3.13",
+        "tegels": [
+         "niet-ingedeeld"
+        ],
+        "sub": null,
+        "herkomst": null
+       },
+       {
+        "artikel": "3.14",
+        "tegels": [
+         "niet-ingedeeld"
+        ],
+        "sub": null,
+        "herkomst": null
+       },
+       {
+        "artikel": "3.15",
+        "tegels": [
+         "niet-ingedeeld"
+        ],
+        "sub": null,
+        "herkomst": null
+       },
+       {
+        "artikel": "3.16",
+        "tegels": [
+         "niet-ingedeeld"
+        ],
+        "sub": null,
+        "herkomst": null
+       },
+       {
+        "artikel": "3.8",
+        "tegels": [
+         "niet-ingedeeld"
+        ],
+        "sub": null,
+        "herkomst": null
+       },
+       {
+        "artikel": "3.9",
+        "tegels": [
+         "niet-ingedeeld"
+        ],
+        "sub": null,
+        "herkomst": null
+       }
+      ],
+      "hybride": [
+       {
+        "artikel": "3.10",
+        "tegels": [
+         "waterkering"
+        ],
+        "sub": "grondwateronttrekking",
+        "herkomst": "pad"
+       },
+       {
+        "artikel": "3.11",
+        "tegels": [
+         "waterkering"
+        ],
+        "sub": "grondwateronttrekking",
+        "herkomst": "pad"
+       },
+       {
+        "artikel": "3.12",
+        "tegels": [
+         "waterkering"
+        ],
+        "sub": "grondwateronttrekking",
+        "herkomst": "pad"
+       },
+       {
+        "artikel": "3.13",
+        "tegels": [
+         "waterkering"
+        ],
+        "sub": "grondwateronttrekking",
+        "herkomst": "pad"
+       },
+       {
+        "artikel": "3.14",
+        "tegels": [
+         "waterkering"
+        ],
+        "sub": "grondwateronttrekking",
+        "herkomst": "pad"
+       },
+       {
+        "artikel": "3.15",
+        "tegels": [
+         "waterkering"
+        ],
+        "sub": "grondwateronttrekking",
+        "herkomst": "pad"
+       },
+       {
+        "artikel": "3.16",
+        "tegels": [
+         "waterkering"
+        ],
+        "sub": "grondwateronttrekking",
+        "herkomst": "pad"
+       },
+       {
+        "artikel": "3.8",
+        "tegels": [
+         "waterkering"
+        ],
+        "sub": "grondwateronttrekking",
+        "herkomst": "pad"
+       },
+       {
+        "artikel": "3.9",
+        "tegels": [
+         "waterkering"
+        ],
+        "sub": "grondwateronttrekking",
+        "herkomst": "pad"
+       }
+      ]
+     }
+    }
+   ],
+   "locatie": {
+    "x": 188661,
+    "y": 560278,
+    "label": "Perceel Oldeboorn (ODB04) F 405",
+    "ok": true,
+    "melding": null
+   },
+   "documenten_op_punt": 23,
+   "kenmerk": {
+    "status": "PASS",
+    "gevonden": [
+     "Grondwater onttrekken"
+    ]
+   },
+   "toegang": {
+    "pad": {
+     "gevonden": true,
+     "artikel": "3.10",
+     "n": 10,
+     "via": "subonderwerp",
+     "score": 1.0
+    },
+    "imow": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "artikel valt onder niet-ingedeeld"
+    },
+    "hybride": {
+     "gevonden": true,
+     "artikel": "3.10",
+     "n": 10,
+     "via": "subonderwerp",
+     "score": 1.0
+    }
+   }
+  },
+  {
+   "id": 28,
+   "vraag": "Wat is hier de overstromingskans?",
+   "routes": {
+    "locatie": "PASS",
+    "kenmerk": "PASS",
+    "document": "PASS",
+    "artikel": "PASS",
+    "pad": "PASS",
+    "imow": "FAIL",
+    "hybride": "PASS"
+   },
+   "documenten": [
+    {
+     "spec": [
+      "omgevingsverordening frysl"
+     ],
+     "gevonden": true,
+     "afwezig": false,
+     "regeling": "Omgevingsverordening Fryslân 2022",
+     "bron_id": "/akn/nl/act/pv21/2023/omgevingsverordening/nld@2026-10-07;1",
+     "via": "regel",
+     "aantal": 277,
+     "artikelen_op_punt": 131,
+     "geraakt": [
+      "3.9"
+     ],
+     "aanvullend": 0,
+     "toegang": {
+      "pad": {
+       "gevonden": true,
+       "artikel": "3.9",
+       "n": 18,
+       "via": "onderwerp",
+       "score": 0.9
+      },
+      "imow": {
+       "gevonden": false,
+       "score": 0.0,
+       "uitleg": "artikel valt onder water"
+      },
+      "hybride": {
+       "gevonden": true,
+       "artikel": "3.9",
+       "n": 18,
+       "via": "onderwerp",
+       "score": 0.9
+      }
+     },
+     "indeling": {
+      "pad": [
+       {
+        "artikel": "3.9",
+        "tegels": [
+         "waterkering"
+        ],
+        "sub": "water algemeen",
+        "herkomst": "pad"
+       }
+      ],
+      "imow": [
+       {
+        "artikel": "3.9",
+        "tegels": [
+         "water"
+        ],
+        "sub": null,
+        "herkomst": "annotatie"
+       }
+      ],
+      "hybride": [
+       {
+        "artikel": "3.9",
+        "tegels": [
+         "waterkering"
+        ],
+        "sub": "water algemeen",
+        "herkomst": "pad"
+       }
+      ]
+     }
+    }
+   ],
+   "locatie": {
+    "x": 192121,
+    "y": 571735,
+    "label": "Krúspaed 9, 9264TE Earnewâld",
+    "ok": true,
+    "melding": null
+   },
+   "documenten_op_punt": 19,
+   "kenmerk": {
+    "status": "PASS",
+    "gevonden": [
+     "Overstromingskans bebouwd gebied"
+    ]
+   },
+   "toegang": {
+    "pad": {
+     "gevonden": true,
+     "artikel": "3.9",
+     "n": 18,
+     "via": "onderwerp",
+     "score": 0.9
+    },
+    "imow": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "artikel valt onder water"
+    },
+    "hybride": {
+     "gevonden": true,
+     "artikel": "3.9",
+     "n": 18,
+     "via": "onderwerp",
+     "score": 0.9
+    }
+   }
+  }
+ ]
+}

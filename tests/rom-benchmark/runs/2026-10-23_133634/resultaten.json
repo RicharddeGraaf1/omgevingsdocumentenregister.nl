@@ -1,0 +1,5514 @@
+{
+ "meta": {
+  "start": "2026-10-23 13:36",
+  "api": "https://omgevingsdocumentenregister.nl/api",
+  "aanroepen": 205,
+  "duur": 174.033367,
+  "golden": "C:\\GIT\\omgevingsdocumentenregister.nl\\tests\\rom-benchmark\\golden.json",
+  "cases": 40
+ },
+ "resultaten": [
+  {
+   "id": 1,
+   "vraag": "Wat is hier de maximale bouwhoogte?",
+   "routes": {
+    "locatie": "PASS",
+    "kenmerk": "PASS",
+    "document": "PASS",
+    "artikel": "n.v.t.",
+    "pad": "n.v.t.",
+    "imow": "n.v.t.",
+    "hybride": "n.v.t.",
+    "vraag": "DOC"
+   },
+   "documenten": [
+    {
+     "spec": [
+      "omgevingsplan gemeente amersfoort"
+     ],
+     "gevonden": true,
+     "afwezig": false,
+     "regeling": "Omgevingsplan gemeente Amersfoort",
+     "bron_id": "/akn/nl/act/gm0307/2020/omgevingsplan/nld@2026-06-04;12255961",
+     "via": "regel",
+     "aantal": 714
+    }
+   ],
+   "locatie": {
+    "x": 154799,
+    "y": 466865,
+    "label": "RD 154799, 466865",
+    "ok": true
+   },
+   "documenten_op_punt": 36,
+   "kenmerk": {
+    "status": "PASS",
+    "gevonden": [
+     "maximale bouwhoogte"
+    ],
+    "waarden": [
+     14.0
+    ],
+    "verwacht": [
+     14.0
+    ]
+   },
+   "toegang": {
+    "pad": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    },
+    "imow": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    },
+    "hybride": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    }
+   },
+   "vraag_route": {
+    "aantal": 1,
+    "rang_artikel": null,
+    "rang_document": 1,
+    "top5": [
+     {
+      "rang": 1,
+      "artikel": "5.9",
+      "opschrift": "Beoordelingsregel hoofdgebouw - bouwhoogte",
+      "regeling": "Omgevingsplan gemeente Amersfoort",
+      "route": "tekst_fallback"
+     }
+    ],
+    "begrippen": [
+     "bouwhoogte"
+    ]
+   }
+  },
+  {
+   "id": 2,
+   "vraag": "Wat is hier de maximale bouwhoogte?",
+   "routes": {
+    "locatie": "PASS",
+    "kenmerk": "PASS",
+    "document": "PASS",
+    "artikel": "n.v.t.",
+    "pad": "n.v.t.",
+    "imow": "n.v.t.",
+    "hybride": "n.v.t.",
+    "vraag": "DOC"
+   },
+   "documenten": [
+    {
+     "spec": [
+      "omgevingsplan gemeente amersfoort"
+     ],
+     "gevonden": true,
+     "afwezig": false,
+     "regeling": "Omgevingsplan gemeente Amersfoort",
+     "bron_id": "/akn/nl/act/gm0307/2020/omgevingsplan/nld@2026-06-04;12255961",
+     "via": "regel",
+     "aantal": 713
+    }
+   ],
+   "locatie": {
+    "x": 154803,
+    "y": 466873,
+    "label": "RD 154803, 466873",
+    "ok": true
+   },
+   "documenten_op_punt": 36,
+   "kenmerk": {
+    "status": "PASS",
+    "gevonden": [
+     "maximale bouwhoogte"
+    ],
+    "waarden": [
+     8.0
+    ],
+    "verwacht": [
+     8.0
+    ]
+   },
+   "toegang": {
+    "pad": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    },
+    "imow": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    },
+    "hybride": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    }
+   },
+   "vraag_route": {
+    "aantal": 1,
+    "rang_artikel": null,
+    "rang_document": 1,
+    "top5": [
+     {
+      "rang": 1,
+      "artikel": "5.9",
+      "opschrift": "Beoordelingsregel hoofdgebouw - bouwhoogte",
+      "regeling": "Omgevingsplan gemeente Amersfoort",
+      "route": "tekst_fallback"
+     }
+    ],
+    "begrippen": [
+     "bouwhoogte"
+    ]
+   }
+  },
+  {
+   "id": 3,
+   "vraag": "Wat is hier de maximale bouwhoogte?",
+   "routes": {
+    "locatie": "PASS",
+    "kenmerk": "DEELS",
+    "document": "PASS",
+    "artikel": "n.v.t.",
+    "pad": "n.v.t.",
+    "imow": "n.v.t.",
+    "hybride": "n.v.t.",
+    "vraag": "DOC"
+   },
+   "documenten": [
+    {
+     "spec": [
+      "omgevingsplan gemeente amersfoort"
+     ],
+     "gevonden": true,
+     "afwezig": false,
+     "regeling": "Omgevingsplan gemeente Amersfoort",
+     "bron_id": "/akn/nl/act/gm0307/2020/omgevingsplan/nld@2026-06-04;12255961",
+     "via": "regel",
+     "aantal": 710
+    }
+   ],
+   "locatie": {
+    "x": 154755,
+    "y": 466903,
+    "label": "Kerklaan 22, 3828EB Hoogland",
+    "ok": true,
+    "melding": null
+   },
+   "documenten_op_punt": 36,
+   "kenmerk": {
+    "status": "DEELS",
+    "gevonden": [
+     "maximale bouwhoogte"
+    ],
+    "waarden": [
+     55.0
+    ],
+    "verwacht": [
+     5.0,
+     6.0,
+     8.0,
+     10.0,
+     11.0,
+     25.0,
+     55.0
+    ]
+   },
+   "toegang": {
+    "pad": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen verwacht artikel om naar te zoeken"
+    },
+    "imow": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen verwacht artikel om naar te zoeken"
+    },
+    "hybride": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen verwacht artikel om naar te zoeken"
+    }
+   },
+   "vraag_route": {
+    "aantal": 1,
+    "rang_artikel": null,
+    "rang_document": 1,
+    "top5": [
+     {
+      "rang": 1,
+      "artikel": "5.9",
+      "opschrift": "Beoordelingsregel hoofdgebouw - bouwhoogte",
+      "regeling": "Omgevingsplan gemeente Amersfoort",
+      "route": "tekst_fallback"
+     }
+    ],
+    "begrippen": [
+     "bouwhoogte"
+    ]
+   }
+  },
+  {
+   "id": 4,
+   "vraag": "Wat is hier de maximale bouwhoogte?",
+   "routes": {
+    "locatie": "PASS",
+    "kenmerk": "PASS",
+    "document": "PASS",
+    "artikel": "n.v.t.",
+    "pad": "n.v.t.",
+    "imow": "n.v.t.",
+    "hybride": "n.v.t.",
+    "vraag": "info"
+   },
+   "documenten": [
+    {
+     "spec": [
+      "omgevingsplan gemeente amersfoort"
+     ],
+     "gevonden": true,
+     "afwezig": false,
+     "regeling": "Omgevingsplan gemeente Amersfoort",
+     "bron_id": "/akn/nl/act/gm0307/2020/omgevingsplan/nld@2026-06-04;12255961",
+     "via": "regel",
+     "aantal": 701
+    }
+   ],
+   "locatie": {
+    "x": 154737,
+    "y": 466858,
+    "label": "RD 154737, 466858",
+    "ok": true
+   },
+   "documenten_op_punt": 36,
+   "kenmerk": {
+    "status": "PASS",
+    "gevonden": [],
+    "uitleg": "terecht geen kenmerk"
+   },
+   "toegang": {
+    "pad": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "negatieve vraag: er is geen artikel om te vinden"
+    },
+    "imow": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "negatieve vraag: er is geen artikel om te vinden"
+    },
+    "hybride": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "negatieve vraag: er is geen artikel om te vinden"
+    }
+   },
+   "vraag_route": {
+    "aantal": 4,
+    "rang_artikel": null,
+    "rang_document": 1,
+    "top5": [
+     {
+      "rang": 1,
+      "artikel": "5.18",
+      "opschrift": "Beoordelingsregels bijbehorend bouwwerken bij een ander hoofdgebouw dan een grondgebonden woning",
+      "regeling": "Omgevingsplan gemeente Amersfoort",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 2,
+      "artikel": "22.31",
+      "opschrift": "Uitzonderingen op vergunningplicht artikel 22.30 – omgevingsplan onverminderd van toepassing",
+      "regeling": "Omgevingsplan gemeente Amersfoort",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 3,
+      "artikel": "22.28",
+      "opschrift": "Meetbepalingen",
+      "regeling": "Omgevingsplan gemeente Amersfoort",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 4,
+      "artikel": "5.15",
+      "opschrift": "Beoordelingsregel bijbehorende bouwwerken",
+      "regeling": "Omgevingsplan gemeente Amersfoort",
+      "route": "tekst_fallback"
+     }
+    ],
+    "begrippen": [
+     "bouwhoogte"
+    ]
+   }
+  },
+  {
+   "id": 5,
+   "vraag": "Wat is hier de maximale bouwhoogte?",
+   "routes": {
+    "locatie": "PASS",
+    "kenmerk": "PASS",
+    "document": "PASS",
+    "artikel": "n.v.t.",
+    "pad": "n.v.t.",
+    "imow": "n.v.t.",
+    "hybride": "n.v.t.",
+    "vraag": "FAIL"
+   },
+   "documenten": [
+    {
+     "spec": [
+      "binnenstad"
+     ],
+     "gevonden": true,
+     "afwezig": false,
+     "regeling": "Bestemmingsplan \"Binnenstad\"",
+     "bron_id": "NL.IMRO.0307.BP00071-0301",
+     "via": "regel",
+     "aantal": 29
+    }
+   ],
+   "locatie": {
+    "x": 155103,
+    "y": 463460,
+    "label": "Boldershof 32, 3811GN Amersfoort",
+    "ok": true,
+    "melding": null
+   },
+   "documenten_op_punt": 36,
+   "kenmerk": {
+    "status": "PASS",
+    "gevonden": [
+     "maximum goothoogte (m), maximum bouwhoogte (m)"
+    ]
+   },
+   "toegang": {
+    "pad": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen verwacht artikel om naar te zoeken"
+    },
+    "imow": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen verwacht artikel om naar te zoeken"
+    },
+    "hybride": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen verwacht artikel om naar te zoeken"
+    }
+   },
+   "vraag_route": {
+    "aantal": 2,
+    "rang_artikel": null,
+    "rang_document": null,
+    "top5": [
+     {
+      "rang": 1,
+      "artikel": "22.31",
+      "opschrift": "Uitzonderingen op vergunningplicht artikel 22.30 – omgevingsplan onverminderd van toepassing",
+      "regeling": "Omgevingsplan gemeente Amersfoort",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 2,
+      "artikel": "22.28",
+      "opschrift": "Meetbepalingen",
+      "regeling": "Omgevingsplan gemeente Amersfoort",
+      "route": "tekst_fallback"
+     }
+    ],
+    "begrippen": [
+     "bouwhoogte"
+    ]
+   }
+  },
+  {
+   "id": 6,
+   "vraag": "Wat is hier de maximale bouwhoogte?",
+   "routes": {
+    "locatie": "PASS",
+    "kenmerk": "PASS",
+    "document": "PASS",
+    "artikel": "n.v.t.",
+    "pad": "n.v.t.",
+    "imow": "n.v.t.",
+    "hybride": "n.v.t.",
+    "vraag": "info"
+   },
+   "documenten": [
+    {
+     "spec": [
+      "binnenstad"
+     ],
+     "gevonden": true,
+     "afwezig": false,
+     "regeling": "Bestemmingsplan \"Binnenstad\"",
+     "bron_id": "NL.IMRO.0307.BP00071-0301",
+     "via": "regel",
+     "aantal": 29
+    }
+   ],
+   "locatie": {
+    "x": 155143,
+    "y": 463394,
+    "label": "RD 155143, 463394",
+    "ok": true
+   },
+   "documenten_op_punt": 36,
+   "kenmerk": {
+    "status": "PASS",
+    "gevonden": [],
+    "uitleg": "terecht geen kenmerk"
+   },
+   "toegang": {
+    "pad": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "negatieve vraag: er is geen artikel om te vinden"
+    },
+    "imow": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "negatieve vraag: er is geen artikel om te vinden"
+    },
+    "hybride": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "negatieve vraag: er is geen artikel om te vinden"
+    }
+   },
+   "vraag_route": {
+    "aantal": 2,
+    "rang_artikel": null,
+    "rang_document": null,
+    "top5": [
+     {
+      "rang": 1,
+      "artikel": "22.31",
+      "opschrift": "Uitzonderingen op vergunningplicht artikel 22.30 – omgevingsplan onverminderd van toepassing",
+      "regeling": "Omgevingsplan gemeente Amersfoort",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 2,
+      "artikel": "22.28",
+      "opschrift": "Meetbepalingen",
+      "regeling": "Omgevingsplan gemeente Amersfoort",
+      "route": "tekst_fallback"
+     }
+    ],
+    "begrippen": [
+     "bouwhoogte"
+    ]
+   }
+  },
+  {
+   "id": 7,
+   "vraag": "Wat is hier het maximum bebouwingspercentage?",
+   "routes": {
+    "locatie": "PASS",
+    "kenmerk": "PASS",
+    "document": "FAIL",
+    "artikel": "n.v.t.",
+    "pad": "n.v.t.",
+    "imow": "n.v.t.",
+    "hybride": "n.v.t.",
+    "vraag": "FAIL"
+   },
+   "documenten": [
+    {
+     "spec": [
+      "earnew",
+      "2013"
+     ],
+     "gevonden": false,
+     "afwezig": false,
+     "uitleg": "document niet bij dit punt, en niet te vinden in het register"
+    }
+   ],
+   "locatie": {
+    "x": 192516,
+    "y": 572200,
+    "label": "De Reidtûgel 3, 9264TS Earnewâld",
+    "ok": true,
+    "melding": null
+   },
+   "documenten_op_punt": 19,
+   "kenmerk": {
+    "status": "PASS",
+    "gevonden": [
+     "maximum goothoogte (m), maximum bouwhoogte (m), maximum bebouwingspercentage (%)"
+    ]
+   },
+   "toegang": {
+    "pad": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    },
+    "imow": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    },
+    "hybride": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    }
+   },
+   "vraag_route": {
+    "aantal": 1,
+    "rang_artikel": null,
+    "rang_document": null,
+    "top5": [
+     {
+      "rang": 1,
+      "artikel": null,
+      "opschrift": "Locatiespecifieke behoefte 20: geplande opschaling Koninklijke Marechaussee Randstad Den Haag, Maaldrift uitbreiden, gemeente Wassenaar",
+      "regeling": "Nationaal Programma Ruimte voor Defensie",
+      "route": "tekst_fallback"
+     }
+    ],
+    "begrippen": [
+     "bebouwingspercentage"
+    ]
+   }
+  },
+  {
+   "id": 8,
+   "vraag": "Mag ik hier een winkel beginnen?",
+   "routes": {
+    "locatie": "PASS",
+    "kenmerk": "PASS",
+    "document": "PASS",
+    "artikel": "FAIL",
+    "pad": "n.v.t.",
+    "imow": "n.v.t.",
+    "hybride": "n.v.t.",
+    "vraag": "FAIL"
+   },
+   "documenten": [
+    {
+     "spec": [
+      "binnenstad 2013"
+     ],
+     "gevonden": true,
+     "afwezig": false,
+     "regeling": "Binnenstad 2013",
+     "bron_id": "NL.IMRO.0402.11bp00binnenstad-va01",
+     "via": "regel",
+     "aantal": 16,
+     "artikelen_op_punt": 16,
+     "geraakt": [],
+     "uitleg": "Wro: OCD heeft 22 tekstobjecten van dit plan, 16 met een nummer; 11.1 zit er niet bij (datalaag, niet de route)"
+    }
+   ],
+   "locatie": {
+    "x": 140261,
+    "y": 470759,
+    "label": "'s-Gravelandseweg 9, 1211BN Hilversum",
+    "ok": true,
+    "melding": null
+   },
+   "documenten_op_punt": 28,
+   "kenmerk": {
+    "status": "PASS",
+    "gevonden": [
+     "Dienstverlening"
+    ]
+   },
+   "toegang": {
+    "pad": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    },
+    "imow": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    },
+    "hybride": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    }
+   },
+   "vraag_route": {
+    "aantal": 3,
+    "rang_artikel": null,
+    "rang_document": null,
+    "top5": [
+     {
+      "rang": 1,
+      "artikel": "22.27",
+      "opschrift": "Uitzonderingen op vergunningplicht artikel 22.26 – omgevingsplan onverminderd van toepassing",
+      "regeling": "Omgevingsplan gemeente Hilversum",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 2,
+      "artikel": "22.35",
+      "opschrift": "Aanvraagvereisten binnenplanse omgevingsvergunning omgevingsplanactiviteit bouwwerken",
+      "regeling": "Omgevingsplan gemeente Hilversum",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 3,
+      "artikel": "22.36",
+      "opschrift": "Binnenplanse vergunningvrije activiteiten van rechtswege in overeenstemming met dit omgevingsplan",
+      "regeling": "Omgevingsplan gemeente Hilversum",
+      "route": "tekst_fallback"
+     }
+    ],
+    "begrippen": [
+     "Woning, bedrijfspand of ander nieuw gebouw bouwen",
+     "Groepen mensen ontvangen of huisvesten in een gebouw of op een terrein",
+     "Detailhandel of ambachtsbedrijf",
+     "Bestaand gebouw verbouwen",
+     "Bouwwerk of deel van een bouwwerk slopen, of asbest verwijderen"
+    ]
+   }
+  },
+  {
+   "id": 9,
+   "vraag": "Mag ik hier een winkel beginnen?",
+   "routes": {
+    "locatie": "PASS",
+    "kenmerk": "PASS",
+    "document": "PASS",
+    "artikel": "FAIL",
+    "pad": "n.v.t.",
+    "imow": "n.v.t.",
+    "hybride": "n.v.t.",
+    "vraag": "FAIL"
+   },
+   "documenten": [
+    {
+     "spec": [
+      "binnenstad"
+     ],
+     "gevonden": true,
+     "afwezig": false,
+     "regeling": "Binnenstad",
+     "bron_id": "NL.IMRO.0014.BP526Binnenstad-vg02",
+     "via": "regel",
+     "aantal": 48,
+     "artikelen_op_punt": 48,
+     "geraakt": [],
+     "uitleg": "Wro: OCD heeft 49 tekstobjecten van dit plan, 48 met een nummer; 4.1 zit er niet bij (datalaag, niet de route)"
+    }
+   ],
+   "locatie": {
+    "x": 233708,
+    "y": 581912,
+    "label": "Vismarkt 7a-7, 9712CA Groningen",
+    "ok": true,
+    "melding": null
+   },
+   "documenten_op_punt": 34,
+   "kenmerk": {
+    "status": "PASS",
+    "gevonden": [
+     "Centrum - 1"
+    ]
+   },
+   "toegang": {
+    "pad": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    },
+    "imow": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    },
+    "hybride": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    }
+   },
+   "vraag_route": {
+    "aantal": 2,
+    "rang_artikel": null,
+    "rang_document": null,
+    "top5": [
+     {
+      "rang": 1,
+      "artikel": "32.27",
+      "opschrift": "Bouwwerken - vergunningvrij A (alleen als activiteit past in omgevingsplan)",
+      "regeling": "Omgevingsplan gemeente Groningen",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 2,
+      "artikel": "32.28a",
+      "opschrift": "Bouwwerken - vergunningvrij B (ook als activiteit niet past in omgevingsplan)",
+      "regeling": "Omgevingsplan gemeente Groningen",
+      "route": "tekst_fallback"
+     }
+    ],
+    "begrippen": [
+     "Woning, bedrijfspand of ander nieuw gebouw bouwen",
+     "Groepen mensen ontvangen of huisvesten in een gebouw of op een terrein",
+     "Detailhandel of ambachtsbedrijf",
+     "Bestaand gebouw verbouwen",
+     "Bouwwerk of deel van een bouwwerk slopen, of asbest verwijderen"
+    ]
+   }
+  },
+  {
+   "id": 10,
+   "vraag": "Mag ik hier een winkel beginnen?",
+   "routes": {
+    "locatie": "PASS",
+    "kenmerk": "PASS",
+    "document": "PASS",
+    "artikel": "n.v.t.",
+    "pad": "n.v.t.",
+    "imow": "n.v.t.",
+    "hybride": "n.v.t.",
+    "vraag": "DOC"
+   },
+   "documenten": [
+    {
+     "spec": [
+      "omgevingsplan gemeente groningen"
+     ],
+     "gevonden": true,
+     "afwezig": false,
+     "regeling": "Omgevingsplan gemeente Groningen",
+     "bron_id": "/akn/nl/act/gm0014/2020/omgevingsplan/nld@2024-09-30;10",
+     "via": "regel",
+     "aantal": 1141
+    }
+   ],
+   "locatie": {
+    "x": 234931,
+    "y": 582190,
+    "label": "Damsterdiep 237, 9713ED Groningen",
+    "ok": true,
+    "melding": null
+   },
+   "documenten_op_punt": 31,
+   "kenmerk": {
+    "status": "PASS",
+    "gevonden": [
+     "Detailhandel"
+    ]
+   },
+   "toegang": {
+    "pad": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen verwacht artikel om naar te zoeken"
+    },
+    "imow": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen verwacht artikel om naar te zoeken"
+    },
+    "hybride": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen verwacht artikel om naar te zoeken"
+    }
+   },
+   "vraag_route": {
+    "aantal": 12,
+    "rang_artikel": null,
+    "rang_document": 1,
+    "top5": [
+     {
+      "rang": 1,
+      "artikel": "32.41",
+      "opschrift": "Algemeen toepassingsbereik",
+      "regeling": "Omgevingsplan gemeente Groningen",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 2,
+      "artikel": "6.9",
+      "opschrift": "Bouwproces - uitzetten rooilijnen, bebouwingsgrenzen en bouwwerkpeil",
+      "regeling": "Omgevingsplan gemeente Groningen",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 3,
+      "artikel": "10.58",
+      "opschrift": "Kamerverhuur - bestaand",
+      "regeling": "Omgevingsplan gemeente Groningen",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 4,
+      "artikel": "32.244",
+      "opschrift": "Gegevens en bescheiden",
+      "regeling": "Omgevingsplan gemeente Groningen",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 5,
+      "artikel": "9.1",
+      "opschrift": "Werken en werkzaamheden - waar de regels over gaan",
+      "regeling": "Omgevingsplan gemeente Groningen",
+      "route": "tekst_fallback"
+     }
+    ],
+    "begrippen": [
+     "Woning, bedrijfspand of ander nieuw gebouw bouwen",
+     "Groepen mensen ontvangen of huisvesten in een gebouw of op een terrein",
+     "Detailhandel of ambachtsbedrijf",
+     "Bestaand gebouw verbouwen",
+     "Bouwwerk of deel van een bouwwerk slopen, of asbest verwijderen"
+    ]
+   }
+  },
+  {
+   "id": 11,
+   "vraag": "Mag ik hier een houtzagerij beginnen?",
+   "routes": {
+    "locatie": "PASS",
+    "kenmerk": "PASS",
+    "document": "FAIL",
+    "artikel": "n.v.t.",
+    "pad": "n.v.t.",
+    "imow": "n.v.t.",
+    "hybride": "n.v.t.",
+    "vraag": "FAIL"
+   },
+   "documenten": [
+    {
+     "spec": [
+      "earnew",
+      "2013"
+     ],
+     "gevonden": false,
+     "afwezig": false,
+     "uitleg": "document niet bij dit punt, en niet te vinden in het register"
+    }
+   ],
+   "locatie": {
+    "x": 192121,
+    "y": 571735,
+    "label": "Krúspaed 9, 9264TE Earnewâld",
+    "ok": true,
+    "melding": null
+   },
+   "documenten_op_punt": 19,
+   "kenmerk": {
+    "status": "PASS",
+    "gevonden": [
+     "Wonen - A1"
+    ]
+   },
+   "toegang": {
+    "pad": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    },
+    "imow": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    },
+    "hybride": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    }
+   },
+   "vraag_route": {
+    "aantal": 7,
+    "rang_artikel": null,
+    "rang_document": null,
+    "top5": [
+     {
+      "rang": 1,
+      "artikel": "22.157",
+      "opschrift": "Inerte goederen",
+      "regeling": "Omgevingsplan gemeente Tytsjerksteradiel",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 2,
+      "artikel": "22.154",
+      "opschrift": "Toepassingsbereik",
+      "regeling": "Omgevingsplan gemeente Tytsjerksteradiel",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 3,
+      "artikel": "22.155",
+      "opschrift": "Periodiek reinigen",
+      "regeling": "Omgevingsplan gemeente Tytsjerksteradiel",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 4,
+      "artikel": "11.111",
+      "opschrift": "(activiteiten)",
+      "regeling": "Besluit van 3 juli 2018, houdende regels over activiteiten in de fysieke leefomgeving (Besluit activiteiten leefomgeving)",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 5,
+      "artikel": "11.112",
+      "opschrift": "(oogmerken)",
+      "regeling": "Besluit van 3 juli 2018, houdende regels over activiteiten in de fysieke leefomgeving (Besluit activiteiten leefomgeving)",
+      "route": "tekst_fallback"
+     }
+    ],
+    "begrippen": [
+     "Bedrijf in de papierindustrie, houtindustrie, textielindustrie of leerindustrie"
+    ]
+   }
+  },
+  {
+   "id": 12,
+   "vraag": "Mag ik hier een houtzagerij beginnen?",
+   "routes": {
+    "locatie": "PASS",
+    "kenmerk": "PASS",
+    "document": "FAIL",
+    "artikel": "n.v.t.",
+    "pad": "n.v.t.",
+    "imow": "n.v.t.",
+    "hybride": "n.v.t.",
+    "vraag": "FAIL"
+   },
+   "documenten": [
+    {
+     "spec": [
+      "earnew",
+      "2013"
+     ],
+     "gevonden": false,
+     "afwezig": false,
+     "uitleg": "document niet bij dit punt, en niet te vinden in het register"
+    }
+   ],
+   "locatie": {
+    "x": 191175,
+    "y": 571558,
+    "label": "Smidspaed 17, 9264TK Earnewâld",
+    "ok": true,
+    "melding": null
+   },
+   "documenten_op_punt": 19,
+   "kenmerk": {
+    "status": "PASS",
+    "gevonden": [
+     "Recreatie - 1A"
+    ]
+   },
+   "toegang": {
+    "pad": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    },
+    "imow": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    },
+    "hybride": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    }
+   },
+   "vraag_route": {
+    "aantal": 7,
+    "rang_artikel": null,
+    "rang_document": null,
+    "top5": [
+     {
+      "rang": 1,
+      "artikel": "22.157",
+      "opschrift": "Inerte goederen",
+      "regeling": "Omgevingsplan gemeente Tytsjerksteradiel",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 2,
+      "artikel": "22.154",
+      "opschrift": "Toepassingsbereik",
+      "regeling": "Omgevingsplan gemeente Tytsjerksteradiel",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 3,
+      "artikel": "22.155",
+      "opschrift": "Periodiek reinigen",
+      "regeling": "Omgevingsplan gemeente Tytsjerksteradiel",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 4,
+      "artikel": "11.111",
+      "opschrift": "(activiteiten)",
+      "regeling": "Besluit van 3 juli 2018, houdende regels over activiteiten in de fysieke leefomgeving (Besluit activiteiten leefomgeving)",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 5,
+      "artikel": "11.112",
+      "opschrift": "(oogmerken)",
+      "regeling": "Besluit van 3 juli 2018, houdende regels over activiteiten in de fysieke leefomgeving (Besluit activiteiten leefomgeving)",
+      "route": "tekst_fallback"
+     }
+    ],
+    "begrippen": [
+     "Bedrijf in de papierindustrie, houtindustrie, textielindustrie of leerindustrie"
+    ]
+   }
+  },
+  {
+   "id": 13,
+   "vraag": "Mag ik hier boten verhuren?",
+   "routes": {
+    "locatie": "PASS",
+    "kenmerk": "PASS",
+    "document": "FAIL",
+    "artikel": "n.v.t.",
+    "pad": "n.v.t.",
+    "imow": "n.v.t.",
+    "hybride": "n.v.t.",
+    "vraag": "FAIL"
+   },
+   "documenten": [
+    {
+     "spec": [
+      "earnew",
+      "2013"
+     ],
+     "gevonden": false,
+     "afwezig": false,
+     "uitleg": "document niet bij dit punt, en niet te vinden in het register"
+    }
+   ],
+   "locatie": {
+    "x": 192232,
+    "y": 571771,
+    "label": "Tsjerkepaed 5, 9264TG Earnewâld",
+    "ok": true,
+    "melding": null
+   },
+   "documenten_op_punt": 19,
+   "kenmerk": {
+    "status": "PASS",
+    "gevonden": [
+     "Wonen - A1"
+    ]
+   },
+   "toegang": {
+    "pad": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    },
+    "imow": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    },
+    "hybride": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    }
+   },
+   "vraag_route": {
+    "aantal": 9,
+    "rang_artikel": null,
+    "rang_document": null,
+    "top5": [
+     {
+      "rang": 1,
+      "artikel": "12.2",
+      "opschrift": "(eerste geluidproductieplafonds voor een aanwezig industrieterrein)",
+      "regeling": "Besluit van 3 juli 2018, houdende regels over de kwaliteit van de fysieke leefomgeving en de uitoefening van taken en bevoegdheden (Besluit kwaliteit leefomgeving)",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 2,
+      "artikel": null,
+      "opschrift": null,
+      "regeling": "Nationaal Programma Ruimte voor Defensie",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 3,
+      "artikel": null,
+      "opschrift": "Niet alles kan in het buitenland",
+      "regeling": "Nationaal Programma Ruimte voor Defensie",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 4,
+      "artikel": null,
+      "opschrift": "Behoefte 7: gegarandeerde havencapaciteit Host Nation Support",
+      "regeling": "Nationaal Programma Ruimte voor Defensie",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 5,
+      "artikel": null,
+      "opschrift": "Locatiespecifieke behoefte 1: uitbreiding oefengebied voor grotere/veelzijdigere oefeningen op, in en boven het water EHD 42",
+      "regeling": "Nationaal Programma Ruimte voor Defensie",
+      "route": "tekst_fallback"
+     }
+    ],
+    "begrippen": [
+     "Bedrijf dat werktuigen met een motor repareert of verhuurt",
+     "Bedrijf dat schepen of jachten bouwt, onderhoudt of repareert",
+     "Schepen of drijvende werktuigen laden of lossen"
+    ]
+   }
+  },
+  {
+   "id": 14,
+   "vraag": "Mag ik hier een parkeerplaats aanleggen?",
+   "routes": {
+    "locatie": "PASS",
+    "kenmerk": "PASS",
+    "document": "PASS",
+    "artikel": "PASS",
+    "pad": "n.v.t.",
+    "imow": "n.v.t.",
+    "hybride": "n.v.t.",
+    "vraag": "FAIL"
+   },
+   "documenten": [
+    {
+     "spec": [
+      "noordwestelijk villagebied",
+      "parkeernormen"
+     ],
+     "gevonden": true,
+     "afwezig": false,
+     "regeling": "Herziening Noordwestelijk Villagebied - parkeernormen 2018",
+     "bron_id": "NL.IMRO.0402.04pbp01hnwpark2018-va01",
+     "via": "regel",
+     "aantal": 8,
+     "artikelen_op_punt": 8,
+     "geraakt": [
+      "4.1"
+     ]
+    }
+   ],
+   "locatie": {
+    "x": 140111,
+    "y": 470626,
+    "label": "Torenlaan 13, 1211JA Hilversum",
+    "ok": true,
+    "melding": null
+   },
+   "documenten_op_punt": 26,
+   "kenmerk": {
+    "status": "PASS",
+    "gevonden": [
+     "overige zone - Herziening Noordwestelijk Villagebied parkeernormen 2018"
+    ]
+   },
+   "toegang": {
+    "pad": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    },
+    "imow": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    },
+    "hybride": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    }
+   },
+   "vraag_route": {
+    "aantal": 21,
+    "rang_artikel": null,
+    "rang_document": null,
+    "top5": [
+     {
+      "rang": 1,
+      "artikel": null,
+      "opschrift": "Onze inzet",
+      "regeling": "Omgevingsprogramma Actief",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 2,
+      "artikel": "16.7",
+      "opschrift": "(aanwijzing vergunningvrije gevallen)",
+      "regeling": "Besluit van 3 juli 2018, houdende regels over activiteiten in de fysieke leefomgeving (Besluit activiteiten leefomgeving)",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 3,
+      "artikel": "22.224",
+      "opschrift": "Toepassingsbereik",
+      "regeling": "Omgevingsplan gemeente Hilversum",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 4,
+      "artikel": "22.225",
+      "opschrift": "Gegevens en bescheiden",
+      "regeling": "Omgevingsplan gemeente Hilversum",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 5,
+      "artikel": null,
+      "opschrift": "Verklarende woordenlijst",
+      "regeling": "Omgevingsvisie Hilversum 2040",
+      "route": "tekst_fallback"
+     }
+    ],
+    "begrippen": [
+     "Verharding aanbrengen of vervangen"
+    ]
+   }
+  },
+  {
+   "id": 15,
+   "vraag": "Mag ik hier een dakopbouw bouwen?",
+   "routes": {
+    "locatie": "PASS",
+    "kenmerk": "PASS",
+    "document": "PASS",
+    "artikel": "PASS",
+    "pad": "PASS",
+    "imow": "FAIL",
+    "hybride": "PASS",
+    "vraag": "PASS"
+   },
+   "documenten": [
+    {
+     "spec": [
+      "omgevingsplan gemeente utrecht"
+     ],
+     "gevonden": true,
+     "afwezig": false,
+     "regeling": "Omgevingsplan gemeente Utrecht",
+     "bron_id": "/akn/nl/act/gm0344/2020/omgevingsplan/nld@2026-08-19;09031012",
+     "via": "regel",
+     "aantal": 763,
+     "artikelen_op_punt": 376,
+     "geraakt": [
+      "4.26"
+     ],
+     "aanvullend": 7,
+     "toegang": {
+      "pad": {
+       "gevonden": true,
+       "artikel": "4.26",
+       "n": 60,
+       "via": "subonderwerp",
+       "score": 0.5
+      },
+      "imow": {
+       "gevonden": false,
+       "score": 0.0,
+       "uitleg": "artikel valt onder niet-ingedeeld"
+      },
+      "hybride": {
+       "gevonden": true,
+       "artikel": "4.26",
+       "n": 60,
+       "via": "subonderwerp",
+       "score": 0.5
+      }
+     },
+     "indeling": {
+      "pad": [
+       {
+        "artikel": "4.26",
+        "tegels": [
+         "bouwen"
+        ],
+        "sub": "bouwen en verbouwen",
+        "herkomst": "pad"
+       }
+      ],
+      "imow": [
+       {
+        "artikel": "4.26",
+        "tegels": [
+         "niet-ingedeeld"
+        ],
+        "sub": null,
+        "herkomst": null
+       }
+      ],
+      "hybride": [
+       {
+        "artikel": "4.26",
+        "tegels": [
+         "bouwen"
+        ],
+        "sub": "bouwen en verbouwen",
+        "herkomst": "pad"
+       }
+      ]
+     }
+    }
+   ],
+   "locatie": {
+    "x": 128983,
+    "y": 455222,
+    "label": "Does 30, 3453MD De Meern",
+    "ok": true,
+    "melding": null
+   },
+   "documenten_op_punt": 34,
+   "kenmerk": {
+    "status": "PASS",
+    "gevonden": [
+     "dakopbouw of bijzondere bouwlaag bouwen"
+    ]
+   },
+   "toegang": {
+    "pad": {
+     "gevonden": true,
+     "artikel": "4.26",
+     "n": 60,
+     "via": "subonderwerp",
+     "score": 0.5
+    },
+    "imow": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "artikel valt onder niet-ingedeeld"
+    },
+    "hybride": {
+     "gevonden": true,
+     "artikel": "4.26",
+     "n": 60,
+     "via": "subonderwerp",
+     "score": 0.5
+    }
+   },
+   "vraag_route": {
+    "aantal": 4,
+    "rang_artikel": 2,
+    "rang_document": 1,
+    "top5": [
+     {
+      "rang": 1,
+      "artikel": "4.27",
+      "opschrift": "Beoordelingsregels voor dakopbouwen in Veldhuizen, De Balije en Voordorp",
+      "regeling": "Omgevingsplan gemeente Utrecht",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 2,
+      "artikel": "4.26",
+      "opschrift": "Dakopbouwen die vergunningvrij zijn",
+      "regeling": "Omgevingsplan gemeente Utrecht",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 3,
+      "artikel": "1.2",
+      "opschrift": "Begrippen",
+      "regeling": "Omgevingsplan gemeente Utrecht",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 4,
+      "artikel": "4.55",
+      "opschrift": "Voorwaardelijke verplichting parkeergelegenheid",
+      "regeling": "Omgevingsplan gemeente Utrecht",
+      "route": "tekst_fallback"
+     }
+    ],
+    "begrippen": [
+     "bouw",
+     "dakopbouw"
+    ]
+   }
+  },
+  {
+   "id": 16,
+   "vraag": "Mag ik hier een dakopbouw bouwen?",
+   "routes": {
+    "locatie": "PASS",
+    "kenmerk": "PASS",
+    "document": "PASS",
+    "artikel": "PASS",
+    "pad": "info",
+    "imow": "info",
+    "hybride": "info",
+    "vraag": "FAIL"
+   },
+   "documenten": [
+    {
+     "spec": [
+      "omgevingsplan gemeente meppel"
+     ],
+     "gevonden": true,
+     "afwezig": false,
+     "regeling": "Omgevingsplan gemeente Meppel",
+     "bron_id": "/akn/nl/act/gm0119/2020/omgevingsplan/nld@2025-05-14;4",
+     "via": "regel",
+     "aantal": 868,
+     "artikelen_op_punt": 501,
+     "geraakt": [
+      "8.28",
+      "8.27",
+      "9.8",
+      "8.36",
+      "8.30",
+      "8.33",
+      "8.34",
+      "8.32",
+      "8.38",
+      "8.31",
+      "8.29",
+      "9.9",
+      "8.35",
+      "9.10",
+      "8.26",
+      "8.37"
+     ],
+     "aanvullend": 2,
+     "indeling": {
+      "pad": [
+       {
+        "artikel": "8.28",
+        "tegels": [
+         "erfgoed"
+        ],
+        "sub": "cultureel erfgoed",
+        "herkomst": "pad"
+       },
+       {
+        "artikel": "8.27",
+        "tegels": [
+         "erfgoed"
+        ],
+        "sub": "cultureel erfgoed",
+        "herkomst": "pad"
+       },
+       {
+        "artikel": "9.8",
+        "tegels": [
+         "erfgoed"
+        ],
+        "sub": "cultureel erfgoed",
+        "herkomst": "pad"
+       },
+       {
+        "artikel": "8.36",
+        "tegels": [
+         "erfgoed"
+        ],
+        "sub": "cultureel erfgoed",
+        "herkomst": "pad"
+       },
+       {
+        "artikel": "8.30",
+        "tegels": [
+         "erfgoed"
+        ],
+        "sub": "cultureel erfgoed",
+        "herkomst": "pad"
+       },
+       {
+        "artikel": "8.33",
+        "tegels": [
+         "erfgoed"
+        ],
+        "sub": "cultureel erfgoed",
+        "herkomst": "pad"
+       },
+       {
+        "artikel": "8.34",
+        "tegels": [
+         "erfgoed"
+        ],
+        "sub": "cultureel erfgoed",
+        "herkomst": "pad"
+       },
+       {
+        "artikel": "8.32",
+        "tegels": [
+         "erfgoed"
+        ],
+        "sub": "cultureel erfgoed",
+        "herkomst": "pad"
+       },
+       {
+        "artikel": "8.38",
+        "tegels": [
+         "erfgoed"
+        ],
+        "sub": "cultureel erfgoed",
+        "herkomst": "pad"
+       },
+       {
+        "artikel": "8.31",
+        "tegels": [
+         "erfgoed"
+        ],
+        "sub": "cultureel erfgoed",
+        "herkomst": "pad"
+       },
+       {
+        "artikel": "8.29",
+        "tegels": [
+         "erfgoed"
+        ],
+        "sub": "cultureel erfgoed",
+        "herkomst": "pad"
+       },
+       {
+        "artikel": "9.9",
+        "tegels": [
+         "erfgoed"
+        ],
+        "sub": "cultureel erfgoed",
+        "herkomst": "pad"
+       },
+       {
+        "artikel": "8.35",
+        "tegels": [
+         "erfgoed"
+        ],
+        "sub": "cultureel erfgoed",
+        "herkomst": "pad"
+       },
+       {
+        "artikel": "9.10",
+        "tegels": [
+         "erfgoed"
+        ],
+        "sub": "cultureel erfgoed",
+        "herkomst": "pad"
+       },
+       {
+        "artikel": "8.26",
+        "tegels": [
+         "erfgoed"
+        ],
+        "sub": "cultureel erfgoed",
+        "herkomst": "pad"
+       },
+       {
+        "artikel": "8.37",
+        "tegels": [
+         "erfgoed"
+        ],
+        "sub": "cultureel erfgoed",
+        "herkomst": "pad"
+       }
+      ],
+      "imow": [
+       {
+        "artikel": "8.28",
+        "tegels": [
+         "niet-ingedeeld"
+        ],
+        "sub": null,
+        "herkomst": null
+       },
+       {
+        "artikel": "8.27",
+        "tegels": [
+         "niet-ingedeeld"
+        ],
+        "sub": null,
+        "herkomst": null
+       },
+       {
+        "artikel": "9.8",
+        "tegels": [
+         "niet-ingedeeld"
+        ],
+        "sub": null,
+        "herkomst": null
+       },
+       {
+        "artikel": "8.36",
+        "tegels": [
+         "niet-ingedeeld"
+        ],
+        "sub": null,
+        "herkomst": null
+       },
+       {
+        "artikel": "8.30",
+        "tegels": [
+         "niet-ingedeeld"
+        ],
+        "sub": null,
+        "herkomst": null
+       },
+       {
+        "artikel": "8.33",
+        "tegels": [
+         "niet-ingedeeld"
+        ],
+        "sub": null,
+        "herkomst": null
+       },
+       {
+        "artikel": "8.34",
+        "tegels": [
+         "niet-ingedeeld"
+        ],
+        "sub": null,
+        "herkomst": null
+       },
+       {
+        "artikel": "8.32",
+        "tegels": [
+         "niet-ingedeeld"
+        ],
+        "sub": null,
+        "herkomst": null
+       },
+       {
+        "artikel": "8.38",
+        "tegels": [
+         "niet-ingedeeld"
+        ],
+        "sub": null,
+        "herkomst": null
+       },
+       {
+        "artikel": "8.31",
+        "tegels": [
+         "niet-ingedeeld"
+        ],
+        "sub": null,
+        "herkomst": null
+       },
+       {
+        "artikel": "8.29",
+        "tegels": [
+         "niet-ingedeeld"
+        ],
+        "sub": null,
+        "herkomst": null
+       },
+       {
+        "artikel": "9.9",
+        "tegels": [
+         "niet-ingedeeld"
+        ],
+        "sub": null,
+        "herkomst": null
+       },
+       {
+        "artikel": "8.35",
+        "tegels": [
+         "niet-ingedeeld"
+        ],
+        "sub": null,
+        "herkomst": null
+       },
+       {
+        "artikel": "9.10",
+        "tegels": [
+         "niet-ingedeeld"
+        ],
+        "sub": null,
+        "herkomst": null
+       },
+       {
+        "artikel": "8.26",
+        "tegels": [
+         "niet-ingedeeld"
+        ],
+        "sub": null,
+        "herkomst": null
+       },
+       {
+        "artikel": "8.37",
+        "tegels": [
+         "niet-ingedeeld"
+        ],
+        "sub": null,
+        "herkomst": null
+       }
+      ],
+      "hybride": [
+       {
+        "artikel": "8.28",
+        "tegels": [
+         "erfgoed"
+        ],
+        "sub": "cultureel erfgoed",
+        "herkomst": "pad"
+       },
+       {
+        "artikel": "8.27",
+        "tegels": [
+         "erfgoed"
+        ],
+        "sub": "cultureel erfgoed",
+        "herkomst": "pad"
+       },
+       {
+        "artikel": "9.8",
+        "tegels": [
+         "erfgoed"
+        ],
+        "sub": "cultureel erfgoed",
+        "herkomst": "pad"
+       },
+       {
+        "artikel": "8.36",
+        "tegels": [
+         "erfgoed"
+        ],
+        "sub": "cultureel erfgoed",
+        "herkomst": "pad"
+       },
+       {
+        "artikel": "8.30",
+        "tegels": [
+         "erfgoed"
+        ],
+        "sub": "cultureel erfgoed",
+        "herkomst": "pad"
+       },
+       {
+        "artikel": "8.33",
+        "tegels": [
+         "erfgoed"
+        ],
+        "sub": "cultureel erfgoed",
+        "herkomst": "pad"
+       },
+       {
+        "artikel": "8.34",
+        "tegels": [
+         "erfgoed"
+        ],
+        "sub": "cultureel erfgoed",
+        "herkomst": "pad"
+       },
+       {
+        "artikel": "8.32",
+        "tegels": [
+         "erfgoed"
+        ],
+        "sub": "cultureel erfgoed",
+        "herkomst": "pad"
+       },
+       {
+        "artikel": "8.38",
+        "tegels": [
+         "erfgoed"
+        ],
+        "sub": "cultureel erfgoed",
+        "herkomst": "pad"
+       },
+       {
+        "artikel": "8.31",
+        "tegels": [
+         "erfgoed"
+        ],
+        "sub": "cultureel erfgoed",
+        "herkomst": "pad"
+       },
+       {
+        "artikel": "8.29",
+        "tegels": [
+         "erfgoed"
+        ],
+        "sub": "cultureel erfgoed",
+        "herkomst": "pad"
+       },
+       {
+        "artikel": "9.9",
+        "tegels": [
+         "erfgoed"
+        ],
+        "sub": "cultureel erfgoed",
+        "herkomst": "pad"
+       },
+       {
+        "artikel": "8.35",
+        "tegels": [
+         "erfgoed"
+        ],
+        "sub": "cultureel erfgoed",
+        "herkomst": "pad"
+       },
+       {
+        "artikel": "9.10",
+        "tegels": [
+         "erfgoed"
+        ],
+        "sub": "cultureel erfgoed",
+        "herkomst": "pad"
+       },
+       {
+        "artikel": "8.26",
+        "tegels": [
+         "erfgoed"
+        ],
+        "sub": "cultureel erfgoed",
+        "herkomst": "pad"
+       },
+       {
+        "artikel": "8.37",
+        "tegels": [
+         "erfgoed"
+        ],
+        "sub": "cultureel erfgoed",
+        "herkomst": "pad"
+       }
+      ]
+     }
+    },
+    {
+     "spec": [
+      "voorbereidingsbesluit",
+      "monumenten"
+     ],
+     "gevonden": true,
+     "afwezig": false,
+     "regeling": "Wijziging annotaties voorbereidingsbesluit Monumenten - Gemeente Meppel",
+     "bron_id": "/akn/nl/act/pv22/2023/12_26_gm0119/nld@59a",
+     "via": "regel",
+     "aantal": 11,
+     "artikelen_op_punt": 7,
+     "geraakt": [
+      "2.2"
+     ],
+     "aanvullend": 0,
+     "indeling": {
+      "pad": [
+       {
+        "artikel": "2.2",
+        "tegels": [
+         "erfgoed"
+        ],
+        "sub": "cultureel erfgoed",
+        "herkomst": "pad"
+       }
+      ],
+      "imow": [
+       {
+        "artikel": "2.2",
+        "tegels": [
+         "niet-ingedeeld"
+        ],
+        "sub": null,
+        "herkomst": null
+       }
+      ],
+      "hybride": [
+       {
+        "artikel": "2.2",
+        "tegels": [
+         "erfgoed"
+        ],
+        "sub": "cultureel erfgoed",
+        "herkomst": "pad"
+       }
+      ]
+     }
+    }
+   ],
+   "locatie": {
+    "x": 209536,
+    "y": 523685,
+    "label": "Vledderstraat 3, 7941LC Meppel",
+    "ok": true,
+    "melding": null
+   },
+   "documenten_op_punt": 29,
+   "kenmerk": {
+    "status": "PASS",
+    "gevonden": [
+     "Activiteit die betrekking heeft op een gemeentelijk monument",
+     "Activiteit die betrekking heeft op een provinciaal monument",
+     "Activiteit met betrekking tot een provinciaal monument",
+     "Archeologische rijksmonumentenactiviteit",
+     "Rijksmonumentenactiviteit met betrekking tot een gebouwd of aangelegd monument"
+    ]
+   },
+   "toegang": {
+    "pad": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    },
+    "imow": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    },
+    "hybride": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    }
+   },
+   "vraag_route": {
+    "aantal": 0,
+    "rang_artikel": null,
+    "rang_document": null,
+    "top5": [],
+    "begrippen": [
+     "bouw",
+     "dakopbouw"
+    ]
+   }
+  },
+  {
+   "id": 17,
+   "vraag": "Mag ik hier een dakkapel bouwen?",
+   "routes": {
+    "locatie": "PASS",
+    "kenmerk": "n.v.t.",
+    "document": "PASS",
+    "artikel": "n.v.t.",
+    "pad": "n.v.t.",
+    "imow": "n.v.t.",
+    "hybride": "n.v.t.",
+    "vraag": "info"
+   },
+   "documenten": [
+    {
+     "spec": [
+      "omgevingsplan gemeente groningen"
+     ],
+     "gevonden": true,
+     "afwezig": false,
+     "regeling": "Omgevingsplan gemeente Groningen",
+     "bron_id": "/akn/nl/act/gm0014/2020/omgevingsplan/nld@2024-09-30;10",
+     "via": "regel",
+     "aantal": 1151
+    }
+   ],
+   "locatie": {
+    "x": 234848,
+    "y": 582090,
+    "label": "Zagerij 8, 9713DD Groningen",
+    "ok": true,
+    "melding": null
+   },
+   "documenten_op_punt": 31,
+   "kenmerk": {
+    "status": "n.v.t."
+   },
+   "toegang": {
+    "pad": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "negatieve vraag: er is geen artikel om te vinden"
+    },
+    "imow": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "negatieve vraag: er is geen artikel om te vinden"
+    },
+    "hybride": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "negatieve vraag: er is geen artikel om te vinden"
+    }
+   },
+   "vraag_route": {
+    "aantal": 1,
+    "rang_artikel": null,
+    "rang_document": null,
+    "top5": [
+     {
+      "rang": 1,
+      "artikel": "2.27",
+      "opschrift": "(uitzonderingen aanwijzing vergunningplichtige gevallen bouwactiviteit in de artikelen 2.25 en 2.26)",
+      "regeling": "Besluit van 3 juli 2018, houdende regels over bouwwerken in de fysieke leefomgeving (Besluit bouwwerken leefomgeving)",
+      "route": "activiteit_uri"
+     }
+    ],
+    "begrippen": [
+     "Dakkapel bouwen",
+     "dakkapel bouwen",
+     "bouw"
+    ]
+   }
+  },
+  {
+   "id": 18,
+   "vraag": "Mag ik hier een dakkapel bouwen?",
+   "routes": {
+    "locatie": "PASS",
+    "kenmerk": "PASS",
+    "document": "PASS",
+    "artikel": "PASS",
+    "pad": "PASS",
+    "imow": "FAIL",
+    "hybride": "PASS",
+    "vraag": "PASS"
+   },
+   "documenten": [
+    {
+     "spec": [
+      "omgevingsplan gemeente utrecht"
+     ],
+     "gevonden": true,
+     "afwezig": false,
+     "regeling": "Omgevingsplan gemeente Utrecht",
+     "bron_id": "/akn/nl/act/gm0344/2020/omgevingsplan/nld@2026-08-19;09031012",
+     "via": "regel",
+     "aantal": 763,
+     "artikelen_op_punt": 376,
+     "geraakt": [
+      "4.24"
+     ],
+     "aanvullend": 7,
+     "toegang": {
+      "pad": {
+       "gevonden": true,
+       "artikel": "4.24",
+       "n": 60,
+       "via": "subonderwerp",
+       "score": 0.5
+      },
+      "imow": {
+       "gevonden": false,
+       "score": 0.0,
+       "uitleg": "artikel valt onder niet-ingedeeld"
+      },
+      "hybride": {
+       "gevonden": true,
+       "artikel": "4.24",
+       "n": 60,
+       "via": "subonderwerp",
+       "score": 0.5
+      }
+     },
+     "indeling": {
+      "pad": [
+       {
+        "artikel": "4.24",
+        "tegels": [
+         "bouwen"
+        ],
+        "sub": "bouwen en verbouwen",
+        "herkomst": "pad"
+       }
+      ],
+      "imow": [
+       {
+        "artikel": "4.24",
+        "tegels": [
+         "niet-ingedeeld"
+        ],
+        "sub": null,
+        "herkomst": null
+       }
+      ],
+      "hybride": [
+       {
+        "artikel": "4.24",
+        "tegels": [
+         "bouwen"
+        ],
+        "sub": "bouwen en verbouwen",
+        "herkomst": "pad"
+       }
+      ]
+     }
+    }
+   ],
+   "locatie": {
+    "x": 128983,
+    "y": 455222,
+    "label": "Does 30, 3453MD De Meern",
+    "ok": true,
+    "melding": null
+   },
+   "documenten_op_punt": 34,
+   "kenmerk": {
+    "status": "PASS",
+    "gevonden": [
+     "Dakkapel bouwen",
+     "bouwen dakkapellen zijkant en achterkant van woningen is vergunningplichtig",
+     "dakkapel bouwen"
+    ]
+   },
+   "toegang": {
+    "pad": {
+     "gevonden": true,
+     "artikel": "4.24",
+     "n": 60,
+     "via": "subonderwerp",
+     "score": 0.5
+    },
+    "imow": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "artikel valt onder niet-ingedeeld"
+    },
+    "hybride": {
+     "gevonden": true,
+     "artikel": "4.24",
+     "n": 60,
+     "via": "subonderwerp",
+     "score": 0.5
+    }
+   },
+   "vraag_route": {
+    "aantal": 6,
+    "rang_artikel": 2,
+    "rang_document": 1,
+    "top5": [
+     {
+      "rang": 1,
+      "artikel": "4.59",
+      "opschrift": "Aanvraagvereisten omgevingsvergunning voor het bouwen",
+      "regeling": "Omgevingsplan gemeente Utrecht",
+      "route": "activiteit_uri"
+     },
+     {
+      "rang": 2,
+      "artikel": "4.24",
+      "opschrift": "Dakkapel aan de voorkant",
+      "regeling": "Omgevingsplan gemeente Utrecht",
+      "route": "activiteit_uri"
+     },
+     {
+      "rang": 3,
+      "artikel": "4.24",
+      "opschrift": "Dakkapel aan de voorkant",
+      "regeling": "Omgevingsplan gemeente Utrecht",
+      "route": "activiteit_uri"
+     },
+     {
+      "rang": 4,
+      "artikel": "4.1",
+      "opschrift": "Afstemming met functieregels in het tijdelijke deel van het omgevingsplan",
+      "regeling": "Omgevingsplan gemeente Utrecht",
+      "route": "activiteit_uri"
+     },
+     {
+      "rang": 5,
+      "artikel": "4.1",
+      "opschrift": "Afstemming met functieregels in het tijdelijke deel van het omgevingsplan",
+      "regeling": "Omgevingsplan gemeente Utrecht",
+      "route": "activiteit_uri"
+     }
+    ],
+    "begrippen": [
+     "Dakkapel bouwen",
+     "dakkapel bouwen",
+     "bouw"
+    ]
+   }
+  },
+  {
+   "id": 19,
+   "vraag": "Mag ik hier een dakterras aanleggen?",
+   "routes": {
+    "locatie": "PASS",
+    "kenmerk": "PASS",
+    "document": "PASS",
+    "artikel": "PASS",
+    "pad": "PASS",
+    "imow": "FAIL",
+    "hybride": "PASS",
+    "vraag": "FAIL"
+   },
+   "documenten": [
+    {
+     "spec": [
+      "omgevingsplan gemeente utrecht"
+     ],
+     "gevonden": true,
+     "afwezig": false,
+     "regeling": "Omgevingsplan gemeente Utrecht",
+     "bron_id": "/akn/nl/act/gm0344/2020/omgevingsplan/nld@2026-08-19;09031012",
+     "via": "regel",
+     "aantal": 763,
+     "artikelen_op_punt": 376,
+     "geraakt": [
+      "4.42"
+     ],
+     "aanvullend": 7,
+     "toegang": {
+      "pad": {
+       "gevonden": true,
+       "artikel": "4.42",
+       "n": 60,
+       "via": "subonderwerp",
+       "score": 0.5
+      },
+      "imow": {
+       "gevonden": false,
+       "score": 0.0,
+       "uitleg": "artikel valt onder niet-ingedeeld"
+      },
+      "hybride": {
+       "gevonden": true,
+       "artikel": "4.42",
+       "n": 60,
+       "via": "subonderwerp",
+       "score": 0.5
+      }
+     },
+     "indeling": {
+      "pad": [
+       {
+        "artikel": "4.42",
+        "tegels": [
+         "bouwen"
+        ],
+        "sub": "bouwen en verbouwen",
+        "herkomst": "pad"
+       }
+      ],
+      "imow": [
+       {
+        "artikel": "4.42",
+        "tegels": [
+         "niet-ingedeeld"
+        ],
+        "sub": null,
+        "herkomst": null
+       }
+      ],
+      "hybride": [
+       {
+        "artikel": "4.42",
+        "tegels": [
+         "bouwen"
+        ],
+        "sub": "bouwen en verbouwen",
+        "herkomst": "pad"
+       }
+      ]
+     }
+    }
+   ],
+   "locatie": {
+    "x": 128983,
+    "y": 455222,
+    "label": "Does 30, 3453MD De Meern",
+    "ok": true,
+    "melding": null
+   },
+   "documenten_op_punt": 34,
+   "kenmerk": {
+    "status": "PASS",
+    "gevonden": [
+     "Afscheiding tussen balkons of dakterrassen bouwen",
+     "Afscheiding tussen balkons of dakterrassen bouwen, in stand houden of gebruiken",
+     "dakterras bouwen"
+    ]
+   },
+   "toegang": {
+    "pad": {
+     "gevonden": true,
+     "artikel": "4.42",
+     "n": 60,
+     "via": "subonderwerp",
+     "score": 0.5
+    },
+    "imow": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "artikel valt onder niet-ingedeeld"
+    },
+    "hybride": {
+     "gevonden": true,
+     "artikel": "4.42",
+     "n": 60,
+     "via": "subonderwerp",
+     "score": 0.5
+    }
+   },
+   "vraag_route": {
+    "aantal": 2,
+    "rang_artikel": null,
+    "rang_document": 2,
+    "top5": [
+     {
+      "rang": 1,
+      "artikel": null,
+      "opschrift": "Luwe gevel",
+      "regeling": "Actieplan Geluid en Trillingen gemeente Utrecht",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 2,
+      "artikel": "4.41",
+      "opschrift": "Verbod voor dakterrassen",
+      "regeling": "Omgevingsplan gemeente Utrecht",
+      "route": "tekst_fallback"
+     }
+    ],
+    "begrippen": [
+     "Bestaand gebouw verbouwen"
+    ]
+   }
+  },
+  {
+   "id": 20,
+   "vraag": "Hoe diep in de bodem mag ik hier een warmtepomp aanleggen?",
+   "routes": {
+    "locatie": "PASS",
+    "kenmerk": "PASS",
+    "document": "PASS",
+    "artikel": "PASS",
+    "pad": "FAIL",
+    "imow": "FAIL",
+    "hybride": "FAIL",
+    "vraag": "FAIL"
+   },
+   "documenten": [
+    {
+     "spec": [
+      "omgevingsverordening provincie"
+     ],
+     "gevonden": true,
+     "afwezig": false,
+     "regeling": "Omgevingsverordening provincie",
+     "bron_id": "/akn/nl/act/pv23/2023/omgevingsverordening/nld@129",
+     "via": "regel",
+     "aantal": 325,
+     "artikelen_op_punt": 168,
+     "geraakt": [
+      "3.42"
+     ],
+     "aanvullend": 14,
+     "toegang": {
+      "pad": {
+       "gevonden": false,
+       "score": 0.0,
+       "uitleg": "artikel valt onder waterkering"
+      },
+      "imow": {
+       "gevonden": false,
+       "score": 0.0,
+       "uitleg": "artikel valt onder niet-ingedeeld"
+      },
+      "hybride": {
+       "gevonden": false,
+       "score": 0.0,
+       "uitleg": "artikel valt onder waterkering"
+      }
+     },
+     "indeling": {
+      "pad": [
+       {
+        "artikel": "3.42",
+        "tegels": [
+         "waterkering"
+        ],
+        "sub": "grondwaterbescherming",
+        "herkomst": "pad"
+       }
+      ],
+      "imow": [
+       {
+        "artikel": "3.42",
+        "tegels": [
+         "niet-ingedeeld"
+        ],
+        "sub": null,
+        "herkomst": null
+       }
+      ],
+      "hybride": [
+       {
+        "artikel": "3.42",
+        "tegels": [
+         "waterkering"
+        ],
+        "sub": "grondwaterbescherming",
+        "herkomst": "pad"
+       }
+      ]
+     }
+    }
+   ],
+   "locatie": {
+    "x": 259645,
+    "y": 471963,
+    "label": "Aronskelkstraat 38, 7531TS Enschede",
+    "ok": true,
+    "melding": null
+   },
+   "documenten_op_punt": 38,
+   "kenmerk": {
+    "status": "PASS",
+    "gevonden": [
+     "boringsvrije zone Kotkamp - Schreurserve in Enschede"
+    ]
+   },
+   "toegang": {
+    "pad": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "artikel valt onder waterkering"
+    },
+    "imow": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "artikel valt onder niet-ingedeeld"
+    },
+    "hybride": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "artikel valt onder waterkering"
+    }
+   },
+   "vraag_route": {
+    "aantal": 50,
+    "rang_artikel": null,
+    "rang_document": null,
+    "top5": [
+     {
+      "rang": 1,
+      "artikel": "5.3",
+      "opschrift": "Voorschrift omgevingsvergunning omgevingsplanactiviteit bouwwerken bodemgevoelig gebouw op bodemgevoelige locatie: na einde activiteit",
+      "regeling": "Omgevingsplan gemeente Enschede",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 2,
+      "artikel": "2.2",
+      "opschrift": "Aanvraagvereisten omgevingsvergunning omgevingsplanactiviteit bouwwerken",
+      "regeling": "Omgevingsplan gemeente Enschede",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 3,
+      "artikel": "22.187",
+      "opschrift": "Water: lozingsroute",
+      "regeling": "Omgevingsplan gemeente Enschede",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 4,
+      "artikel": "22.190",
+      "opschrift": "Water",
+      "regeling": "Omgevingsplan gemeente Enschede",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 5,
+      "artikel": "22.193",
+      "opschrift": "Bodem",
+      "regeling": "Omgevingsplan gemeente Enschede",
+      "route": "tekst_fallback"
+     }
+    ],
+    "begrippen": [
+     "bodem",
+     "bodem",
+     "Installatie voor koelen of vriezen"
+    ]
+   }
+  },
+  {
+   "id": 21,
+   "vraag": "Welke regels gelden hier voor het onttrekken van grondwater voor besproeien van gewassen?",
+   "routes": {
+    "locatie": "PASS",
+    "kenmerk": "PASS",
+    "document": "PASS",
+    "artikel": "PASS",
+    "pad": "PASS",
+    "imow": "FAIL",
+    "hybride": "PASS",
+    "vraag": "PASS"
+   },
+   "documenten": [
+    {
+     "spec": [
+      "waterschapsverordening",
+      "frysl"
+     ],
+     "gevonden": true,
+     "afwezig": false,
+     "regeling": "Waterschapsverordening Wetterskip Fryslân",
+     "bron_id": "/akn/nl/act/ws0653/2023-12-05/fdff9a72-7954-4b22-b34f-2494735c70f5/nld@2026-08-13;13442367",
+     "via": "regel",
+     "aantal": 117,
+     "artikelen_op_punt": 86,
+     "geraakt": [
+      "3.10",
+      "3.11",
+      "3.12",
+      "3.13",
+      "3.14",
+      "3.15",
+      "3.16",
+      "3.8",
+      "3.9"
+     ],
+     "aanvullend": 0,
+     "toegang": {
+      "pad": {
+       "gevonden": true,
+       "artikel": "3.10",
+       "n": 10,
+       "via": "subonderwerp",
+       "score": 1.0
+      },
+      "imow": {
+       "gevonden": false,
+       "score": 0.0,
+       "uitleg": "artikel valt onder niet-ingedeeld"
+      },
+      "hybride": {
+       "gevonden": true,
+       "artikel": "3.10",
+       "n": 10,
+       "via": "subonderwerp",
+       "score": 1.0
+      }
+     },
+     "indeling": {
+      "pad": [
+       {
+        "artikel": "3.10",
+        "tegels": [
+         "waterkering"
+        ],
+        "sub": "grondwateronttrekking",
+        "herkomst": "pad"
+       },
+       {
+        "artikel": "3.11",
+        "tegels": [
+         "waterkering"
+        ],
+        "sub": "grondwateronttrekking",
+        "herkomst": "pad"
+       },
+       {
+        "artikel": "3.12",
+        "tegels": [
+         "waterkering"
+        ],
+        "sub": "grondwateronttrekking",
+        "herkomst": "pad"
+       },
+       {
+        "artikel": "3.13",
+        "tegels": [
+         "waterkering"
+        ],
+        "sub": "grondwateronttrekking",
+        "herkomst": "pad"
+       },
+       {
+        "artikel": "3.14",
+        "tegels": [
+         "waterkering"
+        ],
+        "sub": "grondwateronttrekking",
+        "herkomst": "pad"
+       },
+       {
+        "artikel": "3.15",
+        "tegels": [
+         "waterkering"
+        ],
+        "sub": "grondwateronttrekking",
+        "herkomst": "pad"
+       },
+       {
+        "artikel": "3.16",
+        "tegels": [
+         "waterkering"
+        ],
+        "sub": "grondwateronttrekking",
+        "herkomst": "pad"
+       },
+       {
+        "artikel": "3.8",
+        "tegels": [
+         "waterkering"
+        ],
+        "sub": "grondwateronttrekking",
+        "herkomst": "pad"
+       },
+       {
+        "artikel": "3.9",
+        "tegels": [
+         "waterkering"
+        ],
+        "sub": "grondwateronttrekking",
+        "herkomst": "pad"
+       }
+      ],
+      "imow": [
+       {
+        "artikel": "3.10",
+        "tegels": [
+         "niet-ingedeeld"
+        ],
+        "sub": null,
+        "herkomst": null
+       },
+       {
+        "artikel": "3.11",
+        "tegels": [
+         "niet-ingedeeld"
+        ],
+        "sub": null,
+        "herkomst": null
+       },
+       {
+        "artikel": "3.12",
+        "tegels": [
+         "niet-ingedeeld"
+        ],
+        "sub": null,
+        "herkomst": null
+       },
+       {
+        "artikel": "3.13",
+        "tegels": [
+         "niet-ingedeeld"
+        ],
+        "sub": null,
+        "herkomst": null
+       },
+       {
+        "artikel": "3.14",
+        "tegels": [
+         "niet-ingedeeld"
+        ],
+        "sub": null,
+        "herkomst": null
+       },
+       {
+        "artikel": "3.15",
+        "tegels": [
+         "niet-ingedeeld"
+        ],
+        "sub": null,
+        "herkomst": null
+       },
+       {
+        "artikel": "3.16",
+        "tegels": [
+         "niet-ingedeeld"
+        ],
+        "sub": null,
+        "herkomst": null
+       },
+       {
+        "artikel": "3.8",
+        "tegels": [
+         "niet-ingedeeld"
+        ],
+        "sub": null,
+        "herkomst": null
+       },
+       {
+        "artikel": "3.9",
+        "tegels": [
+         "niet-ingedeeld"
+        ],
+        "sub": null,
+        "herkomst": null
+       }
+      ],
+      "hybride": [
+       {
+        "artikel": "3.10",
+        "tegels": [
+         "waterkering"
+        ],
+        "sub": "grondwateronttrekking",
+        "herkomst": "pad"
+       },
+       {
+        "artikel": "3.11",
+        "tegels": [
+         "waterkering"
+        ],
+        "sub": "grondwateronttrekking",
+        "herkomst": "pad"
+       },
+       {
+        "artikel": "3.12",
+        "tegels": [
+         "waterkering"
+        ],
+        "sub": "grondwateronttrekking",
+        "herkomst": "pad"
+       },
+       {
+        "artikel": "3.13",
+        "tegels": [
+         "waterkering"
+        ],
+        "sub": "grondwateronttrekking",
+        "herkomst": "pad"
+       },
+       {
+        "artikel": "3.14",
+        "tegels": [
+         "waterkering"
+        ],
+        "sub": "grondwateronttrekking",
+        "herkomst": "pad"
+       },
+       {
+        "artikel": "3.15",
+        "tegels": [
+         "waterkering"
+        ],
+        "sub": "grondwateronttrekking",
+        "herkomst": "pad"
+       },
+       {
+        "artikel": "3.16",
+        "tegels": [
+         "waterkering"
+        ],
+        "sub": "grondwateronttrekking",
+        "herkomst": "pad"
+       },
+       {
+        "artikel": "3.8",
+        "tegels": [
+         "waterkering"
+        ],
+        "sub": "grondwateronttrekking",
+        "herkomst": "pad"
+       },
+       {
+        "artikel": "3.9",
+        "tegels": [
+         "waterkering"
+        ],
+        "sub": "grondwateronttrekking",
+        "herkomst": "pad"
+       }
+      ]
+     }
+    }
+   ],
+   "locatie": {
+    "x": 188661,
+    "y": 560278,
+    "label": "Perceel Oldeboorn (ODB04) F 405",
+    "ok": true,
+    "melding": null
+   },
+   "documenten_op_punt": 23,
+   "kenmerk": {
+    "status": "PASS",
+    "gevonden": [
+     "Grondwater onttrekken"
+    ]
+   },
+   "toegang": {
+    "pad": {
+     "gevonden": true,
+     "artikel": "3.10",
+     "n": 10,
+     "via": "subonderwerp",
+     "score": 1.0
+    },
+    "imow": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "artikel valt onder niet-ingedeeld"
+    },
+    "hybride": {
+     "gevonden": true,
+     "artikel": "3.10",
+     "n": 10,
+     "via": "subonderwerp",
+     "score": 1.0
+    }
+   },
+   "vraag_route": {
+    "aantal": 11,
+    "rang_artikel": 1,
+    "rang_document": 1,
+    "top5": [
+     {
+      "rang": 1,
+      "artikel": "3.10",
+      "opschrift": "Algemene regels",
+      "regeling": "Waterschapsverordening Wetterskip Fryslân",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 2,
+      "artikel": "3.12",
+      "opschrift": "Meldingsplicht",
+      "regeling": "Waterschapsverordening Wetterskip Fryslân",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 3,
+      "artikel": "3.14",
+      "opschrift": "Vergunningplicht",
+      "regeling": "Waterschapsverordening Wetterskip Fryslân",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 4,
+      "artikel": "3.18",
+      "opschrift": "Toepassingsbereik",
+      "regeling": "Waterschapsverordening Wetterskip Fryslân",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 5,
+      "artikel": "7.206",
+      "opschrift": "(wateronttrekkingsactiviteit: onttrekken grondwater)",
+      "regeling": "Regeling van de Minister voor Milieu en Wonen, de Staatssecretaris van Defensie, de Minister van Economische Zaken en Klimaat, de Minister van Infrastructuur en Waterstaat, de Minister van Landbouw, Natuur en Voedselkwaliteit en de Minister van Onderwijs, Cultuur en Wetenschap van 21 november 2019, houdende regels over het beschermen en benutten van de fysieke leefomgeving (Omgevingsregeling)",
+      "route": "tekst_fallback"
+     }
+    ],
+    "begrippen": [
+     "Grondwater onttrekken of lozen"
+    ]
+   }
+  },
+  {
+   "id": 22,
+   "vraag": "Mag ik hier water aan het meertje onttrekken?",
+   "routes": {
+    "locatie": "PASS",
+    "kenmerk": "PASS",
+    "document": "PASS",
+    "artikel": "PASS",
+    "pad": "info",
+    "imow": "info",
+    "hybride": "info",
+    "vraag": "FAIL"
+   },
+   "documenten": [
+    {
+     "spec": [
+      "waterschapsverordening",
+      "frysl"
+     ],
+     "gevonden": true,
+     "afwezig": false,
+     "regeling": "Waterschapsverordening Wetterskip Fryslân",
+     "bron_id": "/akn/nl/act/ws0653/2023-12-05/fdff9a72-7954-4b22-b34f-2494735c70f5/nld@2026-08-13;13442367",
+     "via": "regel",
+     "aantal": 120,
+     "artikelen_op_punt": 89,
+     "geraakt": [
+      "3.5"
+     ],
+     "aanvullend": 0,
+     "indeling": {
+      "pad": [
+       {
+        "artikel": "3.5",
+        "tegels": [
+         "waterkering"
+        ],
+        "sub": "grondwateronttrekking",
+        "herkomst": "pad"
+       }
+      ],
+      "imow": [
+       {
+        "artikel": "3.5",
+        "tegels": [
+         "niet-ingedeeld"
+        ],
+        "sub": null,
+        "herkomst": null
+       }
+      ],
+      "hybride": [
+       {
+        "artikel": "3.5",
+        "tegels": [
+         "waterkering"
+        ],
+        "sub": "grondwateronttrekking",
+        "herkomst": "pad"
+       }
+      ]
+     }
+    }
+   ],
+   "locatie": {
+    "x": 172304,
+    "y": 607360,
+    "label": "RD 172304, 607360",
+    "ok": true
+   },
+   "documenten_op_punt": 22,
+   "kenmerk": {
+    "status": "PASS",
+    "gevonden": [
+     "Oppervlaktewater onttrekken"
+    ]
+   },
+   "toegang": {
+    "pad": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    },
+    "imow": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    },
+    "hybride": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    }
+   },
+   "vraag_route": {
+    "aantal": 50,
+    "rang_artikel": null,
+    "rang_document": null,
+    "top5": [
+     {
+      "rang": 1,
+      "artikel": "22.12",
+      "opschrift": "Aansluiting van afvoer huishoudelijk afvalwater en hemelwater",
+      "regeling": "Omgevingsplan gemeente Ameland",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 2,
+      "artikel": "22.19",
+      "opschrift": "Aanwezigheid brandgevaarlijke stoffen nabij bouwwerken",
+      "regeling": "Omgevingsplan gemeente Ameland",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 3,
+      "artikel": "22.19",
+      "opschrift": "Aanwezigheid brandgevaarlijke stoffen nabij bouwwerken",
+      "regeling": "Omgevingsplan gemeente Ameland",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 4,
+      "artikel": "22.187",
+      "opschrift": "Water: lozingsroute",
+      "regeling": "Omgevingsplan gemeente Ameland",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 5,
+      "artikel": "22.213",
+      "opschrift": "Water: opruimen gemorste en gelekte stoffen",
+      "regeling": "Omgevingsplan gemeente Ameland",
+      "route": "tekst_fallback"
+     }
+    ],
+    "begrippen": [
+     "Water",
+     "Water",
+     "water",
+     "water",
+     "water"
+    ]
+   }
+  },
+  {
+   "id": 23,
+   "vraag": "Mag ik hier een datacenter ontwikkelen van 10 MVA?",
+   "routes": {
+    "locatie": "PASS",
+    "kenmerk": "PASS",
+    "document": "PASS",
+    "artikel": "PASS",
+    "pad": "PASS",
+    "imow": "FAIL",
+    "hybride": "PASS",
+    "vraag": "PASS"
+   },
+   "documenten": [
+    {
+     "spec": [
+      "omgevingsverordening nh2022"
+     ],
+     "gevonden": true,
+     "afwezig": false,
+     "regeling": "Omgevingsverordening NH2022",
+     "bron_id": "/akn/nl/act/pv27/2022/omgevingsverordening/nld@126",
+     "via": "regel",
+     "aantal": 311,
+     "artikelen_op_punt": 179,
+     "geraakt": [
+      "6.32b"
+     ],
+     "aanvullend": 3,
+     "toegang": {
+      "pad": {
+       "gevonden": true,
+       "artikel": "6.32b",
+       "n": 4,
+       "via": "subonderwerp",
+       "score": 1.0
+      },
+      "imow": {
+       "gevonden": false,
+       "score": 0.0,
+       "uitleg": "artikel valt onder niet-ingedeeld"
+      },
+      "hybride": {
+       "gevonden": true,
+       "artikel": "6.32b",
+       "n": 4,
+       "via": "subonderwerp",
+       "score": 1.0
+      }
+     },
+     "indeling": {
+      "pad": [
+       {
+        "artikel": "6.32b",
+        "tegels": [
+         "bedrijven"
+        ],
+        "sub": "datacenters",
+        "herkomst": "pad"
+       }
+      ],
+      "imow": [
+       {
+        "artikel": "6.32b",
+        "tegels": [
+         "niet-ingedeeld"
+        ],
+        "sub": null,
+        "herkomst": null
+       }
+      ],
+      "hybride": [
+       {
+        "artikel": "6.32b",
+        "tegels": [
+         "bedrijven"
+        ],
+        "sub": "datacenters",
+        "herkomst": "pad"
+       }
+      ]
+     }
+    }
+   ],
+   "locatie": {
+    "x": 112782,
+    "y": 514075,
+    "label": "Laanenderweg 34, 1812PW Alkmaar",
+    "ok": true,
+    "melding": null
+   },
+   "documenten_op_punt": 22,
+   "kenmerk": {
+    "status": "PASS",
+    "gevonden": [
+     "Datacenters uitgesloten"
+    ]
+   },
+   "toegang": {
+    "pad": {
+     "gevonden": true,
+     "artikel": "6.32b",
+     "n": 4,
+     "via": "subonderwerp",
+     "score": 1.0
+    },
+    "imow": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "artikel valt onder niet-ingedeeld"
+    },
+    "hybride": {
+     "gevonden": true,
+     "artikel": "6.32b",
+     "n": 4,
+     "via": "subonderwerp",
+     "score": 1.0
+    }
+   },
+   "vraag_route": {
+    "aantal": 15,
+    "rang_artikel": 3,
+    "rang_document": 2,
+    "top5": [
+     {
+      "rang": 1,
+      "artikel": null,
+      "opschrift": "Beleidskeuze 2.6",
+      "regeling": "Nationale Omgevingsvisie",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 2,
+      "artikel": "6.32",
+      "opschrift": "Toepassingsbereik Datacenters",
+      "regeling": "Omgevingsverordening NH2022",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 3,
+      "artikel": "6.32b",
+      "opschrift": "Datacenter uitgesloten",
+      "regeling": "Omgevingsverordening NH2022",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 4,
+      "artikel": "1.1",
+      "opschrift": "Begripsbepalingen",
+      "regeling": "Voorbeschermingsregels hyperscale datacentra",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 5,
+      "artikel": "2.1",
+      "opschrift": "Verbod op activiteiten die betrekking hebben op een hyperscale datacentrum",
+      "regeling": "Voorbeschermingsregels hyperscale datacentra",
+      "route": "tekst_fallback"
+     }
+    ],
+    "begrippen": [
+     "Datacentrum"
+    ]
+   }
+  },
+  {
+   "id": 24,
+   "vraag": "Welke regels gelden hier t.a.v. het doden van zwervende damherten?",
+   "routes": {
+    "locatie": "PASS",
+    "kenmerk": "PASS",
+    "document": "PASS",
+    "artikel": "PASS",
+    "pad": "PASS",
+    "imow": "PASS",
+    "hybride": "PASS",
+    "vraag": "FAIL"
+   },
+   "documenten": [
+    {
+     "spec": [
+      "omgevingsverordening zeeland"
+     ],
+     "gevonden": true,
+     "afwezig": false,
+     "regeling": "Omgevingsverordening Zeeland",
+     "bron_id": "/akn/nl/act/pv29/2023/omgevingsverordening/nld@2026-06-01;1",
+     "via": "regel",
+     "aantal": 480,
+     "artikelen_op_punt": 218,
+     "geraakt": [
+      "12.6"
+     ],
+     "aanvullend": 0,
+     "toegang": {
+      "pad": {
+       "gevonden": true,
+       "artikel": "12.6",
+       "n": 42,
+       "via": "subonderwerp",
+       "score": 0.5
+      },
+      "imow": {
+       "gevonden": true,
+       "artikel": "12.6",
+       "n": 76,
+       "via": "onderwerp",
+       "score": 0.5
+      },
+      "hybride": {
+       "gevonden": true,
+       "artikel": "12.6",
+       "n": 42,
+       "via": "subonderwerp",
+       "score": 0.5
+      }
+     },
+     "indeling": {
+      "pad": [
+       {
+        "artikel": "12.6",
+        "tegels": [
+         "natuur"
+        ],
+        "sub": "natuur en bomen",
+        "herkomst": "pad"
+       }
+      ],
+      "imow": [
+       {
+        "artikel": "12.6",
+        "tegels": [
+         "natuur"
+        ],
+        "sub": null,
+        "herkomst": "annotatie"
+       }
+      ],
+      "hybride": [
+       {
+        "artikel": "12.6",
+        "tegels": [
+         "natuur"
+        ],
+        "sub": "natuur en bomen",
+        "herkomst": "pad"
+       }
+      ]
+     }
+    }
+   ],
+   "locatie": {
+    "x": 20618,
+    "y": 394120,
+    "label": "Perceel Westkapelle (WKP00) F 2523",
+    "ok": true,
+    "melding": null
+   },
+   "documenten_op_punt": 30,
+   "kenmerk": {
+    "status": "PASS",
+    "gevonden": [
+     "beheergebied zwervende damherten"
+    ]
+   },
+   "toegang": {
+    "pad": {
+     "gevonden": true,
+     "artikel": "12.6",
+     "n": 42,
+     "via": "subonderwerp",
+     "score": 0.5
+    },
+    "imow": {
+     "gevonden": true,
+     "artikel": "12.6",
+     "n": 76,
+     "via": "onderwerp",
+     "score": 0.5
+    },
+    "hybride": {
+     "gevonden": true,
+     "artikel": "12.6",
+     "n": 42,
+     "via": "subonderwerp",
+     "score": 0.5
+    }
+   },
+   "vraag_route": {
+    "aantal": 50,
+    "rang_artikel": null,
+    "rang_document": 49,
+    "top5": [
+     {
+      "rang": 1,
+      "artikel": "11.58",
+      "opschrift": "(begrenzing aanwijzing vergunningvrije flora- en fauna-activiteiten andere soorten)",
+      "regeling": "Besluit van 3 juli 2018, houdende regels over activiteiten in de fysieke leefomgeving (Besluit activiteiten leefomgeving)",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 2,
+      "artikel": "8.74s",
+      "opschrift": "(voorschrift flora- en fauna-activiteit soorten habitatrichtlijn en andere soorten: niet drijven van groot wild)",
+      "regeling": "Besluit van 3 juli 2018, houdende regels over de kwaliteit van de fysieke leefomgeving en de uitoefening van taken en bevoegdheden (Besluit kwaliteit leefomgeving)",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 3,
+      "artikel": "11.22",
+      "opschrift": "(activiteiten)",
+      "regeling": "Besluit van 3 juli 2018, houdende regels over activiteiten in de fysieke leefomgeving (Besluit activiteiten leefomgeving)",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 4,
+      "artikel": "11.23",
+      "opschrift": "(oogmerken)",
+      "regeling": "Besluit van 3 juli 2018, houdende regels over activiteiten in de fysieke leefomgeving (Besluit activiteiten leefomgeving)",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 5,
+      "artikel": "11.23",
+      "opschrift": "(oogmerken)",
+      "regeling": "Besluit van 3 juli 2018, houdende regels over activiteiten in de fysieke leefomgeving (Besluit activiteiten leefomgeving)",
+      "route": "tekst_fallback"
+     }
+    ],
+    "begrippen": []
+   }
+  },
+  {
+   "id": 25,
+   "vraag": "Welke regels gelden hier t.a.v. het doden van zwervende damherten?",
+   "routes": {
+    "locatie": "PASS",
+    "kenmerk": "PASS",
+    "document": "PASS",
+    "artikel": "n.v.t.",
+    "pad": "n.v.t.",
+    "imow": "n.v.t.",
+    "hybride": "n.v.t.",
+    "vraag": "info"
+   },
+   "documenten": [
+    {
+     "spec": [
+      "omgevingsverordening nh2022"
+     ],
+     "gevonden": true,
+     "afwezig": false,
+     "regeling": "Omgevingsverordening NH2022",
+     "bron_id": "/akn/nl/act/pv27/2022/omgevingsverordening/nld@126",
+     "via": "regel",
+     "aantal": 307
+    }
+   ],
+   "locatie": {
+    "x": 121394,
+    "y": 487383,
+    "label": "Dam 1, 1012JS Amsterdam",
+    "ok": true,
+    "melding": null
+   },
+   "documenten_op_punt": 26,
+   "kenmerk": {
+    "status": "PASS",
+    "gevonden": [],
+    "uitleg": "terecht geen kenmerk"
+   },
+   "toegang": {
+    "pad": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "negatieve vraag: er is geen artikel om te vinden"
+    },
+    "imow": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "negatieve vraag: er is geen artikel om te vinden"
+    },
+    "hybride": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "negatieve vraag: er is geen artikel om te vinden"
+    }
+   },
+   "vraag_route": {
+    "aantal": 50,
+    "rang_artikel": null,
+    "rang_document": 49,
+    "top5": [
+     {
+      "rang": 1,
+      "artikel": "11.58",
+      "opschrift": "(begrenzing aanwijzing vergunningvrije flora- en fauna-activiteiten andere soorten)",
+      "regeling": "Besluit van 3 juli 2018, houdende regels over activiteiten in de fysieke leefomgeving (Besluit activiteiten leefomgeving)",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 2,
+      "artikel": "8.74s",
+      "opschrift": "(voorschrift flora- en fauna-activiteit soorten habitatrichtlijn en andere soorten: niet drijven van groot wild)",
+      "regeling": "Besluit van 3 juli 2018, houdende regels over de kwaliteit van de fysieke leefomgeving en de uitoefening van taken en bevoegdheden (Besluit kwaliteit leefomgeving)",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 3,
+      "artikel": "11.22",
+      "opschrift": "(activiteiten)",
+      "regeling": "Besluit van 3 juli 2018, houdende regels over activiteiten in de fysieke leefomgeving (Besluit activiteiten leefomgeving)",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 4,
+      "artikel": "11.23",
+      "opschrift": "(oogmerken)",
+      "regeling": "Besluit van 3 juli 2018, houdende regels over activiteiten in de fysieke leefomgeving (Besluit activiteiten leefomgeving)",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 5,
+      "artikel": "11.23",
+      "opschrift": "(oogmerken)",
+      "regeling": "Besluit van 3 juli 2018, houdende regels over activiteiten in de fysieke leefomgeving (Besluit activiteiten leefomgeving)",
+      "route": "tekst_fallback"
+     }
+    ],
+    "begrippen": []
+   }
+  },
+  {
+   "id": 26,
+   "vraag": "Is de aalscholver hier een beschermde diersoort?",
+   "routes": {
+    "locatie": "PASS",
+    "kenmerk": "PASS",
+    "document": "PASS",
+    "artikel": "PASS",
+    "pad": "FAIL",
+    "imow": "FAIL",
+    "hybride": "FAIL",
+    "vraag": "FAIL"
+   },
+   "documenten": [
+    {
+     "spec": [
+      "alde feanen"
+     ],
+     "gevonden": true,
+     "afwezig": false,
+     "regeling": "Aanwijzingsbesluit Natura 2000-gebied Alde Feanen",
+     "bron_id": "/akn/nl/act/mnre1153/2025/AldeFeanen/nld@2025-11-14;3",
+     "via": "regel",
+     "aantal": 14,
+     "artikelen_op_punt": 6,
+     "geraakt": [
+      "2"
+     ],
+     "aanvullend": 0,
+     "toegang": {
+      "pad": {
+       "gevonden": false,
+       "score": 0.0,
+       "uitleg": "artikel valt onder niet-ingedeeld"
+      },
+      "imow": {
+       "gevonden": false,
+       "score": 0.0,
+       "uitleg": "artikel valt onder natuur"
+      },
+      "hybride": {
+       "gevonden": false,
+       "score": 0.0,
+       "uitleg": "artikel valt onder natuur"
+      }
+     },
+     "indeling": {
+      "pad": [
+       {
+        "artikel": "2",
+        "tegels": [
+         "niet-ingedeeld"
+        ],
+        "sub": null,
+        "herkomst": null
+       }
+      ],
+      "imow": [
+       {
+        "artikel": "2",
+        "tegels": [
+         "natuur"
+        ],
+        "sub": null,
+        "herkomst": "annotatie"
+       }
+      ],
+      "hybride": [
+       {
+        "artikel": "2",
+        "tegels": [
+         "natuur"
+        ],
+        "sub": null,
+        "herkomst": "annotatie"
+       }
+      ]
+     }
+    }
+   ],
+   "locatie": {
+    "x": 190124,
+    "y": 572555,
+    "label": "De Sayter 1, 9003XT Warten",
+    "ok": true,
+    "melding": null
+   },
+   "documenten_op_punt": 26,
+   "kenmerk": {
+    "status": "PASS",
+    "gevonden": [
+     "Habitatrichtlijngebied Alde Feanen",
+     "Natura 2000-gebied Alde Feanen",
+     "Vogelrichtlijngebied Alde Feanen"
+    ]
+   },
+   "toegang": {
+    "pad": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "artikel valt onder niet-ingedeeld"
+    },
+    "imow": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "artikel valt onder natuur"
+    },
+    "hybride": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "artikel valt onder natuur"
+    }
+   },
+   "vraag_route": {
+    "aantal": 1,
+    "rang_artikel": null,
+    "rang_document": null,
+    "top5": [
+     {
+      "rang": 1,
+      "artikel": "3.80",
+      "opschrift": "(openingen)",
+      "regeling": "Besluit van 3 juli 2018, houdende regels over bouwwerken in de fysieke leefomgeving (Besluit bouwwerken leefomgeving)",
+      "route": "tekst_fallback"
+     }
+    ],
+    "begrippen": []
+   }
+  },
+  {
+   "id": 27,
+   "vraag": "Is de aalscholver hier een beschermde diersoort?",
+   "routes": {
+    "locatie": "PASS",
+    "kenmerk": "PASS",
+    "document": "PASS",
+    "artikel": "n.v.t.",
+    "pad": "n.v.t.",
+    "imow": "n.v.t.",
+    "hybride": "n.v.t.",
+    "vraag": "info"
+   },
+   "documenten": [
+    {
+     "spec": [
+      "alde feanen"
+     ],
+     "gevonden": false,
+     "afwezig": true,
+     "uitleg": "terecht niet op dit punt"
+    }
+   ],
+   "locatie": {
+    "x": 194087,
+    "y": 575548,
+    "label": "Inialoane 23, 9263RB Garyp",
+    "ok": true,
+    "melding": null
+   },
+   "documenten_op_punt": 19,
+   "kenmerk": {
+    "status": "PASS",
+    "gevonden": [],
+    "uitleg": "terecht geen kenmerk"
+   },
+   "toegang": {
+    "pad": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "negatieve vraag: er is geen artikel om te vinden"
+    },
+    "imow": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "negatieve vraag: er is geen artikel om te vinden"
+    },
+    "hybride": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "negatieve vraag: er is geen artikel om te vinden"
+    }
+   },
+   "vraag_route": {
+    "aantal": 1,
+    "rang_artikel": null,
+    "rang_document": null,
+    "top5": [
+     {
+      "rang": 1,
+      "artikel": "3.80",
+      "opschrift": "(openingen)",
+      "regeling": "Besluit van 3 juli 2018, houdende regels over bouwwerken in de fysieke leefomgeving (Besluit bouwwerken leefomgeving)",
+      "route": "tekst_fallback"
+     }
+    ],
+    "begrippen": []
+   }
+  },
+  {
+   "id": 28,
+   "vraag": "Wat is hier de overstromingskans?",
+   "routes": {
+    "locatie": "PASS",
+    "kenmerk": "PASS",
+    "document": "PASS",
+    "artikel": "PASS",
+    "pad": "PASS",
+    "imow": "FAIL",
+    "hybride": "PASS",
+    "vraag": "PASS"
+   },
+   "documenten": [
+    {
+     "spec": [
+      "omgevingsverordening frysl"
+     ],
+     "gevonden": true,
+     "afwezig": false,
+     "regeling": "Omgevingsverordening Fryslân 2022",
+     "bron_id": "/akn/nl/act/pv21/2023/omgevingsverordening/nld@2026-10-07;1",
+     "via": "regel",
+     "aantal": 277,
+     "artikelen_op_punt": 131,
+     "geraakt": [
+      "3.9"
+     ],
+     "aanvullend": 0,
+     "toegang": {
+      "pad": {
+       "gevonden": true,
+       "artikel": "3.9",
+       "n": 18,
+       "via": "onderwerp",
+       "score": 0.9
+      },
+      "imow": {
+       "gevonden": false,
+       "score": 0.0,
+       "uitleg": "artikel valt onder water"
+      },
+      "hybride": {
+       "gevonden": true,
+       "artikel": "3.9",
+       "n": 18,
+       "via": "onderwerp",
+       "score": 0.9
+      }
+     },
+     "indeling": {
+      "pad": [
+       {
+        "artikel": "3.9",
+        "tegels": [
+         "waterkering"
+        ],
+        "sub": "water algemeen",
+        "herkomst": "pad"
+       }
+      ],
+      "imow": [
+       {
+        "artikel": "3.9",
+        "tegels": [
+         "water"
+        ],
+        "sub": null,
+        "herkomst": "annotatie"
+       }
+      ],
+      "hybride": [
+       {
+        "artikel": "3.9",
+        "tegels": [
+         "waterkering"
+        ],
+        "sub": "water algemeen",
+        "herkomst": "pad"
+       }
+      ]
+     }
+    }
+   ],
+   "locatie": {
+    "x": 192121,
+    "y": 571735,
+    "label": "Krúspaed 9, 9264TE Earnewâld",
+    "ok": true,
+    "melding": null
+   },
+   "documenten_op_punt": 19,
+   "kenmerk": {
+    "status": "PASS",
+    "gevonden": [
+     "Overstromingskans bebouwd gebied"
+    ]
+   },
+   "toegang": {
+    "pad": {
+     "gevonden": true,
+     "artikel": "3.9",
+     "n": 18,
+     "via": "onderwerp",
+     "score": 0.9
+    },
+    "imow": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "artikel valt onder water"
+    },
+    "hybride": {
+     "gevonden": true,
+     "artikel": "3.9",
+     "n": 18,
+     "via": "onderwerp",
+     "score": 0.9
+    }
+   },
+   "vraag_route": {
+    "aantal": 4,
+    "rang_artikel": 4,
+    "rang_document": 3,
+    "top5": [
+     {
+      "rang": 1,
+      "artikel": "11.11",
+      "opschrift": "(monitoring andere parameters voor signalering over de veiligheid primaire waterkeringen)",
+      "regeling": "Besluit van 3 juli 2018, houdende regels over de kwaliteit van de fysieke leefomgeving en de uitoefening van taken en bevoegdheden (Besluit kwaliteit leefomgeving)",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 2,
+      "artikel": "11.9",
+      "opschrift": "(monitoring omgevingswaarden veiligheid primaire waterkeringen)",
+      "regeling": "Besluit van 3 juli 2018, houdende regels over de kwaliteit van de fysieke leefomgeving en de uitoefening van taken en bevoegdheden (Besluit kwaliteit leefomgeving)",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 3,
+      "artikel": "3.7",
+      "opschrift": "Kans op overstroming vanuit regionale wateren",
+      "regeling": "Omgevingsverordening Fryslân 2022",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 4,
+      "artikel": "3.9",
+      "opschrift": "Omgevingswaarden voor kans op overstroming vanuit regionale wateren",
+      "regeling": "Omgevingsverordening Fryslân 2022",
+      "route": "tekst_fallback"
+     }
+    ],
+    "begrippen": []
+   }
+  },
+  {
+   "id": 29,
+   "vraag": "Wat is hier de overstromingskans?",
+   "routes": {
+    "locatie": "PASS",
+    "kenmerk": "PASS",
+    "document": "PASS",
+    "artikel": "PASS",
+    "pad": "PASS",
+    "imow": "FAIL",
+    "hybride": "PASS",
+    "vraag": "PASS"
+   },
+   "documenten": [
+    {
+     "spec": [
+      "omgevingsverordening frysl"
+     ],
+     "gevonden": true,
+     "afwezig": false,
+     "regeling": "Omgevingsverordening Fryslân 2022",
+     "bron_id": "/akn/nl/act/pv21/2023/omgevingsverordening/nld@2026-10-07;1",
+     "via": "regel",
+     "aantal": 327,
+     "artikelen_op_punt": 150,
+     "geraakt": [
+      "3.9"
+     ],
+     "aanvullend": 0,
+     "toegang": {
+      "pad": {
+       "gevonden": true,
+       "artikel": "3.9",
+       "n": 18,
+       "via": "onderwerp",
+       "score": 0.9
+      },
+      "imow": {
+       "gevonden": false,
+       "score": 0.0,
+       "uitleg": "artikel valt onder water"
+      },
+      "hybride": {
+       "gevonden": true,
+       "artikel": "3.9",
+       "n": 18,
+       "via": "onderwerp",
+       "score": 0.9
+      }
+     },
+     "indeling": {
+      "pad": [
+       {
+        "artikel": "3.9",
+        "tegels": [
+         "waterkering"
+        ],
+        "sub": "water algemeen",
+        "herkomst": "pad"
+       }
+      ],
+      "imow": [
+       {
+        "artikel": "3.9",
+        "tegels": [
+         "water"
+        ],
+        "sub": null,
+        "herkomst": "annotatie"
+       }
+      ],
+      "hybride": [
+       {
+        "artikel": "3.9",
+        "tegels": [
+         "waterkering"
+        ],
+        "sub": "water algemeen",
+        "herkomst": "pad"
+       }
+      ]
+     }
+    }
+   ],
+   "locatie": {
+    "x": 198910,
+    "y": 575939,
+    "label": "Perceel Oostermeer (OTM00) K 530",
+    "ok": true,
+    "melding": null
+   },
+   "documenten_op_punt": 19,
+   "kenmerk": {
+    "status": "PASS",
+    "gevonden": [
+     "Overstromingskans grasland"
+    ]
+   },
+   "toegang": {
+    "pad": {
+     "gevonden": true,
+     "artikel": "3.9",
+     "n": 18,
+     "via": "onderwerp",
+     "score": 0.9
+    },
+    "imow": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "artikel valt onder water"
+    },
+    "hybride": {
+     "gevonden": true,
+     "artikel": "3.9",
+     "n": 18,
+     "via": "onderwerp",
+     "score": 0.9
+    }
+   },
+   "vraag_route": {
+    "aantal": 4,
+    "rang_artikel": 4,
+    "rang_document": 3,
+    "top5": [
+     {
+      "rang": 1,
+      "artikel": "11.11",
+      "opschrift": "(monitoring andere parameters voor signalering over de veiligheid primaire waterkeringen)",
+      "regeling": "Besluit van 3 juli 2018, houdende regels over de kwaliteit van de fysieke leefomgeving en de uitoefening van taken en bevoegdheden (Besluit kwaliteit leefomgeving)",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 2,
+      "artikel": "11.9",
+      "opschrift": "(monitoring omgevingswaarden veiligheid primaire waterkeringen)",
+      "regeling": "Besluit van 3 juli 2018, houdende regels over de kwaliteit van de fysieke leefomgeving en de uitoefening van taken en bevoegdheden (Besluit kwaliteit leefomgeving)",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 3,
+      "artikel": "3.7",
+      "opschrift": "Kans op overstroming vanuit regionale wateren",
+      "regeling": "Omgevingsverordening Fryslân 2022",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 4,
+      "artikel": "3.9",
+      "opschrift": "Omgevingswaarden voor kans op overstroming vanuit regionale wateren",
+      "regeling": "Omgevingsverordening Fryslân 2022",
+      "route": "tekst_fallback"
+     }
+    ],
+    "begrippen": []
+   }
+  },
+  {
+   "id": 30,
+   "vraag": "Wat is hier de overstromingskans?",
+   "routes": {
+    "locatie": "PASS",
+    "kenmerk": "PASS",
+    "document": "PASS",
+    "artikel": "n.v.t.",
+    "pad": "n.v.t.",
+    "imow": "n.v.t.",
+    "hybride": "n.v.t.",
+    "vraag": "info"
+   },
+   "documenten": [
+    {
+     "spec": [
+      "omgevingsverordening frysl"
+     ],
+     "gevonden": true,
+     "afwezig": false,
+     "regeling": "Omgevingsverordening Fryslân 2022",
+     "bron_id": "/akn/nl/act/pv21/2023/omgevingsverordening/nld@2026-10-07;1",
+     "via": "regel",
+     "aantal": 350
+    }
+   ],
+   "locatie": {
+    "x": 179523,
+    "y": 594456,
+    "label": "Perceel Hallum (HLM05) A 424",
+    "ok": true,
+    "melding": null
+   },
+   "documenten_op_punt": 28,
+   "kenmerk": {
+    "status": "PASS",
+    "gevonden": [],
+    "uitleg": "terecht geen kenmerk"
+   },
+   "toegang": {
+    "pad": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "negatieve vraag: er is geen artikel om te vinden"
+    },
+    "imow": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "negatieve vraag: er is geen artikel om te vinden"
+    },
+    "hybride": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "negatieve vraag: er is geen artikel om te vinden"
+    }
+   },
+   "vraag_route": {
+    "aantal": 2,
+    "rang_artikel": null,
+    "rang_document": null,
+    "top5": [
+     {
+      "rang": 1,
+      "artikel": "11.11",
+      "opschrift": "(monitoring andere parameters voor signalering over de veiligheid primaire waterkeringen)",
+      "regeling": "Besluit van 3 juli 2018, houdende regels over de kwaliteit van de fysieke leefomgeving en de uitoefening van taken en bevoegdheden (Besluit kwaliteit leefomgeving)",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 2,
+      "artikel": "11.9",
+      "opschrift": "(monitoring omgevingswaarden veiligheid primaire waterkeringen)",
+      "regeling": "Besluit van 3 juli 2018, houdende regels over de kwaliteit van de fysieke leefomgeving en de uitoefening van taken en bevoegdheden (Besluit kwaliteit leefomgeving)",
+      "route": "tekst_fallback"
+     }
+    ],
+    "begrippen": []
+   }
+  },
+  {
+   "id": 31,
+   "vraag": "Wat is hier de kans op wateroverlast?",
+   "routes": {
+    "locatie": "PASS",
+    "kenmerk": "PASS",
+    "document": "PASS",
+    "artikel": "PASS",
+    "pad": "FAIL",
+    "imow": "FAIL",
+    "hybride": "FAIL",
+    "vraag": "PASS"
+   },
+   "documenten": [
+    {
+     "spec": [
+      "omgevingsverordening gelderland"
+     ],
+     "gevonden": true,
+     "afwezig": false,
+     "regeling": "Omgevingsverordening Gelderland",
+     "bron_id": "/akn/nl/act/pv25/2023/omgevingsverordening/nld@2026-10-14;11",
+     "via": "regel",
+     "aantal": 309,
+     "artikelen_op_punt": 162,
+     "geraakt": [
+      "3.11"
+     ],
+     "aanvullend": 0,
+     "toegang": {
+      "pad": {
+       "gevonden": false,
+       "score": 0.0,
+       "uitleg": "artikel valt onder niet-ingedeeld"
+      },
+      "imow": {
+       "gevonden": false,
+       "score": 0.0,
+       "uitleg": "artikel valt onder water"
+      },
+      "hybride": {
+       "gevonden": false,
+       "score": 0.0,
+       "uitleg": "artikel valt onder water"
+      }
+     },
+     "indeling": {
+      "pad": [
+       {
+        "artikel": "3.11",
+        "tegels": [
+         "niet-ingedeeld"
+        ],
+        "sub": null,
+        "herkomst": null
+       }
+      ],
+      "imow": [
+       {
+        "artikel": "3.11",
+        "tegels": [
+         "water"
+        ],
+        "sub": null,
+        "herkomst": "annotatie"
+       }
+      ],
+      "hybride": [
+       {
+        "artikel": "3.11",
+        "tegels": [
+         "water"
+        ],
+        "sub": null,
+        "herkomst": "annotatie"
+       }
+      ]
+     }
+    }
+   ],
+   "locatie": {
+    "x": 211758,
+    "y": 456492,
+    "label": "Perceel Steenderen (SDR00) W 583",
+    "ok": true,
+    "melding": null
+   },
+   "documenten_op_punt": 26,
+   "kenmerk": {
+    "status": "PASS",
+    "gevonden": [
+     "wateroverlast in het beheergebied van waterschap Rijn en IJssel"
+    ]
+   },
+   "toegang": {
+    "pad": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "artikel valt onder niet-ingedeeld"
+    },
+    "imow": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "artikel valt onder water"
+    },
+    "hybride": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "artikel valt onder water"
+    }
+   },
+   "vraag_route": {
+    "aantal": 9,
+    "rang_artikel": 8,
+    "rang_document": 8,
+    "top5": [
+     {
+      "rang": 1,
+      "artikel": "2.2",
+      "opschrift": "(oogmerken)",
+      "regeling": "Besluit van 3 juli 2018, houdende regels over activiteiten in de fysieke leefomgeving (Besluit activiteiten leefomgeving)",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 2,
+      "artikel": null,
+      "opschrift": "Waarborgen van de waterveiligheid en de klimaatbestendigheid (inclusief vitale infrastructuur voor water en mobiliteit)",
+      "regeling": "Nationale Omgevingsvisie",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 3,
+      "artikel": null,
+      "opschrift": "Een klimaatbestendige delta",
+      "regeling": "Nationale Omgevingsvisie",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 4,
+      "artikel": null,
+      "opschrift": "Klimaatbestendigheid en waterrobuustheid",
+      "regeling": "Nationale Omgevingsvisie",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 5,
+      "artikel": null,
+      "opschrift": "Beleidskeuze 1.1",
+      "regeling": "Nationale Omgevingsvisie",
+      "route": "tekst_fallback"
+     }
+    ],
+    "begrippen": [
+     "wateroverlast"
+    ]
+   }
+  },
+  {
+   "id": 32,
+   "vraag": "Wat is hier de kans op wateroverlast?",
+   "routes": {
+    "locatie": "PASS",
+    "kenmerk": "PASS",
+    "document": "PASS",
+    "artikel": "PASS",
+    "pad": "FAIL",
+    "imow": "FAIL",
+    "hybride": "FAIL",
+    "vraag": "LAAT"
+   },
+   "documenten": [
+    {
+     "spec": [
+      "omgevingsverordening gelderland"
+     ],
+     "gevonden": true,
+     "afwezig": false,
+     "regeling": "Omgevingsverordening Gelderland",
+     "bron_id": "/akn/nl/act/pv25/2023/omgevingsverordening/nld@2026-10-14;11",
+     "via": "regel",
+     "aantal": 294,
+     "artikelen_op_punt": 152,
+     "geraakt": [
+      "3.11"
+     ],
+     "aanvullend": 0,
+     "toegang": {
+      "pad": {
+       "gevonden": false,
+       "score": 0.0,
+       "uitleg": "artikel valt onder niet-ingedeeld"
+      },
+      "imow": {
+       "gevonden": false,
+       "score": 0.0,
+       "uitleg": "artikel valt onder water"
+      },
+      "hybride": {
+       "gevonden": false,
+       "score": 0.0,
+       "uitleg": "artikel valt onder water"
+      }
+     },
+     "indeling": {
+      "pad": [
+       {
+        "artikel": "3.11",
+        "tegels": [
+         "niet-ingedeeld"
+        ],
+        "sub": null,
+        "herkomst": null
+       }
+      ],
+      "imow": [
+       {
+        "artikel": "3.11",
+        "tegels": [
+         "water"
+        ],
+        "sub": null,
+        "herkomst": "annotatie"
+       }
+      ],
+      "hybride": [
+       {
+        "artikel": "3.11",
+        "tegels": [
+         "water"
+        ],
+        "sub": null,
+        "herkomst": "annotatie"
+       }
+      ]
+     }
+    }
+   ],
+   "locatie": {
+    "x": 210232,
+    "y": 461765,
+    "label": "Groenmarkt 16, 7201HX Zutphen",
+    "ok": true,
+    "melding": null
+   },
+   "documenten_op_punt": 28,
+   "kenmerk": {
+    "status": "PASS",
+    "gevonden": [
+     "wateroverlast in het beheergebied van waterschap Rijn en IJssel"
+    ]
+   },
+   "toegang": {
+    "pad": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "artikel valt onder niet-ingedeeld"
+    },
+    "imow": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "artikel valt onder water"
+    },
+    "hybride": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "artikel valt onder water"
+    }
+   },
+   "vraag_route": {
+    "aantal": 15,
+    "rang_artikel": 14,
+    "rang_document": 14,
+    "top5": [
+     {
+      "rang": 1,
+      "artikel": null,
+      "opschrift": "Grote opgaven vragen om een integrale visie op de leefomgeving",
+      "regeling": "Omgevingsvisie gemeente Zutphen",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 2,
+      "artikel": null,
+      "opschrift": "Zutphen bloeit: een gezonde, diervriendelijke stadse en dorpse leefomgeving met een sterke sociale verbondenheid",
+      "regeling": "Omgevingsvisie gemeente Zutphen",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 3,
+      "artikel": null,
+      "opschrift": "Zutphen onderneemt: een vitale en duurzame economie die slim verbonden is",
+      "regeling": "Omgevingsvisie gemeente Zutphen",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 4,
+      "artikel": null,
+      "opschrift": "Beleven in Zutphen: historische hanzestad van de 21e eeuw in een groen-blauwe jas",
+      "regeling": "Omgevingsvisie gemeente Zutphen",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 5,
+      "artikel": null,
+      "opschrift": "Bestaande en nieuwe woonwijken",
+      "regeling": "Omgevingsvisie gemeente Zutphen",
+      "route": "tekst_fallback"
+     }
+    ],
+    "begrippen": [
+     "wateroverlast"
+    ]
+   }
+  },
+  {
+   "id": 33,
+   "vraag": "Wat is hier de kans op wateroverlast?",
+   "routes": {
+    "locatie": "PASS",
+    "kenmerk": "n.v.t.",
+    "document": "PASS",
+    "artikel": "PASS",
+    "pad": "FAIL",
+    "imow": "FAIL",
+    "hybride": "FAIL",
+    "vraag": "FAIL"
+   },
+   "documenten": [
+    {
+     "spec": [
+      "omgevingsverordening provincie"
+     ],
+     "gevonden": true,
+     "afwezig": false,
+     "regeling": "Omgevingsverordening provincie",
+     "bron_id": "/akn/nl/act/pv23/2023/omgevingsverordening/nld@129",
+     "via": "regel",
+     "aantal": 338,
+     "artikelen_op_punt": 172,
+     "geraakt": [
+      "2.7"
+     ],
+     "aanvullend": 14,
+     "toegang": {
+      "pad": {
+       "gevonden": false,
+       "score": 0.0,
+       "uitleg": "artikel valt onder niet-ingedeeld"
+      },
+      "imow": {
+       "gevonden": false,
+       "score": 0.0,
+       "uitleg": "artikel valt onder niet-ingedeeld"
+      },
+      "hybride": {
+       "gevonden": false,
+       "score": 0.0,
+       "uitleg": "artikel valt onder niet-ingedeeld"
+      }
+     },
+     "indeling": {
+      "pad": [
+       {
+        "artikel": "2.7",
+        "tegels": [
+         "niet-ingedeeld"
+        ],
+        "sub": null,
+        "herkomst": null
+       }
+      ],
+      "imow": [
+       {
+        "artikel": "2.7",
+        "tegels": [
+         "niet-ingedeeld"
+        ],
+        "sub": null,
+        "herkomst": null
+       }
+      ],
+      "hybride": [
+       {
+        "artikel": "2.7",
+        "tegels": [
+         "niet-ingedeeld"
+        ],
+        "sub": null,
+        "herkomst": null
+       }
+      ]
+     }
+    }
+   ],
+   "locatie": {
+    "x": 207517,
+    "y": 473890,
+    "label": "Welle 23D, 7411CC Deventer",
+    "ok": true,
+    "melding": null
+   },
+   "documenten_op_punt": 26,
+   "kenmerk": {
+    "status": "n.v.t."
+   },
+   "toegang": {
+    "pad": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "artikel valt onder niet-ingedeeld"
+    },
+    "imow": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "artikel valt onder niet-ingedeeld"
+    },
+    "hybride": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "artikel valt onder niet-ingedeeld"
+    }
+   },
+   "vraag_route": {
+    "aantal": 20,
+    "rang_artikel": null,
+    "rang_document": null,
+    "top5": [
+     {
+      "rang": 1,
+      "artikel": "2.2",
+      "opschrift": "(oogmerken)",
+      "regeling": "Besluit van 3 juli 2018, houdende regels over activiteiten in de fysieke leefomgeving (Besluit activiteiten leefomgeving)",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 2,
+      "artikel": null,
+      "opschrift": "Waarborgen van de waterveiligheid en de klimaatbestendigheid (inclusief vitale infrastructuur voor water en mobiliteit)",
+      "regeling": "Nationale Omgevingsvisie",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 3,
+      "artikel": null,
+      "opschrift": "Een klimaatbestendige delta",
+      "regeling": "Nationale Omgevingsvisie",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 4,
+      "artikel": null,
+      "opschrift": "Klimaatbestendigheid en waterrobuustheid",
+      "regeling": "Nationale Omgevingsvisie",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 5,
+      "artikel": null,
+      "opschrift": "Beleidskeuze 1.1",
+      "regeling": "Nationale Omgevingsvisie",
+      "route": "tekst_fallback"
+     }
+    ],
+    "begrippen": [
+     "wateroverlast"
+    ]
+   }
+  },
+  {
+   "id": 34,
+   "vraag": "Wat is hier het beleid t.a.v. hoogwaterbescherming?",
+   "routes": {
+    "locatie": "PASS",
+    "kenmerk": "n.v.t.",
+    "document": "PASS",
+    "artikel": "FAIL",
+    "pad": "n.v.t.",
+    "imow": "n.v.t.",
+    "hybride": "n.v.t.",
+    "vraag": "FAIL"
+   },
+   "documenten": [
+    {
+     "spec": [
+      "integraal riviermanagement"
+     ],
+     "gevonden": true,
+     "afwezig": false,
+     "regeling": "Programma Integraal Riviermanagement",
+     "bron_id": "/akn/nl/act/mnre1130/2024/Ontwerp_IRM/nld@2025-04-09",
+     "via": "gebied",
+     "aantal": 63,
+     "artikelen_op_punt": 63,
+     "geraakt": [],
+     "uitleg": "niet bij de artikelen op dit punt"
+    }
+   ],
+   "locatie": {
+    "x": 204396,
+    "y": 429402,
+    "label": "Rijnstraat 1-01, 6916BC Tolkamer",
+    "ok": true,
+    "melding": null
+   },
+   "documenten_op_punt": 30,
+   "kenmerk": {
+    "status": "n.v.t."
+   },
+   "toegang": {
+    "pad": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "artikel niet op dit punt"
+    },
+    "imow": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "artikel niet op dit punt"
+    },
+    "hybride": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "artikel niet op dit punt"
+    }
+   },
+   "vraag_route": {
+    "aantal": 50,
+    "rang_artikel": null,
+    "rang_document": null,
+    "top5": [
+     {
+      "rang": 1,
+      "artikel": null,
+      "opschrift": "Open ruimtes in bebouwingstructuren (Lintbebouwing)",
+      "regeling": "Omgevingsvisie Zevenaar 2040",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 2,
+      "artikel": null,
+      "opschrift": "Nieuwe mogelijkheden",
+      "regeling": "Omgevingsvisie Zevenaar 2040",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 3,
+      "artikel": null,
+      "opschrift": "Effectscores",
+      "regeling": "Omgevingsvisie Zevenaar 2040",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 4,
+      "artikel": null,
+      "opschrift": "Lokaal energie opwekken en consumeren: local for local",
+      "regeling": "Regionale Energie Strategie Groene Metropoolregio Arnhem-Nijmegen",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 5,
+      "artikel": null,
+      "opschrift": "Algemeen",
+      "regeling": "Omgevingsvisie Zevenaar 2040",
+      "route": "tekst_fallback"
+     }
+    ],
+    "begrippen": []
+   }
+  },
+  {
+   "id": 35,
+   "vraag": "Welke regels gelden hier over aanvragen van subsidie voor natuur- en landschapsbeheer?",
+   "routes": {
+    "locatie": "PASS",
+    "kenmerk": "n.v.t.",
+    "document": "PASS",
+    "artikel": "PASS",
+    "pad": "FAIL",
+    "imow": "FAIL",
+    "hybride": "FAIL",
+    "vraag": "FAIL"
+   },
+   "documenten": [
+    {
+     "spec": [
+      "natuurbeheerplan",
+      "flevoland"
+     ],
+     "gevonden": true,
+     "afwezig": false,
+     "regeling": "Natuurbeheerplan Flevoland",
+     "bron_id": "/akn/nl/act/pv24/2025/2_43/nld@104",
+     "via": "gebied",
+     "aantal": 33,
+     "artikelen_op_punt": 33,
+     "geraakt": [
+      "Natuur- en landschapsbeheer",
+      "Agrarisch natuur- en landschapsbeheer",
+      "Investeringssubsidie",
+      "Subsidie functieverandering",
+      "Niet-productieve investeringen in biodiversiteit, natuur- en landschap en hydrologische maatregelen PAS",
+      "Regeling Specifieke Uitkering Programma Natuur"
+     ],
+     "aanvullend": 0,
+     "toegang": {
+      "pad": {
+       "gevonden": false,
+       "score": 0.0,
+       "uitleg": "artikel valt onder niet-ingedeeld"
+      },
+      "imow": {
+       "gevonden": false,
+       "score": 0.0,
+       "uitleg": "artikel valt onder niet-ingedeeld"
+      },
+      "hybride": {
+       "gevonden": false,
+       "score": 0.0,
+       "uitleg": "artikel valt onder niet-ingedeeld"
+      }
+     },
+     "indeling": {
+      "pad": [
+       {
+        "artikel": "Natuur- en landschapsbeheer",
+        "tegels": [
+         "niet-ingedeeld"
+        ],
+        "sub": null,
+        "herkomst": null
+       },
+       {
+        "artikel": "Agrarisch natuur- en landschapsbeheer",
+        "tegels": [
+         "niet-ingedeeld"
+        ],
+        "sub": null,
+        "herkomst": null
+       },
+       {
+        "artikel": "Investeringssubsidie",
+        "tegels": [
+         "niet-ingedeeld"
+        ],
+        "sub": null,
+        "herkomst": null
+       },
+       {
+        "artikel": "Subsidie functieverandering",
+        "tegels": [
+         "niet-ingedeeld"
+        ],
+        "sub": null,
+        "herkomst": null
+       },
+       {
+        "artikel": "Niet-productieve investeringen in biodiversiteit, natuur- en landschap en hydrologische maatregelen PAS",
+        "tegels": [
+         "niet-ingedeeld"
+        ],
+        "sub": null,
+        "herkomst": null
+       },
+       {
+        "artikel": "Regeling Specifieke Uitkering Programma Natuur",
+        "tegels": [
+         "niet-ingedeeld"
+        ],
+        "sub": null,
+        "herkomst": null
+       }
+      ],
+      "imow": [
+       {
+        "artikel": "Natuur- en landschapsbeheer",
+        "tegels": [
+         "niet-ingedeeld"
+        ],
+        "sub": null,
+        "herkomst": null
+       },
+       {
+        "artikel": "Agrarisch natuur- en landschapsbeheer",
+        "tegels": [
+         "niet-ingedeeld"
+        ],
+        "sub": null,
+        "herkomst": null
+       },
+       {
+        "artikel": "Investeringssubsidie",
+        "tegels": [
+         "niet-ingedeeld"
+        ],
+        "sub": null,
+        "herkomst": null
+       },
+       {
+        "artikel": "Subsidie functieverandering",
+        "tegels": [
+         "niet-ingedeeld"
+        ],
+        "sub": null,
+        "herkomst": null
+       },
+       {
+        "artikel": "Niet-productieve investeringen in biodiversiteit, natuur- en landschap en hydrologische maatregelen PAS",
+        "tegels": [
+         "niet-ingedeeld"
+        ],
+        "sub": null,
+        "herkomst": null
+       },
+       {
+        "artikel": "Regeling Specifieke Uitkering Programma Natuur",
+        "tegels": [
+         "niet-ingedeeld"
+        ],
+        "sub": null,
+        "herkomst": null
+       }
+      ],
+      "hybride": [
+       {
+        "artikel": "Natuur- en landschapsbeheer",
+        "tegels": [
+         "niet-ingedeeld"
+        ],
+        "sub": null,
+        "herkomst": null
+       },
+       {
+        "artikel": "Agrarisch natuur- en landschapsbeheer",
+        "tegels": [
+         "niet-ingedeeld"
+        ],
+        "sub": null,
+        "herkomst": null
+       },
+       {
+        "artikel": "Investeringssubsidie",
+        "tegels": [
+         "niet-ingedeeld"
+        ],
+        "sub": null,
+        "herkomst": null
+       },
+       {
+        "artikel": "Subsidie functieverandering",
+        "tegels": [
+         "niet-ingedeeld"
+        ],
+        "sub": null,
+        "herkomst": null
+       },
+       {
+        "artikel": "Niet-productieve investeringen in biodiversiteit, natuur- en landschap en hydrologische maatregelen PAS",
+        "tegels": [
+         "niet-ingedeeld"
+        ],
+        "sub": null,
+        "herkomst": null
+       },
+       {
+        "artikel": "Regeling Specifieke Uitkering Programma Natuur",
+        "tegels": [
+         "niet-ingedeeld"
+        ],
+        "sub": null,
+        "herkomst": null
+       }
+      ]
+     }
+    }
+   ],
+   "locatie": {
+    "x": 153029,
+    "y": 496976,
+    "label": "Perceel Lelystad (LLS00) R 214",
+    "ok": true,
+    "melding": null
+   },
+   "documenten_op_punt": 28,
+   "kenmerk": {
+    "status": "n.v.t."
+   },
+   "toegang": {
+    "pad": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "artikel valt onder niet-ingedeeld"
+    },
+    "imow": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "artikel valt onder niet-ingedeeld"
+    },
+    "hybride": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "artikel valt onder niet-ingedeeld"
+    }
+   },
+   "vraag_route": {
+    "aantal": 2,
+    "rang_artikel": null,
+    "rang_document": null,
+    "top5": [
+     {
+      "rang": 1,
+      "artikel": null,
+      "opschrift": "Beleidskeuze 1.4",
+      "regeling": "Nationale Omgevingsvisie",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 2,
+      "artikel": null,
+      "opschrift": "Veilig en gezond, herkenbaar en natuurlijk",
+      "regeling": "Nationale Omgevingsvisie",
+      "route": "tekst_fallback"
+     }
+    ],
+    "begrippen": []
+   }
+  },
+  {
+   "id": 36,
+   "vraag": "Welke regels gelden hier over aanvragen van subsidie voor natuur- en landschapsbeheer?",
+   "routes": {
+    "locatie": "PASS",
+    "kenmerk": "n.v.t.",
+    "document": "PASS",
+    "artikel": "PASS",
+    "pad": "info",
+    "imow": "info",
+    "hybride": "info",
+    "vraag": "FAIL"
+   },
+   "documenten": [
+    {
+     "spec": [
+      "natuurbeheerplan",
+      "flevoland"
+     ],
+     "gevonden": true,
+     "afwezig": false,
+     "regeling": "Natuurbeheerplan Flevoland",
+     "bron_id": "/akn/nl/act/pv24/2025/2_43/nld@104",
+     "via": "gebied",
+     "aantal": 33,
+     "artikelen_op_punt": 33,
+     "geraakt": [
+      "Natuur- en landschapsbeheer",
+      "Agrarisch natuur- en landschapsbeheer",
+      "Investeringssubsidie",
+      "Subsidie functieverandering",
+      "Niet-productieve investeringen in biodiversiteit, natuur- en landschap en hydrologische maatregelen PAS",
+      "Regeling Specifieke Uitkering Programma Natuur"
+     ],
+     "aanvullend": 0,
+     "indeling": {
+      "pad": [
+       {
+        "artikel": "Natuur- en landschapsbeheer",
+        "tegels": [
+         "niet-ingedeeld"
+        ],
+        "sub": null,
+        "herkomst": null
+       },
+       {
+        "artikel": "Agrarisch natuur- en landschapsbeheer",
+        "tegels": [
+         "niet-ingedeeld"
+        ],
+        "sub": null,
+        "herkomst": null
+       },
+       {
+        "artikel": "Investeringssubsidie",
+        "tegels": [
+         "niet-ingedeeld"
+        ],
+        "sub": null,
+        "herkomst": null
+       },
+       {
+        "artikel": "Subsidie functieverandering",
+        "tegels": [
+         "niet-ingedeeld"
+        ],
+        "sub": null,
+        "herkomst": null
+       },
+       {
+        "artikel": "Niet-productieve investeringen in biodiversiteit, natuur- en landschap en hydrologische maatregelen PAS",
+        "tegels": [
+         "niet-ingedeeld"
+        ],
+        "sub": null,
+        "herkomst": null
+       },
+       {
+        "artikel": "Regeling Specifieke Uitkering Programma Natuur",
+        "tegels": [
+         "niet-ingedeeld"
+        ],
+        "sub": null,
+        "herkomst": null
+       }
+      ],
+      "imow": [
+       {
+        "artikel": "Natuur- en landschapsbeheer",
+        "tegels": [
+         "niet-ingedeeld"
+        ],
+        "sub": null,
+        "herkomst": null
+       },
+       {
+        "artikel": "Agrarisch natuur- en landschapsbeheer",
+        "tegels": [
+         "niet-ingedeeld"
+        ],
+        "sub": null,
+        "herkomst": null
+       },
+       {
+        "artikel": "Investeringssubsidie",
+        "tegels": [
+         "niet-ingedeeld"
+        ],
+        "sub": null,
+        "herkomst": null
+       },
+       {
+        "artikel": "Subsidie functieverandering",
+        "tegels": [
+         "niet-ingedeeld"
+        ],
+        "sub": null,
+        "herkomst": null
+       },
+       {
+        "artikel": "Niet-productieve investeringen in biodiversiteit, natuur- en landschap en hydrologische maatregelen PAS",
+        "tegels": [
+         "niet-ingedeeld"
+        ],
+        "sub": null,
+        "herkomst": null
+       },
+       {
+        "artikel": "Regeling Specifieke Uitkering Programma Natuur",
+        "tegels": [
+         "niet-ingedeeld"
+        ],
+        "sub": null,
+        "herkomst": null
+       }
+      ],
+      "hybride": [
+       {
+        "artikel": "Natuur- en landschapsbeheer",
+        "tegels": [
+         "niet-ingedeeld"
+        ],
+        "sub": null,
+        "herkomst": null
+       },
+       {
+        "artikel": "Agrarisch natuur- en landschapsbeheer",
+        "tegels": [
+         "niet-ingedeeld"
+        ],
+        "sub": null,
+        "herkomst": null
+       },
+       {
+        "artikel": "Investeringssubsidie",
+        "tegels": [
+         "niet-ingedeeld"
+        ],
+        "sub": null,
+        "herkomst": null
+       },
+       {
+        "artikel": "Subsidie functieverandering",
+        "tegels": [
+         "niet-ingedeeld"
+        ],
+        "sub": null,
+        "herkomst": null
+       },
+       {
+        "artikel": "Niet-productieve investeringen in biodiversiteit, natuur- en landschap en hydrologische maatregelen PAS",
+        "tegels": [
+         "niet-ingedeeld"
+        ],
+        "sub": null,
+        "herkomst": null
+       },
+       {
+        "artikel": "Regeling Specifieke Uitkering Programma Natuur",
+        "tegels": [
+         "niet-ingedeeld"
+        ],
+        "sub": null,
+        "herkomst": null
+       }
+      ]
+     }
+    }
+   ],
+   "locatie": {
+    "x": 170239,
+    "y": 489741,
+    "label": "RD 170239, 489741",
+    "ok": true
+   },
+   "documenten_op_punt": 26,
+   "kenmerk": {
+    "status": "n.v.t."
+   },
+   "toegang": {
+    "pad": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    },
+    "imow": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    },
+    "hybride": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    }
+   },
+   "vraag_route": {
+    "aantal": 2,
+    "rang_artikel": null,
+    "rang_document": null,
+    "top5": [
+     {
+      "rang": 1,
+      "artikel": null,
+      "opschrift": "Beleidskeuze 1.4",
+      "regeling": "Nationale Omgevingsvisie",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 2,
+      "artikel": null,
+      "opschrift": "Veilig en gezond, herkenbaar en natuurlijk",
+      "regeling": "Nationale Omgevingsvisie",
+      "route": "tekst_fallback"
+     }
+    ],
+    "begrippen": []
+   }
+  },
+  {
+   "id": 37,
+   "vraag": "Welke visie is hier op de spoorwegverbinding tussen het noorden en de Randstad?",
+   "routes": {
+    "locatie": "PASS",
+    "kenmerk": "n.v.t.",
+    "document": "FAIL",
+    "artikel": "FAIL",
+    "pad": "n.v.t.",
+    "imow": "n.v.t.",
+    "hybride": "n.v.t.",
+    "vraag": "FAIL"
+   },
+   "documenten": [
+    {
+     "spec": [
+      "nota ruimte"
+     ],
+     "gevonden": false,
+     "afwezig": false,
+     "uitleg": "document niet bij dit punt, en niet te vinden in het register"
+    }
+   ],
+   "locatie": {
+    "x": 194087,
+    "y": 575548,
+    "label": "Inialoane 23, 9263RB Garyp",
+    "ok": true,
+    "melding": null
+   },
+   "documenten_op_punt": 19,
+   "kenmerk": {
+    "status": "n.v.t."
+   },
+   "toegang": {
+    "pad": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "document niet op dit punt"
+    },
+    "imow": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "document niet op dit punt"
+    },
+    "hybride": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "document niet op dit punt"
+    }
+   },
+   "vraag_route": {
+    "aantal": 50,
+    "rang_artikel": null,
+    "rang_document": null,
+    "top5": [
+     {
+      "rang": 1,
+      "artikel": null,
+      "opschrift": "Behoefte 8: toename gebruik jachtvliegtuigcapaciteit",
+      "regeling": "Nationaal Programma Ruimte voor Defensie",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 2,
+      "artikel": "22.13",
+      "opschrift": "Bluswatervoorziening",
+      "regeling": "Omgevingsplan gemeente Tytsjerksteradiel",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 3,
+      "artikel": "22.14",
+      "opschrift": "Bereikbaarheid bouwwerk voor hulpverleningsdiensten",
+      "regeling": "Omgevingsplan gemeente Tytsjerksteradiel",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 4,
+      "artikel": "22.15",
+      "opschrift": "Opstelplaatsen voor brandweervoertuigen",
+      "regeling": "Omgevingsplan gemeente Tytsjerksteradiel",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 5,
+      "artikel": "22.15",
+      "opschrift": "Opstelplaatsen voor brandweervoertuigen",
+      "regeling": "Omgevingsplan gemeente Tytsjerksteradiel",
+      "route": "tekst_fallback"
+     }
+    ],
+    "begrippen": []
+   }
+  },
+  {
+   "id": 38,
+   "vraag": "Welke lange termijnvisie is hier op een doorontwikkeling van de Betuwelijn?",
+   "routes": {
+    "locatie": "PASS",
+    "kenmerk": "n.v.t.",
+    "document": "PASS",
+    "artikel": "n.v.t.",
+    "pad": "n.v.t.",
+    "imow": "n.v.t.",
+    "hybride": "n.v.t.",
+    "vraag": "DOC"
+   },
+   "documenten": [
+    {
+     "spec": [
+      "omgevingsvisie",
+      "neder-betuwe"
+     ],
+     "gevonden": true,
+     "afwezig": false,
+     "regeling": "Omgevingsvisie Neder-Betuwe",
+     "bron_id": "/akn/nl/act/gm1740/2026/Regelingb81942ac66a549e8a1467c91fd6d8f0c/nld@2026-04-15;09063196",
+     "via": "gebied",
+     "aantal": 67
+    }
+   ],
+   "locatie": {
+    "x": 164238,
+    "y": 436644,
+    "label": "Saneringsweg 3a, 4053JK IJzendoorn",
+    "ok": true,
+    "melding": null
+   },
+   "documenten_op_punt": 34,
+   "kenmerk": {
+    "status": "n.v.t."
+   },
+   "toegang": {
+    "pad": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen verwacht artikel om naar te zoeken"
+    },
+    "imow": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen verwacht artikel om naar te zoeken"
+    },
+    "hybride": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen verwacht artikel om naar te zoeken"
+    }
+   },
+   "vraag_route": {
+    "aantal": 50,
+    "rang_artikel": null,
+    "rang_document": 1,
+    "top5": [
+     {
+      "rang": 1,
+      "artikel": null,
+      "opschrift": "Wat doet de gemeente?",
+      "regeling": "Omgevingsvisie Neder-Betuwe",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 2,
+      "artikel": null,
+      "opschrift": "Wat houdt dit speerpunt in?",
+      "regeling": "Omgevingsvisie Neder-Betuwe",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 3,
+      "artikel": null,
+      "opschrift": "Aanleiding",
+      "regeling": "Programma Hamsestraat Opheusden",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 4,
+      "artikel": null,
+      "opschrift": "Kennisinstrumenten &amp; uitgangspunten beleidscyclus",
+      "regeling": "Omgevingsvisie Neder-Betuwe",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 5,
+      "artikel": "8.275",
+      "opschrift": "Tijdelijke opslag van vrijkomende grond",
+      "regeling": "Omgevingsplan gemeente Neder-Betuwe",
+      "route": "tekst_fallback"
+     }
+    ],
+    "begrippen": []
+   }
+  },
+  {
+   "id": 39,
+   "vraag": "Welke ambitie is hier t.a.v. het terugdringen van broeikasgassen?",
+   "routes": {
+    "locatie": "PASS",
+    "kenmerk": "n.v.t.",
+    "document": "FAIL",
+    "artikel": "n.v.t.",
+    "pad": "n.v.t.",
+    "imow": "n.v.t.",
+    "hybride": "n.v.t.",
+    "vraag": "FAIL"
+   },
+   "documenten": [
+    {
+     "spec": [
+      "gaaf gelderland"
+     ],
+     "gevonden": false,
+     "afwezig": false,
+     "uitleg": "'Omgevingsvisie Gaaf Gelderland' staat in het register met 0 artikelen; zonder tekst laat regelmix het plan weg (datalaag)"
+    }
+   ],
+   "locatie": {
+    "x": 194195,
+    "y": 465886,
+    "label": "Laan van Westenenk 701, 7334DP Apeldoorn",
+    "ok": true,
+    "melding": null
+   },
+   "documenten_op_punt": 31,
+   "kenmerk": {
+    "status": "n.v.t."
+   },
+   "toegang": {
+    "pad": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    },
+    "imow": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    },
+    "hybride": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    }
+   },
+   "vraag_route": {
+    "aantal": 7,
+    "rang_artikel": null,
+    "rang_document": null,
+    "top5": [
+     {
+      "rang": 1,
+      "artikel": null,
+      "opschrift": "Waarborgen en bevorderen van een gezonde en veilige fysieke leefomgeving",
+      "regeling": "Nationale Omgevingsvisie",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 2,
+      "artikel": null,
+      "opschrift": "Hoe we stadmaken, vitale dorpen en buitengebied realiseren",
+      "regeling": "Omgevingsvisie gemeente Apeldoorn",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 3,
+      "artikel": null,
+      "opschrift": null,
+      "regeling": "Programma voor Gemeente Apeldoorn",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 4,
+      "artikel": null,
+      "opschrift": "Hoe we ons fysiek en sociaal fundament versterken",
+      "regeling": "Omgevingsvisie gemeente Apeldoorn",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 5,
+      "artikel": null,
+      "opschrift": "Beperken van klimaatverandering",
+      "regeling": "Nationale Omgevingsvisie",
+      "route": "tekst_fallback"
+     }
+    ],
+    "begrippen": []
+   }
+  },
+  {
+   "id": 40,
+   "vraag": "Kunnen er nog zienswijzen worden ingediend op het plan voor de aanleg van een windpark hier?",
+   "routes": {
+    "locatie": "PASS",
+    "kenmerk": "n.v.t.",
+    "document": "FAIL",
+    "artikel": "n.v.t.",
+    "pad": "n.v.t.",
+    "imow": "n.v.t.",
+    "hybride": "n.v.t.",
+    "vraag": "FAIL"
+   },
+   "documenten": [
+    {
+     "spec": [
+      "windpark",
+      "echteld"
+     ],
+     "gevonden": false,
+     "afwezig": false,
+     "uitleg": "'Omgevingsplanregels vanwege projectbesluit Windpark Echteld - Lienden, provincie Gelderland' staat in het register (32 artikelen), maar niet bij dit punt"
+    }
+   ],
+   "locatie": {
+    "x": 164238,
+    "y": 436644,
+    "label": "Saneringsweg 3a, 4053JK IJzendoorn",
+    "ok": true,
+    "melding": null
+   },
+   "documenten_op_punt": 34,
+   "kenmerk": {
+    "status": "n.v.t."
+   },
+   "toegang": {
+    "pad": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen verwacht artikel om naar te zoeken"
+    },
+    "imow": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen verwacht artikel om naar te zoeken"
+    },
+    "hybride": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen verwacht artikel om naar te zoeken"
+    }
+   },
+   "vraag_route": {
+    "aantal": 15,
+    "rang_artikel": null,
+    "rang_document": null,
+    "top5": [
+     {
+      "rang": 1,
+      "artikel": null,
+      "opschrift": "Terinzagelegging",
+      "regeling": "Nationaal Programma Ruimte voor Defensie",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 2,
+      "artikel": null,
+      "opschrift": "Hoe kwam het Programma Buitengebied tot stand?",
+      "regeling": "Programma Buitengebied gemeente Neder-Betuwe",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 3,
+      "artikel": null,
+      "opschrift": "Notitie Reikwijdte en Detail, zienswijzen en Nota van Antwoord",
+      "regeling": "Nationaal Programma Ruimte voor Defensie",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 4,
+      "artikel": null,
+      "opschrift": "Trechteringsproces",
+      "regeling": "Nationaal Programma Ruimte voor Defensie",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 5,
+      "artikel": null,
+      "opschrift": "Wat doet de gemeente?",
+      "regeling": "Omgevingsvisie Neder-Betuwe",
+      "route": "tekst_fallback"
+     }
+    ],
+    "begrippen": []
+   }
+  }
+ ]
+}

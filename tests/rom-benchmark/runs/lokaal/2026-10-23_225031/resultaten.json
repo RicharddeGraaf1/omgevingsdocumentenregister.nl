@@ -1,0 +1,637 @@
+{
+ "meta": {
+  "start": "2026-10-23 22:50",
+  "api": "http://localhost:8002",
+  "water_als_waterkering": false,
+  "aanroepen": 31,
+  "duur": 89.91529,
+  "golden": "C:\\GIT\\omgevingsdocumentenregister.nl\\tests\\rom-benchmark\\golden.json",
+  "cases": 9
+ },
+ "resultaten": [
+  {
+   "id": 5,
+   "vraag": "Wat is hier de maximale bouwhoogte?",
+   "routes": {
+    "locatie": "PASS",
+    "kenmerk": "PASS",
+    "document": "PASS",
+    "artikel": "n.v.t.",
+    "pad": "n.v.t.",
+    "imow": "n.v.t.",
+    "hybride": "n.v.t.",
+    "stelsel": "n.v.t.",
+    "stelsel_act": "n.v.t."
+   },
+   "documenten": [
+    {
+     "spec": [
+      "binnenstad"
+     ],
+     "gevonden": true,
+     "afwezig": false,
+     "regeling": "Bestemmingsplan \"Binnenstad\"",
+     "bron_id": "NL.IMRO.0307.BP00071-0301",
+     "via": "regel",
+     "aantal": 572
+    }
+   ],
+   "locatie": {
+    "x": 155103,
+    "y": 463460,
+    "label": "Boldershof 32, 3811GN Amersfoort",
+    "ok": true,
+    "melding": null
+   },
+   "documenten_op_punt": 41,
+   "kenmerk": {
+    "status": "PASS",
+    "gevonden": [
+     "maximum goothoogte (m), maximum bouwhoogte (m)"
+    ]
+   },
+   "toegang": {
+    "pad": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen verwacht artikel om naar te zoeken"
+    },
+    "imow": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen verwacht artikel om naar te zoeken"
+    },
+    "hybride": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen verwacht artikel om naar te zoeken"
+    },
+    "stelsel": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen verwacht artikel om naar te zoeken"
+    },
+    "stelsel_act": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen verwacht artikel om naar te zoeken"
+    }
+   }
+  },
+  {
+   "id": 7,
+   "vraag": "Wat is hier het maximum bebouwingspercentage?",
+   "routes": {
+    "locatie": "PASS",
+    "kenmerk": "PASS",
+    "document": "FAIL",
+    "artikel": "n.v.t.",
+    "pad": "n.v.t.",
+    "imow": "n.v.t.",
+    "hybride": "n.v.t.",
+    "stelsel": "n.v.t.",
+    "stelsel_act": "n.v.t."
+   },
+   "documenten": [
+    {
+     "spec": [
+      "earnew",
+      "2013"
+     ],
+     "gevonden": false,
+     "afwezig": false,
+     "uitleg": "document niet bij dit punt, en niet te vinden in het register"
+    }
+   ],
+   "locatie": {
+    "x": 192516,
+    "y": 572200,
+    "label": "De Reidtûgel 3, 9264TS Earnewâld",
+    "ok": true,
+    "melding": null
+   },
+   "documenten_op_punt": 19,
+   "kenmerk": {
+    "status": "PASS",
+    "gevonden": [
+     "maximum goothoogte (m), maximum bouwhoogte (m), maximum bebouwingspercentage (%)"
+    ]
+   },
+   "toegang": {
+    "pad": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    },
+    "imow": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    },
+    "hybride": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    },
+    "stelsel": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    },
+    "stelsel_act": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    }
+   }
+  },
+  {
+   "id": 8,
+   "vraag": "Mag ik hier een winkel beginnen?",
+   "routes": {
+    "locatie": "PASS",
+    "kenmerk": "PASS",
+    "document": "PASS",
+    "artikel": "PASS",
+    "pad": "n.v.t.",
+    "imow": "n.v.t.",
+    "hybride": "n.v.t.",
+    "stelsel": "n.v.t.",
+    "stelsel_act": "n.v.t."
+   },
+   "documenten": [
+    {
+     "spec": [
+      "binnenstad 2013"
+     ],
+     "gevonden": true,
+     "afwezig": false,
+     "regeling": "Binnenstad 2013",
+     "bron_id": "NL.IMRO.0402.11bp00binnenstad-va01",
+     "via": "regel",
+     "aantal": 617,
+     "artikelen_op_punt": 234,
+     "geraakt": [
+      "11.1"
+     ]
+    }
+   ],
+   "locatie": {
+    "x": 140261,
+    "y": 470759,
+    "label": "'s-Gravelandseweg 9, 1211BN Hilversum",
+    "ok": true,
+    "melding": null
+   },
+   "documenten_op_punt": 28,
+   "kenmerk": {
+    "status": "PASS",
+    "gevonden": [
+     "Dienstverlening"
+    ]
+   },
+   "toegang": {
+    "pad": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    },
+    "imow": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    },
+    "hybride": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    },
+    "stelsel": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    },
+    "stelsel_act": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    }
+   }
+  },
+  {
+   "id": 9,
+   "vraag": "Mag ik hier een winkel beginnen?",
+   "routes": {
+    "locatie": "PASS",
+    "kenmerk": "PASS",
+    "document": "PASS",
+    "artikel": "PASS",
+    "pad": "n.v.t.",
+    "imow": "n.v.t.",
+    "hybride": "n.v.t.",
+    "stelsel": "n.v.t.",
+    "stelsel_act": "n.v.t."
+   },
+   "documenten": [
+    {
+     "spec": [
+      "binnenstad"
+     ],
+     "gevonden": true,
+     "afwezig": false,
+     "regeling": "Binnenstad geconsolideerde versie",
+     "bron_id": "NL.IMRO.0014.BP574BinnenstadGV-gv02",
+     "via": "regel",
+     "aantal": 263,
+     "artikelen_op_punt": 193,
+     "geraakt": [
+      "4.1",
+      "4.1"
+     ]
+    }
+   ],
+   "locatie": {
+    "x": 233708,
+    "y": 581912,
+    "label": "Vismarkt 7a-7, 9712CA Groningen",
+    "ok": true,
+    "melding": null
+   },
+   "documenten_op_punt": 34,
+   "kenmerk": {
+    "status": "PASS",
+    "gevonden": [
+     "Centrum - 1"
+    ]
+   },
+   "toegang": {
+    "pad": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    },
+    "imow": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    },
+    "hybride": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    },
+    "stelsel": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    },
+    "stelsel_act": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    }
+   }
+  },
+  {
+   "id": 11,
+   "vraag": "Mag ik hier een houtzagerij beginnen?",
+   "routes": {
+    "locatie": "PASS",
+    "kenmerk": "PASS",
+    "document": "FAIL",
+    "artikel": "n.v.t.",
+    "pad": "n.v.t.",
+    "imow": "n.v.t.",
+    "hybride": "n.v.t.",
+    "stelsel": "n.v.t.",
+    "stelsel_act": "n.v.t."
+   },
+   "documenten": [
+    {
+     "spec": [
+      "earnew",
+      "2013"
+     ],
+     "gevonden": false,
+     "afwezig": false,
+     "uitleg": "document niet bij dit punt, en niet te vinden in het register"
+    }
+   ],
+   "locatie": {
+    "x": 192121,
+    "y": 571735,
+    "label": "Krúspaed 9, 9264TE Earnewâld",
+    "ok": true,
+    "melding": null
+   },
+   "documenten_op_punt": 19,
+   "kenmerk": {
+    "status": "PASS",
+    "gevonden": [
+     "Wonen - A1"
+    ]
+   },
+   "toegang": {
+    "pad": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    },
+    "imow": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    },
+    "hybride": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    },
+    "stelsel": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    },
+    "stelsel_act": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    }
+   }
+  },
+  {
+   "id": 12,
+   "vraag": "Mag ik hier een houtzagerij beginnen?",
+   "routes": {
+    "locatie": "PASS",
+    "kenmerk": "PASS",
+    "document": "FAIL",
+    "artikel": "n.v.t.",
+    "pad": "n.v.t.",
+    "imow": "n.v.t.",
+    "hybride": "n.v.t.",
+    "stelsel": "n.v.t.",
+    "stelsel_act": "n.v.t."
+   },
+   "documenten": [
+    {
+     "spec": [
+      "earnew",
+      "2013"
+     ],
+     "gevonden": false,
+     "afwezig": false,
+     "uitleg": "document niet bij dit punt, en niet te vinden in het register"
+    }
+   ],
+   "locatie": {
+    "x": 191175,
+    "y": 571558,
+    "label": "Smidspaed 17, 9264TK Earnewâld",
+    "ok": true,
+    "melding": null
+   },
+   "documenten_op_punt": 19,
+   "kenmerk": {
+    "status": "PASS",
+    "gevonden": [
+     "Recreatie - 1A"
+    ]
+   },
+   "toegang": {
+    "pad": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    },
+    "imow": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    },
+    "hybride": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    },
+    "stelsel": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    },
+    "stelsel_act": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    }
+   }
+  },
+  {
+   "id": 13,
+   "vraag": "Mag ik hier boten verhuren?",
+   "routes": {
+    "locatie": "PASS",
+    "kenmerk": "PASS",
+    "document": "FAIL",
+    "artikel": "n.v.t.",
+    "pad": "n.v.t.",
+    "imow": "n.v.t.",
+    "hybride": "n.v.t.",
+    "stelsel": "n.v.t.",
+    "stelsel_act": "n.v.t."
+   },
+   "documenten": [
+    {
+     "spec": [
+      "earnew",
+      "2013"
+     ],
+     "gevonden": false,
+     "afwezig": false,
+     "uitleg": "document niet bij dit punt, en niet te vinden in het register"
+    }
+   ],
+   "locatie": {
+    "x": 192232,
+    "y": 571771,
+    "label": "Tsjerkepaed 5, 9264TG Earnewâld",
+    "ok": true,
+    "melding": null
+   },
+   "documenten_op_punt": 19,
+   "kenmerk": {
+    "status": "PASS",
+    "gevonden": [
+     "Wonen - A1"
+    ]
+   },
+   "toegang": {
+    "pad": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    },
+    "imow": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    },
+    "hybride": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    },
+    "stelsel": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    },
+    "stelsel_act": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    }
+   }
+  },
+  {
+   "id": 14,
+   "vraag": "Mag ik hier een parkeerplaats aanleggen?",
+   "routes": {
+    "locatie": "PASS",
+    "kenmerk": "PASS",
+    "document": "PASS",
+    "artikel": "PASS",
+    "pad": "n.v.t.",
+    "imow": "n.v.t.",
+    "hybride": "n.v.t.",
+    "stelsel": "n.v.t.",
+    "stelsel_act": "n.v.t."
+   },
+   "documenten": [
+    {
+     "spec": [
+      "noordwestelijk villagebied",
+      "parkeernormen"
+     ],
+     "gevonden": true,
+     "afwezig": false,
+     "regeling": "Herziening Noordwestelijk Villagebied - parkeernormen 2018",
+     "bron_id": "NL.IMRO.0402.04pbp01hnwpark2018-va01",
+     "via": "regel",
+     "aantal": 26,
+     "artikelen_op_punt": 26,
+     "geraakt": [
+      "4.1"
+     ]
+    }
+   ],
+   "locatie": {
+    "x": 140111,
+    "y": 470626,
+    "label": "Torenlaan 13, 1211JA Hilversum",
+    "ok": true,
+    "melding": null
+   },
+   "documenten_op_punt": 26,
+   "kenmerk": {
+    "status": "PASS",
+    "gevonden": [
+     "overige zone - Herziening Noordwestelijk Villagebied parkeernormen 2018"
+    ]
+   },
+   "toegang": {
+    "pad": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    },
+    "imow": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    },
+    "hybride": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    },
+    "stelsel": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    },
+    "stelsel_act": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    }
+   }
+  },
+  {
+   "id": 39,
+   "vraag": "Welke ambitie is hier t.a.v. het terugdringen van broeikasgassen?",
+   "routes": {
+    "locatie": "PASS",
+    "kenmerk": "n.v.t.",
+    "document": "PASS",
+    "artikel": "n.v.t.",
+    "pad": "n.v.t.",
+    "imow": "n.v.t.",
+    "hybride": "n.v.t.",
+    "stelsel": "n.v.t.",
+    "stelsel_act": "n.v.t."
+   },
+   "documenten": [
+    {
+     "spec": [
+      "gaaf gelderland"
+     ],
+     "gevonden": true,
+     "afwezig": false,
+     "regeling": "Omgevingsvisie Gaaf Gelderland",
+     "bron_id": "NL.IMRO.9925.SVOmgvisieGG-vst1",
+     "via": "regel",
+     "aantal": 20
+    }
+   ],
+   "locatie": {
+    "x": 194195,
+    "y": 465886,
+    "label": "Laan van Westenenk 701, 7334DP Apeldoorn",
+    "ok": true,
+    "melding": null
+   },
+   "documenten_op_punt": 33,
+   "kenmerk": {
+    "status": "n.v.t."
+   },
+   "toegang": {
+    "pad": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    },
+    "imow": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    },
+    "hybride": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    },
+    "stelsel": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    },
+    "stelsel_act": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    }
+   }
+  }
+ ]
+}

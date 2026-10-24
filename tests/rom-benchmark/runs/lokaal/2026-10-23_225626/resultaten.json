@@ -1,0 +1,293 @@
+{
+ "meta": {
+  "start": "2026-10-23 22:56",
+  "api": "http://localhost:8002",
+  "water_als_waterkering": false,
+  "aanroepen": 12,
+  "duur": 18.30595,
+  "golden": "C:\\GIT\\omgevingsdocumentenregister.nl\\tests\\rom-benchmark\\golden.json",
+  "cases": 4
+ },
+ "resultaten": [
+  {
+   "id": 7,
+   "vraag": "Wat is hier het maximum bebouwingspercentage?",
+   "routes": {
+    "locatie": "PASS",
+    "kenmerk": "PASS",
+    "document": "PASS",
+    "artikel": "n.v.t.",
+    "pad": "n.v.t.",
+    "imow": "n.v.t.",
+    "hybride": "n.v.t.",
+    "stelsel": "n.v.t.",
+    "stelsel_act": "n.v.t."
+   },
+   "documenten": [
+    {
+     "spec": [
+      "earnew",
+      "2013"
+     ],
+     "gevonden": true,
+     "afwezig": false,
+     "regeling": "Bestemmingsplan Earnewâld 2013",
+     "bron_id": "NL.IMRO.0737.04BPI-vg01",
+     "via": "regel",
+     "aantal": 264
+    }
+   ],
+   "locatie": {
+    "x": 192516,
+    "y": 572200,
+    "label": "De Reidtûgel 3, 9264TS Earnewâld",
+    "ok": true,
+    "melding": null
+   },
+   "documenten_op_punt": 20,
+   "kenmerk": {
+    "status": "PASS",
+    "gevonden": [
+     "maximum goothoogte (m), maximum bouwhoogte (m), maximum bebouwingspercentage (%)"
+    ]
+   },
+   "toegang": {
+    "pad": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    },
+    "imow": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    },
+    "hybride": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    },
+    "stelsel": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    },
+    "stelsel_act": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    }
+   }
+  },
+  {
+   "id": 11,
+   "vraag": "Mag ik hier een houtzagerij beginnen?",
+   "routes": {
+    "locatie": "PASS",
+    "kenmerk": "PASS",
+    "document": "PASS",
+    "artikel": "n.v.t.",
+    "pad": "n.v.t.",
+    "imow": "n.v.t.",
+    "hybride": "n.v.t.",
+    "stelsel": "n.v.t.",
+    "stelsel_act": "n.v.t."
+   },
+   "documenten": [
+    {
+     "spec": [
+      "earnew",
+      "2013"
+     ],
+     "gevonden": true,
+     "afwezig": false,
+     "regeling": "Bestemmingsplan Earnewâld 2013",
+     "bron_id": "NL.IMRO.0737.04BPI-vg01",
+     "via": "regel",
+     "aantal": 264
+    }
+   ],
+   "locatie": {
+    "x": 192121,
+    "y": 571735,
+    "label": "Krúspaed 9, 9264TE Earnewâld",
+    "ok": true,
+    "melding": null
+   },
+   "documenten_op_punt": 20,
+   "kenmerk": {
+    "status": "PASS",
+    "gevonden": [
+     "Wonen - A1"
+    ]
+   },
+   "toegang": {
+    "pad": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    },
+    "imow": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    },
+    "hybride": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    },
+    "stelsel": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    },
+    "stelsel_act": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    }
+   }
+  },
+  {
+   "id": 12,
+   "vraag": "Mag ik hier een houtzagerij beginnen?",
+   "routes": {
+    "locatie": "PASS",
+    "kenmerk": "PASS",
+    "document": "PASS",
+    "artikel": "n.v.t.",
+    "pad": "n.v.t.",
+    "imow": "n.v.t.",
+    "hybride": "n.v.t.",
+    "stelsel": "n.v.t.",
+    "stelsel_act": "n.v.t."
+   },
+   "documenten": [
+    {
+     "spec": [
+      "earnew",
+      "2013"
+     ],
+     "gevonden": true,
+     "afwezig": false,
+     "regeling": "Bestemmingsplan Earnewâld 2013",
+     "bron_id": "NL.IMRO.0737.04BPI-vg01",
+     "via": "regel",
+     "aantal": 264
+    }
+   ],
+   "locatie": {
+    "x": 191175,
+    "y": 571558,
+    "label": "Smidspaed 17, 9264TK Earnewâld",
+    "ok": true,
+    "melding": null
+   },
+   "documenten_op_punt": 20,
+   "kenmerk": {
+    "status": "PASS",
+    "gevonden": [
+     "Recreatie - 1A"
+    ]
+   },
+   "toegang": {
+    "pad": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    },
+    "imow": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    },
+    "hybride": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    },
+    "stelsel": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    },
+    "stelsel_act": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    }
+   }
+  },
+  {
+   "id": 13,
+   "vraag": "Mag ik hier boten verhuren?",
+   "routes": {
+    "locatie": "PASS",
+    "kenmerk": "PASS",
+    "document": "PASS",
+    "artikel": "n.v.t.",
+    "pad": "n.v.t.",
+    "imow": "n.v.t.",
+    "hybride": "n.v.t.",
+    "stelsel": "n.v.t.",
+    "stelsel_act": "n.v.t."
+   },
+   "documenten": [
+    {
+     "spec": [
+      "earnew",
+      "2013"
+     ],
+     "gevonden": true,
+     "afwezig": false,
+     "regeling": "Bestemmingsplan Earnewâld 2013",
+     "bron_id": "NL.IMRO.0737.04BPI-vg01",
+     "via": "regel",
+     "aantal": 264
+    }
+   ],
+   "locatie": {
+    "x": 192232,
+    "y": 571771,
+    "label": "Tsjerkepaed 5, 9264TG Earnewâld",
+    "ok": true,
+    "melding": null
+   },
+   "documenten_op_punt": 20,
+   "kenmerk": {
+    "status": "PASS",
+    "gevonden": [
+     "Wonen - A1"
+    ]
+   },
+   "toegang": {
+    "pad": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    },
+    "imow": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    },
+    "hybride": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    },
+    "stelsel": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    },
+    "stelsel_act": {
+     "gevonden": false,
+     "score": 0.0,
+     "uitleg": "geen toeleiding (kolom M) in het Excel"
+    }
+   }
+  }
+ ]
+}

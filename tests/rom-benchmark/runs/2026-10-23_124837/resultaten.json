@@ -1,0 +1,357 @@
+{
+ "meta": {
+  "start": "2026-10-23 12:48",
+  "api": "https://omgevingsdocumentenregister.nl/api",
+  "aanroepen": 9,
+  "duur": 7.387243,
+  "golden": "C:\\GIT\\omgevingsdocumentenregister.nl\\tests\\rom-benchmark\\golden.json",
+  "cases": 3
+ },
+ "resultaten": [
+  {
+   "id": 15,
+   "vraag": "Mag ik hier een dakopbouw bouwen?",
+   "routes": {
+    "locatie": "PASS",
+    "kenmerk": "PASS",
+    "document": "PASS",
+    "artikel": "PASS",
+    "pad": "PASS",
+    "imow": "FAIL",
+    "hybride": "PASS",
+    "vraag": "PASS"
+   },
+   "documenten": [
+    {
+     "spec": [
+      "omgevingsplan gemeente utrecht"
+     ],
+     "gevonden": true,
+     "afwezig": false,
+     "regeling": "Omgevingsplan gemeente Utrecht",
+     "bron_id": "/akn/nl/act/gm0344/2020/omgevingsplan/nld@2026-08-19;09031012",
+     "via": "regel",
+     "aantal": 763,
+     "artikelen_op_punt": 376,
+     "geraakt": [
+      "4.26"
+     ],
+     "indeling": {
+      "pad": [
+       {
+        "artikel": "4.26",
+        "tegels": [
+         "bouwen"
+        ],
+        "sub": "bouwen en verbouwen",
+        "herkomst": "pad"
+       }
+      ],
+      "imow": [
+       {
+        "artikel": "4.26",
+        "tegels": [
+         "niet-ingedeeld"
+        ],
+        "sub": null,
+        "herkomst": null
+       }
+      ],
+      "hybride": [
+       {
+        "artikel": "4.26",
+        "tegels": [
+         "bouwen"
+        ],
+        "sub": "bouwen en verbouwen",
+        "herkomst": "pad"
+       }
+      ]
+     }
+    }
+   ],
+   "locatie": {
+    "x": 128983,
+    "y": 455222,
+    "label": "Does 30, 3453MD De Meern",
+    "ok": true,
+    "melding": null
+   },
+   "documenten_op_punt": 34,
+   "kenmerk": {
+    "status": "PASS",
+    "gevonden": [
+     "dakopbouw of bijzondere bouwlaag bouwen"
+    ]
+   },
+   "vraag_route": {
+    "aantal": 4,
+    "rang_artikel": 2,
+    "rang_document": 1,
+    "top5": [
+     {
+      "rang": 1,
+      "artikel": "4.27",
+      "opschrift": "Beoordelingsregels voor dakopbouwen in Veldhuizen, De Balije en Voordorp",
+      "regeling": "Omgevingsplan gemeente Utrecht",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 2,
+      "artikel": "4.26",
+      "opschrift": "Dakopbouwen die vergunningvrij zijn",
+      "regeling": "Omgevingsplan gemeente Utrecht",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 3,
+      "artikel": "1.2",
+      "opschrift": "Begrippen",
+      "regeling": "Omgevingsplan gemeente Utrecht",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 4,
+      "artikel": "4.55",
+      "opschrift": "Voorwaardelijke verplichting parkeergelegenheid",
+      "regeling": "Omgevingsplan gemeente Utrecht",
+      "route": "tekst_fallback"
+     }
+    ],
+    "begrippen": [
+     "bouw",
+     "dakopbouw"
+    ]
+   }
+  },
+  {
+   "id": 18,
+   "vraag": "Mag ik hier een dakkapel bouwen?",
+   "routes": {
+    "locatie": "PASS",
+    "kenmerk": "PASS",
+    "document": "PASS",
+    "artikel": "PASS",
+    "pad": "PASS",
+    "imow": "FAIL",
+    "hybride": "PASS",
+    "vraag": "PASS"
+   },
+   "documenten": [
+    {
+     "spec": [
+      "omgevingsplan gemeente utrecht"
+     ],
+     "gevonden": true,
+     "afwezig": false,
+     "regeling": "Omgevingsplan gemeente Utrecht",
+     "bron_id": "/akn/nl/act/gm0344/2020/omgevingsplan/nld@2026-08-19;09031012",
+     "via": "regel",
+     "aantal": 763,
+     "artikelen_op_punt": 376,
+     "geraakt": [
+      "4.24"
+     ],
+     "indeling": {
+      "pad": [
+       {
+        "artikel": "4.24",
+        "tegels": [
+         "bouwen"
+        ],
+        "sub": "bouwen en verbouwen",
+        "herkomst": "pad"
+       }
+      ],
+      "imow": [
+       {
+        "artikel": "4.24",
+        "tegels": [
+         "niet-ingedeeld"
+        ],
+        "sub": null,
+        "herkomst": null
+       }
+      ],
+      "hybride": [
+       {
+        "artikel": "4.24",
+        "tegels": [
+         "bouwen"
+        ],
+        "sub": "bouwen en verbouwen",
+        "herkomst": "pad"
+       }
+      ]
+     }
+    }
+   ],
+   "locatie": {
+    "x": 128983,
+    "y": 455222,
+    "label": "Does 30, 3453MD De Meern",
+    "ok": true,
+    "melding": null
+   },
+   "documenten_op_punt": 34,
+   "kenmerk": {
+    "status": "PASS",
+    "gevonden": [
+     "Dakkapel bouwen",
+     "bouwen dakkapellen zijkant en achterkant van woningen is vergunningplichtig",
+     "dakkapel bouwen"
+    ]
+   },
+   "vraag_route": {
+    "aantal": 6,
+    "rang_artikel": 2,
+    "rang_document": 1,
+    "top5": [
+     {
+      "rang": 1,
+      "artikel": "4.59",
+      "opschrift": "Aanvraagvereisten omgevingsvergunning voor het bouwen",
+      "regeling": "Omgevingsplan gemeente Utrecht",
+      "route": "activiteit_uri"
+     },
+     {
+      "rang": 2,
+      "artikel": "4.24",
+      "opschrift": "Dakkapel aan de voorkant",
+      "regeling": "Omgevingsplan gemeente Utrecht",
+      "route": "activiteit_uri"
+     },
+     {
+      "rang": 3,
+      "artikel": "4.24",
+      "opschrift": "Dakkapel aan de voorkant",
+      "regeling": "Omgevingsplan gemeente Utrecht",
+      "route": "activiteit_uri"
+     },
+     {
+      "rang": 4,
+      "artikel": "4.1",
+      "opschrift": "Afstemming met functieregels in het tijdelijke deel van het omgevingsplan",
+      "regeling": "Omgevingsplan gemeente Utrecht",
+      "route": "activiteit_uri"
+     },
+     {
+      "rang": 5,
+      "artikel": "4.1",
+      "opschrift": "Afstemming met functieregels in het tijdelijke deel van het omgevingsplan",
+      "regeling": "Omgevingsplan gemeente Utrecht",
+      "route": "activiteit_uri"
+     }
+    ],
+    "begrippen": [
+     "Dakkapel bouwen",
+     "dakkapel bouwen",
+     "bouw"
+    ]
+   }
+  },
+  {
+   "id": 19,
+   "vraag": "Mag ik hier een dakterras aanleggen?",
+   "routes": {
+    "locatie": "PASS",
+    "kenmerk": "PASS",
+    "document": "PASS",
+    "artikel": "PASS",
+    "pad": "PASS",
+    "imow": "FAIL",
+    "hybride": "PASS",
+    "vraag": "FAIL"
+   },
+   "documenten": [
+    {
+     "spec": [
+      "omgevingsplan gemeente utrecht"
+     ],
+     "gevonden": true,
+     "afwezig": false,
+     "regeling": "Omgevingsplan gemeente Utrecht",
+     "bron_id": "/akn/nl/act/gm0344/2020/omgevingsplan/nld@2026-08-19;09031012",
+     "via": "regel",
+     "aantal": 763,
+     "artikelen_op_punt": 376,
+     "geraakt": [
+      "4.42"
+     ],
+     "indeling": {
+      "pad": [
+       {
+        "artikel": "4.42",
+        "tegels": [
+         "bouwen"
+        ],
+        "sub": "bouwen en verbouwen",
+        "herkomst": "pad"
+       }
+      ],
+      "imow": [
+       {
+        "artikel": "4.42",
+        "tegels": [
+         "niet-ingedeeld"
+        ],
+        "sub": null,
+        "herkomst": null
+       }
+      ],
+      "hybride": [
+       {
+        "artikel": "4.42",
+        "tegels": [
+         "bouwen"
+        ],
+        "sub": "bouwen en verbouwen",
+        "herkomst": "pad"
+       }
+      ]
+     }
+    }
+   ],
+   "locatie": {
+    "x": 128983,
+    "y": 455222,
+    "label": "Does 30, 3453MD De Meern",
+    "ok": true,
+    "melding": null
+   },
+   "documenten_op_punt": 34,
+   "kenmerk": {
+    "status": "PASS",
+    "gevonden": [
+     "Afscheiding tussen balkons of dakterrassen bouwen",
+     "Afscheiding tussen balkons of dakterrassen bouwen, in stand houden of gebruiken",
+     "dakterras bouwen"
+    ]
+   },
+   "vraag_route": {
+    "aantal": 2,
+    "rang_artikel": null,
+    "rang_document": 2,
+    "top5": [
+     {
+      "rang": 1,
+      "artikel": null,
+      "opschrift": "Luwe gevel",
+      "regeling": "Actieplan Geluid en Trillingen gemeente Utrecht",
+      "route": "tekst_fallback"
+     },
+     {
+      "rang": 2,
+      "artikel": "4.41",
+      "opschrift": "Verbod voor dakterrassen",
+      "regeling": "Omgevingsplan gemeente Utrecht",
+      "route": "tekst_fallback"
+     }
+    ],
+    "begrippen": [
+     "Bestaand gebouw verbouwen"
+    ]
+   }
+  }
+ ]
+}

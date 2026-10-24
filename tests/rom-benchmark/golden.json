@@ -1,0 +1,2024 @@
+[
+ {
+  "id": 1,
+  "vraag": "Wat is hier de maximale bouwhoogte?",
+  "locatie": {
+   "rd": [
+    154799,
+    466865
+   ]
+  },
+  "documenten": [
+   {
+    "titel": [
+     "omgevingsplan gemeente amersfoort"
+    ],
+    "type": "ow"
+   }
+  ],
+  "kenmerk": {
+   "soort": "normwaarde",
+   "naam": "maximale bouwhoogte",
+   "waarden": [
+    14
+   ]
+  },
+  "negatief": false,
+  "onderwerp": null,
+  "sub": null,
+  "sub_fijn": null,
+  "onderwerp_d": null,
+  "termen_d": [],
+  "benchmark30": false,
+  "excel_n": false,
+  "excel_o": false,
+  "excel": {
+   "locatie": "154799, 466865",
+   "bevoegd_gezag": "Gemeente Amersfoort",
+   "type_bron": "OP",
+   "im": "OW",
+   "bron": "Omgevingsplan gemeente Amersfoort",
+   "datum_bron": "2025-11-19",
+   "verwacht_antwoord": "14 meter",
+   "annotatie_toeleiding": "Omgevingsnorm",
+   "annotatie_naam": "maximale bouwhoogte",
+   "filter_op_kenmerken": "ja",
+   "toeleiding": null,
+   "opschriftpad": "zoeken op punt",
+   "annotatie": null,
+   "vraag_route": null
+  }
+ },
+ {
+  "id": 2,
+  "vraag": "Wat is hier de maximale bouwhoogte?",
+  "locatie": {
+   "rd": [
+    154803,
+    466873
+   ]
+  },
+  "documenten": [
+   {
+    "titel": [
+     "omgevingsplan gemeente amersfoort"
+    ],
+    "type": "ow"
+   }
+  ],
+  "kenmerk": {
+   "soort": "normwaarde",
+   "naam": "maximale bouwhoogte",
+   "waarden": [
+    8
+   ]
+  },
+  "negatief": false,
+  "onderwerp": null,
+  "sub": null,
+  "sub_fijn": null,
+  "onderwerp_d": null,
+  "termen_d": [],
+  "benchmark30": false,
+  "excel_n": false,
+  "excel_o": false,
+  "excel": {
+   "locatie": "154803, 466873",
+   "bevoegd_gezag": "Gemeente Amersfoort",
+   "type_bron": "OP",
+   "im": "OW",
+   "bron": "Omgevingsplan gemeente Amersfoort",
+   "datum_bron": "2025-11-19",
+   "verwacht_antwoord": "8 meter",
+   "annotatie_toeleiding": "Omgevingsnorm",
+   "annotatie_naam": "maximale bouwhoogte",
+   "filter_op_kenmerken": "ja",
+   "toeleiding": null,
+   "opschriftpad": "zoeken op punt",
+   "annotatie": null,
+   "vraag_route": null
+  }
+ },
+ {
+  "id": 3,
+  "vraag": "Wat is hier de maximale bouwhoogte?",
+  "locatie": {
+   "pdok_q": "3828EB 22",
+   "verwacht": "Kerklaan 22"
+  },
+  "documenten": [
+   {
+    "titel": [
+     "omgevingsplan gemeente amersfoort"
+    ],
+    "type": "ow"
+   }
+  ],
+  "kenmerk": {
+   "soort": "normwaarde",
+   "naam": "maximale bouwhoogte",
+   "waarden": [
+    5,
+    6,
+    8,
+    10,
+    11,
+    25,
+    55
+   ]
+  },
+  "negatief": false,
+  "onderwerp": "bouwen",
+  "sub": "bouwen en verbouwen",
+  "sub_fijn": null,
+  "onderwerp_d": "d-bouwen",
+  "termen_d": [],
+  "benchmark30": false,
+  "excel_n": false,
+  "excel_o": false,
+  "excel": {
+   "locatie": "Kerklaan 22 3828EB Hoogland",
+   "bevoegd_gezag": "Gemeente Amersfoort",
+   "type_bron": "OP",
+   "im": "OW",
+   "bron": "Omgevingsplan gemeente Amersfoort",
+   "datum_bron": "2025-11-19",
+   "verwacht_antwoord": "8 waarden (5,6,8,10,11,25,55 meter)",
+   "annotatie_toeleiding": "Omgevingsnorm",
+   "annotatie_naam": "maximale bouwhoogte",
+   "filter_op_kenmerken": "ja",
+   "toeleiding": "Bouwen en wonen; bouwen en verbouwen",
+   "opschriftpad": "3 documenten, 56 artikelen bij categorie, 77 niet ingedeeld",
+   "annotatie": "",
+   "vraag_route": null
+  }
+ },
+ {
+  "id": 4,
+  "vraag": "Wat is hier de maximale bouwhoogte?",
+  "locatie": {
+   "rd": [
+    154737,
+    466858
+   ]
+  },
+  "documenten": [
+   {
+    "titel": [
+     "omgevingsplan gemeente amersfoort"
+    ],
+    "type": "ow"
+   }
+  ],
+  "kenmerk": {
+   "soort": "normwaarde",
+   "naam": "maximale bouwhoogte"
+  },
+  "negatief": true,
+  "onderwerp": null,
+  "sub": null,
+  "sub_fijn": null,
+  "onderwerp_d": null,
+  "termen_d": [],
+  "benchmark30": false,
+  "excel_n": false,
+  "excel_o": false,
+  "excel": {
+   "locatie": "154737, 466858",
+   "bevoegd_gezag": "Gemeente Amersfoort",
+   "type_bron": "OP",
+   "im": "OW",
+   "bron": "Omgevingsplan gemeente Amersfoort",
+   "datum_bron": "2025-11-19",
+   "verwacht_antwoord": "niet bepaald",
+   "annotatie_toeleiding": "(geen) Omgevingsnorm",
+   "annotatie_naam": "maximale bouwhoogte",
+   "filter_op_kenmerken": "ja",
+   "toeleiding": null,
+   "opschriftpad": "zoeken op punt",
+   "annotatie": null,
+   "vraag_route": null
+  }
+ },
+ {
+  "id": 5,
+  "vraag": "Wat is hier de maximale bouwhoogte?",
+  "locatie": {
+   "pdok_q": "3811GN 32",
+   "verwacht": "Boldershof 32"
+  },
+  "documenten": [
+   {
+    "titel": [
+     "binnenstad"
+    ],
+    "type": "wro"
+   }
+  ],
+  "kenmerk": {
+   "soort": "wro",
+   "naam": "bouwhoogte",
+   "object_type": "Maatvoering"
+  },
+  "negatief": false,
+  "onderwerp": "bouwen",
+  "sub": "bouwen en verbouwen",
+  "sub_fijn": null,
+  "onderwerp_d": "d-bouwen",
+  "termen_d": [],
+  "benchmark30": false,
+  "excel_n": false,
+  "excel_o": false,
+  "excel": {
+   "locatie": "Boldershof 32 3811GN Amersfoort",
+   "bevoegd_gezag": "Gemeente Amersfoort",
+   "type_bron": "BP",
+   "im": "RO",
+   "bron": "Bestemmingsplan “Binnenstad”",
+   "datum_bron": "2025-10-13",
+   "verwacht_antwoord": "14 meter",
+   "annotatie_toeleiding": "Maatvoering",
+   "annotatie_naam": "maximale bouwhoogte",
+   "filter_op_kenmerken": "ja",
+   "toeleiding": "Bouwen en wonen; bouwen en verbouwen",
+   "opschriftpad": "geen ro",
+   "annotatie": null,
+   "vraag_route": null
+  }
+ },
+ {
+  "id": 6,
+  "vraag": "Wat is hier de maximale bouwhoogte?",
+  "locatie": {
+   "rd": [
+    155143,
+    463394
+   ]
+  },
+  "documenten": [
+   {
+    "titel": [
+     "binnenstad"
+    ],
+    "type": "wro"
+   }
+  ],
+  "kenmerk": {
+   "soort": "wro",
+   "naam": "bouwhoogte",
+   "object_type": "Maatvoering"
+  },
+  "negatief": true,
+  "onderwerp": null,
+  "sub": null,
+  "sub_fijn": null,
+  "onderwerp_d": null,
+  "termen_d": [],
+  "benchmark30": false,
+  "excel_n": false,
+  "excel_o": false,
+  "excel": {
+   "locatie": "155143, 463394",
+   "bevoegd_gezag": "Gemeente Amersfoort",
+   "type_bron": "BP",
+   "im": "RO",
+   "bron": "Bestemmingsplan “Binnenstad”",
+   "datum_bron": "2025-10-13",
+   "verwacht_antwoord": "niet bepaald",
+   "annotatie_toeleiding": "(geen) Maatvoering",
+   "annotatie_naam": "maximale bouwhoogte",
+   "filter_op_kenmerken": "niet vindbaar",
+   "toeleiding": null,
+   "opschriftpad": "zoeken op punt",
+   "annotatie": null,
+   "vraag_route": null
+  }
+ },
+ {
+  "id": 7,
+  "vraag": "Wat is hier het maximum bebouwingspercentage?",
+  "locatie": {
+   "pdok_q": "9264TS 3",
+   "verwacht": "De Reidt"
+  },
+  "documenten": [
+   {
+    "titel": [
+     "earnew",
+     "2013"
+    ],
+    "type": "wro"
+   }
+  ],
+  "kenmerk": {
+   "soort": "wro",
+   "naam": "bebouwingspercentage",
+   "object_type": "Maatvoering"
+  },
+  "negatief": false,
+  "onderwerp": null,
+  "sub": null,
+  "sub_fijn": null,
+  "onderwerp_d": null,
+  "termen_d": [],
+  "benchmark30": false,
+  "excel_n": false,
+  "excel_o": false,
+  "excel": {
+   "locatie": "De Reidtûgel 3, 9264TS Earnewâld",
+   "bevoegd_gezag": "Gemeente Tytsjerksteradiel",
+   "type_bron": "BP",
+   "im": "RO",
+   "bron": "Bestemmingsplan Earnewâld 2013",
+   "datum_bron": "2014-11-19",
+   "verwacht_antwoord": "70%, voor het bouwvlak (dat groter is dan het perceel)",
+   "annotatie_toeleiding": "Maatvoering, Bouwvlak",
+   "annotatie_naam": "Maximum bebouwingspercentage (%)",
+   "filter_op_kenmerken": "niet vindbaar via Filter op kenmerken",
+   "toeleiding": null,
+   "opschriftpad": "ro",
+   "annotatie": null,
+   "vraag_route": null
+  }
+ },
+ {
+  "id": 8,
+  "vraag": "Mag ik hier een winkel beginnen?",
+  "locatie": {
+   "pdok_q": "1211BN 9",
+   "verwacht": "s-Gravelandseweg 9"
+  },
+  "documenten": [
+   {
+    "titel": [
+     "binnenstad 2013"
+    ],
+    "type": "wro",
+    "match": [
+     {
+      "artikel": "11.1"
+     }
+    ]
+   }
+  ],
+  "kenmerk": {
+   "soort": "wro",
+   "naam": "dienstverlening",
+   "object_type": "Enkelbestemming"
+  },
+  "negatief": false,
+  "onderwerp": null,
+  "sub": null,
+  "sub_fijn": null,
+  "onderwerp_d": null,
+  "termen_d": [],
+  "benchmark30": false,
+  "excel_n": false,
+  "excel_o": false,
+  "excel": {
+   "locatie": "s-Gravelandseweg 9, 1211BN Hilversum",
+   "bevoegd_gezag": "Gemeente Hilversum",
+   "type_bron": "BP",
+   "im": "RO",
+   "bron": "Binnenstad 2013",
+   "datum_bron": "2023-06-12",
+   "verwacht_antwoord": "ja, artikel 11.1, winkel valt onder bestemming Dienstverlening",
+   "annotatie_toeleiding": "Bestemming",
+   "annotatie_naam": "Dienstverlening",
+   "filter_op_kenmerken": "nee (naam nietszeggend)",
+   "toeleiding": null,
+   "opschriftpad": "ro",
+   "annotatie": null,
+   "vraag_route": null
+  }
+ },
+ {
+  "id": 9,
+  "vraag": "Mag ik hier een winkel beginnen?",
+  "locatie": {
+   "pdok_q": "9712CA 7",
+   "verwacht": "Vismarkt 7"
+  },
+  "documenten": [
+   {
+    "titel": [
+     "binnenstad"
+    ],
+    "type": "wro",
+    "match": [
+     {
+      "artikel": "4.1"
+     }
+    ]
+   }
+  ],
+  "kenmerk": {
+   "soort": "wro",
+   "naam": "centrum - 1",
+   "object_type": "Enkelbestemming"
+  },
+  "negatief": false,
+  "onderwerp": null,
+  "sub": null,
+  "sub_fijn": null,
+  "onderwerp_d": null,
+  "termen_d": [],
+  "benchmark30": false,
+  "excel_n": false,
+  "excel_o": false,
+  "excel": {
+   "locatie": "Vismarkt 7-13, 9712CA Groningen",
+   "bevoegd_gezag": "Gemeente Groningen",
+   "type_bron": "BP",
+   "im": "RO",
+   "bron": "Binnenstad geconsolideerde versie",
+   "datum_bron": "2022-08-11",
+   "verwacht_antwoord": "ja, artikel 4.1, bestemming Centrum-1",
+   "annotatie_toeleiding": "Bestemming",
+   "annotatie_naam": "Centrum - 1",
+   "filter_op_kenmerken": "nee (naam nietszeggend)",
+   "toeleiding": null,
+   "opschriftpad": "ro",
+   "annotatie": null,
+   "vraag_route": null
+  }
+ },
+ {
+  "id": 10,
+  "vraag": "Mag ik hier een winkel beginnen?",
+  "locatie": {
+   "pdok_q": "9713ED 237",
+   "verwacht": "Damsterdiep 237"
+  },
+  "documenten": [
+   {
+    "titel": [
+     "omgevingsplan gemeente groningen"
+    ],
+    "type": "ow"
+   }
+  ],
+  "kenmerk": {
+   "soort": "activiteit",
+   "naam": "detailhandel"
+  },
+  "negatief": false,
+  "onderwerp": "bedrijven",
+  "sub": "detailhandel",
+  "sub_fijn": null,
+  "onderwerp_d": "d-werken",
+  "termen_d": [],
+  "benchmark30": false,
+  "excel_n": false,
+  "excel_o": false,
+  "excel": {
+   "locatie": "Damsterdiep 237, 9713ED Groningen",
+   "bevoegd_gezag": "Gemeente Groningen",
+   "type_bron": "OP",
+   "im": "OW",
+   "bron": "Omgevingsplan gemeente Groningen",
+   "datum_bron": "2026-06-24",
+   "verwacht_antwoord": "niet bepaald, ook via activiteit Detailhandel geen specifieke regels",
+   "annotatie_toeleiding": "Activiteit",
+   "annotatie_naam": "Detailhandel",
+   "filter_op_kenmerken": "nee, 'winkel' geeft geen resultaat",
+   "toeleiding": "Bedrijven, energie en milieu; detailhandel",
+   "opschriftpad": "2 documenten, kom wel via subcategorie bij nietszeggend artikel over detailhandel",
+   "annotatie": null,
+   "vraag_route": null
+  }
+ },
+ {
+  "id": 11,
+  "vraag": "Mag ik hier een houtzagerij beginnen?",
+  "locatie": {
+   "pdok_q": "9264TE 9",
+   "verwacht": "9264TE"
+  },
+  "documenten": [
+   {
+    "titel": [
+     "earnew",
+     "2013"
+    ],
+    "type": "wro"
+   }
+  ],
+  "kenmerk": {
+   "soort": "wro",
+   "naam": "wonen - a1",
+   "object_type": "Enkelbestemming"
+  },
+  "negatief": false,
+  "onderwerp": null,
+  "sub": null,
+  "sub_fijn": null,
+  "onderwerp_d": null,
+  "termen_d": [],
+  "benchmark30": true,
+  "excel_n": false,
+  "excel_o": false,
+  "excel": {
+   "locatie": "Krúspaed 9, 9264TE Earnewâld",
+   "bevoegd_gezag": "Gemeente Tytsjerksteradiel",
+   "type_bron": "BP",
+   "im": "RO",
+   "bron": "Bestemmingsplan Earnewâld 2013",
+   "datum_bron": "2014-11-19",
+   "verwacht_antwoord": "nee, bestemming Wonen-A1, valt onder bedrijven categorie 3.2",
+   "annotatie_toeleiding": "Bestemming",
+   "annotatie_naam": "Wonen - A1",
+   "filter_op_kenmerken": "nee (naam nietszeggend)",
+   "toeleiding": null,
+   "opschriftpad": "ro",
+   "annotatie": null,
+   "vraag_route": null
+  }
+ },
+ {
+  "id": 12,
+  "vraag": "Mag ik hier een houtzagerij beginnen?",
+  "locatie": {
+   "pdok_q": "9264TK 17",
+   "verwacht": "Smidspaed 17"
+  },
+  "documenten": [
+   {
+    "titel": [
+     "earnew",
+     "2013"
+    ],
+    "type": "wro"
+   }
+  ],
+  "kenmerk": {
+   "soort": "wro",
+   "naam": "recreatie - 1a",
+   "object_type": "Enkelbestemming"
+  },
+  "negatief": false,
+  "onderwerp": null,
+  "sub": null,
+  "sub_fijn": null,
+  "onderwerp_d": null,
+  "termen_d": [],
+  "benchmark30": true,
+  "excel_n": false,
+  "excel_o": false,
+  "excel": {
+   "locatie": "Smidspaed 17, 9264TK Earnewâld",
+   "bevoegd_gezag": "Gemeente Tytsjerksteradiel",
+   "type_bron": "BP",
+   "im": "RO",
+   "bron": "Bestemmingsplan Earnewâld 2013",
+   "datum_bron": "2014-11-19",
+   "verwacht_antwoord": "nee, bestemming Recreatie-1A en Water",
+   "annotatie_toeleiding": "Bestemming",
+   "annotatie_naam": "Wonen - A1",
+   "filter_op_kenmerken": "nee (naam nietszeggend)",
+   "toeleiding": null,
+   "opschriftpad": "ro",
+   "annotatie": null,
+   "vraag_route": null
+  }
+ },
+ {
+  "id": 13,
+  "vraag": "Mag ik hier boten verhuren?",
+  "locatie": {
+   "pdok_q": "9264TG 5",
+   "verwacht": "Tsjerkepaed 5"
+  },
+  "documenten": [
+   {
+    "titel": [
+     "earnew",
+     "2013"
+    ],
+    "type": "wro"
+   }
+  ],
+  "kenmerk": {
+   "soort": "wro",
+   "naam": "wonen - a1",
+   "object_type": "Enkelbestemming"
+  },
+  "negatief": false,
+  "onderwerp": null,
+  "sub": null,
+  "sub_fijn": null,
+  "onderwerp_d": null,
+  "termen_d": [],
+  "benchmark30": true,
+  "excel_n": false,
+  "excel_o": false,
+  "excel": {
+   "locatie": "Tsjerkepaed 5, 9264TG Earnewâld",
+   "bevoegd_gezag": "Gemeente Tytsjerksteradiel",
+   "type_bron": "BP",
+   "im": "RO",
+   "bron": "Bestemmingsplan Earnewâld 2013",
+   "datum_bron": "2014-11-19",
+   "verwacht_antwoord": "ja, valt onder bestemming Wonen-A1",
+   "annotatie_toeleiding": "Bestemming",
+   "annotatie_naam": "Wonen - A1",
+   "filter_op_kenmerken": "nee (naam nietszeggend)",
+   "toeleiding": null,
+   "opschriftpad": "ro",
+   "annotatie": null,
+   "vraag_route": null
+  }
+ },
+ {
+  "id": 14,
+  "vraag": "Mag ik hier een parkeerplaats aanleggen?",
+  "locatie": {
+   "pdok_q": "1211JA 13",
+   "verwacht": "Torenlaan 13"
+  },
+  "documenten": [
+   {
+    "titel": [
+     "noordwestelijk villagebied",
+     "parkeernormen"
+    ],
+    "type": "wro",
+    "match": [
+     {
+      "artikel": "4.1"
+     }
+    ]
+   }
+  ],
+  "kenmerk": {
+   "soort": "wro",
+   "naam": "parkeernormen 2018",
+   "object_type": "Gebiedsaanduiding"
+  },
+  "negatief": false,
+  "onderwerp": null,
+  "sub": null,
+  "sub_fijn": null,
+  "onderwerp_d": null,
+  "termen_d": [],
+  "benchmark30": true,
+  "excel_n": false,
+  "excel_o": false,
+  "excel": {
+   "locatie": "Torenlaan 13, 1211JA Hilversum",
+   "bevoegd_gezag": "Gemeente Hilversum",
+   "type_bron": "BP",
+   "im": "RO",
+   "bron": "Herziening Noordwestelijk Villagebied - parkeernormen 2018",
+   "datum_bron": "2018-01-30",
+   "verwacht_antwoord": "artikel 4.1, rekening houden met gebruiksregels parkeren",
+   "annotatie_toeleiding": "Gebiedsaanduiding",
+   "annotatie_naam": "overige zone - Herziening Noordwestelijk Villagebied parkeernormen 2018",
+   "filter_op_kenmerken": "nee (naam nietszeggend)",
+   "toeleiding": null,
+   "opschriftpad": "ro",
+   "annotatie": null,
+   "vraag_route": null
+  }
+ },
+ {
+  "id": 15,
+  "vraag": "Mag ik hier een dakopbouw bouwen?",
+  "locatie": {
+   "pdok_q": "3453MD 30",
+   "verwacht": "Does 30"
+  },
+  "documenten": [
+   {
+    "titel": [
+     "omgevingsplan gemeente utrecht"
+    ],
+    "type": "ow",
+    "match": [
+     {
+      "artikel": "4.26"
+     }
+    ]
+   }
+  ],
+  "kenmerk": {
+   "soort": "activiteit",
+   "naam": "dakopbouw"
+  },
+  "negatief": false,
+  "onderwerp": "bouwen",
+  "sub": "bouwen en verbouwen",
+  "sub_fijn": "dakkapellen, dakopbouwen en dakterrassen",
+  "onderwerp_d": "d-bouwen",
+  "termen_d": [
+   "dakopbouw"
+  ],
+  "benchmark30": true,
+  "excel_n": false,
+  "excel_o": false,
+  "excel": {
+   "locatie": "Does 30, 3453MD De Meern",
+   "bevoegd_gezag": "Gemeente Utrecht",
+   "type_bron": "OP",
+   "im": "OW",
+   "bron": "Omgevingsplan gemeente Utrecht",
+   "datum_bron": "2024-12-27",
+   "verwacht_antwoord": "artikel 4.22, toegestaan zonder omgevingsvergunning onder voorwaarden",
+   "annotatie_toeleiding": "Activiteit",
+   "annotatie_naam": "dakopbouw bouwen",
+   "filter_op_kenmerken": "vindbaar via 'dakopbouw'",
+   "toeleiding": "Bouwen en wonen; bouwen en verbouwen",
+   "opschriftpad": "alleen via ctrl-f in omgevingsplan",
+   "annotatie": "verkeerde artikel",
+   "vraag_route": null
+  }
+ },
+ {
+  "id": 16,
+  "vraag": "Mag ik hier een dakopbouw bouwen?",
+  "locatie": {
+   "pdok_q": "7941LC 3",
+   "verwacht": "Vledderstraat 3"
+  },
+  "documenten": [
+   {
+    "titel": [
+     "omgevingsplan gemeente meppel"
+    ],
+    "type": "ow",
+    "match": [
+     {
+      "sectie": "8.3"
+     }
+    ]
+   },
+   {
+    "titel": [
+     "voorbereidingsbesluit",
+     "monumenten"
+    ],
+    "type": "ow",
+    "match": [
+     {
+      "artikel": "2.2"
+     }
+    ]
+   }
+  ],
+  "kenmerk": {
+   "soort": "activiteit",
+   "naam": "monument"
+  },
+  "negatief": false,
+  "onderwerp": null,
+  "sub": null,
+  "sub_fijn": null,
+  "onderwerp_d": null,
+  "termen_d": [],
+  "benchmark30": true,
+  "excel_n": false,
+  "excel_o": false,
+  "excel": {
+   "locatie": "Vledderstraat 3, 7941LC Meppel",
+   "bevoegd_gezag": "Gemeente Meppel, Provincie Drenthe",
+   "type_bron": "OP + VB",
+   "im": "OW",
+   "bron": "Omgevingsplan gemeente Meppel, ‘Wijziging annotaties voorbereidingsbesluit Monumenten – Gemeente Meppel’",
+   "datum_bron": "11-06-2025,07-06-2024",
+   "verwacht_antwoord": "dit is een monument, er geldt een vergunningsplicht voor wijzigingen; omgevingsplan afdeling 8.3, voorbereidingsbesluit artikel 2.2",
+   "annotatie_toeleiding": "Activiteit",
+   "annotatie_naam": "provinciaal monument, locatie 'voorbeschermd provinciaal monument in gemeente Meppel",
+   "filter_op_kenmerken": "nee (je  moet zelf uitvinden dat het een monument is)",
+   "toeleiding": null,
+   "opschriftpad": "geen tijdelijk delen",
+   "annotatie": null,
+   "vraag_route": null
+  }
+ },
+ {
+  "id": 17,
+  "vraag": "Mag ik hier een dakkapel bouwen?",
+  "locatie": {
+   "pdok_q": "9713DD 8",
+   "verwacht": "Zagerij 8"
+  },
+  "documenten": [
+   {
+    "titel": [
+     "omgevingsplan gemeente groningen"
+    ],
+    "type": "ow"
+   }
+  ],
+  "kenmerk": null,
+  "negatief": true,
+  "onderwerp": null,
+  "sub": null,
+  "sub_fijn": null,
+  "onderwerp_d": null,
+  "termen_d": [],
+  "benchmark30": true,
+  "excel_n": false,
+  "excel_o": false,
+  "excel": {
+   "locatie": "Zagerij 8, 9713DD Groningen",
+   "bevoegd_gezag": "Gemeente Groningen",
+   "type_bron": "OP",
+   "im": "OW",
+   "bron": "Omgevingsplan gemeente Groningen",
+   "datum_bron": "2026-06-24",
+   "verwacht_antwoord": "niet bepaald",
+   "annotatie_toeleiding": null,
+   "annotatie_naam": null,
+   "filter_op_kenmerken": "niet bepaald",
+   "toeleiding": null,
+   "opschriftpad": null,
+   "annotatie": null,
+   "vraag_route": null
+  }
+ },
+ {
+  "id": 18,
+  "vraag": "Mag ik hier een dakkapel bouwen?",
+  "locatie": {
+   "pdok_q": "3453MD 30",
+   "verwacht": "Does 30"
+  },
+  "documenten": [
+   {
+    "titel": [
+     "omgevingsplan gemeente utrecht"
+    ],
+    "type": "ow",
+    "match": [
+     {
+      "artikel": "4.24"
+     }
+    ]
+   }
+  ],
+  "kenmerk": {
+   "soort": "activiteit",
+   "naam": "dakkapel"
+  },
+  "negatief": false,
+  "onderwerp": "bouwen",
+  "sub": "bouwen en verbouwen",
+  "sub_fijn": "dakkapellen, dakopbouwen en dakterrassen",
+  "onderwerp_d": "d-bouwen",
+  "termen_d": [
+   "dakkapel"
+  ],
+  "benchmark30": true,
+  "excel_n": false,
+  "excel_o": false,
+  "excel": {
+   "locatie": "Does 30, 3453MD De Meern",
+   "bevoegd_gezag": "Gemeente Utrecht",
+   "type_bron": "OP",
+   "im": "OW",
+   "bron": "Omgevingsplan gemeente Utrecht",
+   "datum_bron": "2024-12-27",
+   "verwacht_antwoord": "artikel 4.20, toegestaan zonder omgevingsvergunning onder voorwaarden  (gewijzigd in niuewe versie)",
+   "annotatie_toeleiding": "Activiteit",
+   "annotatie_naam": "dakkapel bouwen",
+   "filter_op_kenmerken": "vindbaar met 'dakkapel'",
+   "toeleiding": "zie 15",
+   "opschriftpad": "",
+   "annotatie": null,
+   "vraag_route": null
+  }
+ },
+ {
+  "id": 19,
+  "vraag": "Mag ik hier een dakterras aanleggen?",
+  "locatie": {
+   "pdok_q": "3453MD 30",
+   "verwacht": "Does 30"
+  },
+  "documenten": [
+   {
+    "titel": [
+     "omgevingsplan gemeente utrecht"
+    ],
+    "type": "ow",
+    "match": [
+     {
+      "artikel": "4.42"
+     }
+    ]
+   }
+  ],
+  "kenmerk": {
+   "soort": "activiteit",
+   "naam": "dakterras"
+  },
+  "negatief": false,
+  "onderwerp": "bouwen",
+  "sub": "bouwen en verbouwen",
+  "sub_fijn": "dakkapellen, dakopbouwen en dakterrassen",
+  "onderwerp_d": "d-bouwen",
+  "termen_d": [
+   "dakterras"
+  ],
+  "benchmark30": true,
+  "excel_n": false,
+  "excel_o": false,
+  "excel": {
+   "locatie": "Does 30, 3453MD De Meern",
+   "bevoegd_gezag": "Gemeente Utrecht",
+   "type_bron": "OP",
+   "im": "OW",
+   "bron": "Omgevingsplan gemeente Utrecht",
+   "datum_bron": "2024-12-27",
+   "verwacht_antwoord": "artikel 4.31, toegestaan zonder omgevingsvergunning onder voorwaarden  (gewijzigd in nieuwe versie)",
+   "annotatie_toeleiding": "Activiteit",
+   "annotatie_naam": "dakterras bouwen",
+   "filter_op_kenmerken": "vindbaar met 'dakterras'",
+   "toeleiding": "zie 15",
+   "opschriftpad": "",
+   "annotatie": null,
+   "vraag_route": null
+  }
+ },
+ {
+  "id": 20,
+  "vraag": "Hoe diep in de bodem mag ik hier een warmtepomp aanleggen?",
+  "locatie": {
+   "pdok_q": "7531TS 38",
+   "verwacht": "Aronskelkstraat 38"
+  },
+  "documenten": [
+   {
+    "titel": [
+     "omgevingsverordening provincie"
+    ],
+    "bron": "/pv23/",
+    "type": "ow",
+    "match": [
+     {
+      "artikel": "3.42"
+     }
+    ]
+   }
+  ],
+  "kenmerk": {
+   "soort": "gebiedsaanwijzing",
+   "naam": "kotkamp"
+  },
+  "negatief": false,
+  "onderwerp": "bodem",
+  "sub": "warmtepomp",
+  "sub_fijn": null,
+  "onderwerp_d": "d-bodem-water",
+  "termen_d": [
+   "warmtepomp",
+   "bodem"
+  ],
+  "benchmark30": true,
+  "excel_n": false,
+  "excel_o": false,
+  "excel": {
+   "locatie": "Aronskelkstraat 38, 7531TS Enschede",
+   "bevoegd_gezag": "Provincie Overijssel",
+   "type_bron": "OV",
+   "im": "OW",
+   "bron": "Omgevingsverordening Overijssel",
+   "datum_bron": "2025-05-01",
+   "verwacht_antwoord": "artikel 3.42, aanleggen bodemenergiesystemen dieper dan 5 meter verboden",
+   "annotatie_toeleiding": "Gebiedsaanwijzing",
+   "annotatie_naam": "boringsvrije zone Kotkamp - Schreurserve in Enschede",
+   "filter_op_kenmerken": "nee (naam nietszeggend)",
+   "toeleiding": "Bodem en graven; warmtepomp",
+   "opschriftpad": "20 artikelen bij categorie in omgevingsverordening, artikel 3.42 ontbreekt. 101 niet ingedeeld",
+   "annotatie": null,
+   "vraag_route": null
+  }
+ },
+ {
+  "id": 21,
+  "vraag": "Welke regels gelden hier voor het onttrekken van grondwater voor besproeien van gewassen?",
+  "locatie": {
+   "pdok_q": "ODB04 F 405",
+   "verwacht": "ODB04) F 405"
+  },
+  "documenten": [
+   {
+    "titel": [
+     "waterschapsverordening",
+     "frysl"
+    ],
+    "type": "ow",
+    "match": [
+     {
+      "sectie": "3.7"
+     },
+     {
+      "artikel": "3.8"
+     },
+     {
+      "artikel": "3.9"
+     },
+     {
+      "artikel": "3.10"
+     },
+     {
+      "artikel": "3.11"
+     },
+     {
+      "artikel": "3.12"
+     },
+     {
+      "artikel": "3.13"
+     },
+     {
+      "artikel": "3.14"
+     },
+     {
+      "artikel": "3.15"
+     },
+     {
+      "artikel": "3.16"
+     }
+    ]
+   }
+  ],
+  "kenmerk": {
+   "soort": "activiteit",
+   "naam": "grondwater onttrekken"
+  },
+  "negatief": false,
+  "onderwerp": "waterkering",
+  "sub": "grondwater onttrekking",
+  "sub_fijn": null,
+  "onderwerp_d": "d-bodem-water",
+  "termen_d": [
+   "grondwater",
+   "onttrek",
+   "besproei",
+   "gewas"
+  ],
+  "benchmark30": true,
+  "excel_n": true,
+  "excel_o": true,
+  "excel": {
+   "locatie": "Perceel Oldeboorn (ODB04) F 405",
+   "bevoegd_gezag": "Wetterskip Fryslân",
+   "type_bron": "WV",
+   "im": "OW",
+   "bron": "Waterschapsverordening Wetterskip Fryslân 2023",
+   "datum_bron": "2025-12-11",
+   "verwacht_antwoord": "afdeling 3.7 Onttrekken van grondwater, artikel 3.8 t/m 3.16 (veel tekst)",
+   "annotatie_toeleiding": "Activiteit",
+   "annotatie_naam": "Grondwater onttrekken",
+   "filter_op_kenmerken": "vindbaar met 'grondwater'",
+   "toeleiding": "Waterkeringen en grondwater; grondwater onttrekking",
+   "opschriftpad": "afdeling 3.7 staat erbij",
+   "annotatie": "onderscheid tussen opschriftpad en annotatie wordt niet getoond",
+   "vraag_route": null
+  }
+ },
+ {
+  "id": 22,
+  "vraag": "Mag ik hier water aan het meertje onttrekken?",
+  "locatie": {
+   "rd": [
+    172304,
+    607360
+   ]
+  },
+  "documenten": [
+   {
+    "titel": [
+     "waterschapsverordening",
+     "frysl"
+    ],
+    "type": "ow",
+    "match": [
+     {
+      "artikel": "3.5"
+     }
+    ]
+   }
+  ],
+  "kenmerk": {
+   "soort": "activiteit",
+   "naam": "oppervlaktewater onttrekken"
+  },
+  "negatief": false,
+  "onderwerp": null,
+  "sub": null,
+  "sub_fijn": null,
+  "onderwerp_d": null,
+  "termen_d": [],
+  "benchmark30": true,
+  "excel_n": false,
+  "excel_o": false,
+  "excel": {
+   "locatie": "172304, 607360",
+   "bevoegd_gezag": "Wetterskip Fryslân",
+   "type_bron": "WV",
+   "im": "OW",
+   "bron": "Waterschapsverordening Wetterskip Fryslân 2023",
+   "datum_bron": "2025-12-11",
+   "verwacht_antwoord": "artikel 3.5, vergunningplicht, Waddengebied",
+   "annotatie_toeleiding": "Activiteit",
+   "annotatie_naam": "Oppervlaktewater onttrekken",
+   "filter_op_kenmerken": "vindbaar met 'onttrekken'",
+   "toeleiding": null,
+   "opschriftpad": "zoeken op punt",
+   "annotatie": null,
+   "vraag_route": null
+  }
+ },
+ {
+  "id": 23,
+  "vraag": "Mag ik hier een datacenter ontwikkelen van 10 MVA?",
+  "locatie": {
+   "pdok_q": "1812PW 34",
+   "verwacht": "Laanenderweg 34"
+  },
+  "documenten": [
+   {
+    "titel": [
+     "omgevingsverordening nh2022"
+    ],
+    "type": "ow",
+    "match": [
+     {
+      "artikel": "6.32b"
+     }
+    ]
+   }
+  ],
+  "kenmerk": {
+   "soort": "gebiedsaanwijzing",
+   "naam": "datacenters uitgesloten"
+  },
+  "negatief": false,
+  "onderwerp": "bedrijven",
+  "sub": "datacenters",
+  "sub_fijn": null,
+  "onderwerp_d": "d-werken",
+  "termen_d": [
+   "datacenter"
+  ],
+  "benchmark30": true,
+  "excel_n": true,
+  "excel_o": false,
+  "excel": {
+   "locatie": "Laanenderweg 34, 1812PW Alkmaar",
+   "bevoegd_gezag": "Provincie Noord-Holland",
+   "type_bron": "OV",
+   "im": "OW",
+   "bron": "Omgevingsverordening NH2022",
+   "datum_bron": "2026-02-12",
+   "verwacht_antwoord": "nee, artikel 6.32b",
+   "annotatie_toeleiding": "Gebiedsaanwijzing",
+   "annotatie_naam": "Datacenters uitgesloten",
+   "filter_op_kenmerken": "vindbaar met 'datacenter'",
+   "toeleiding": "Bedrijven, energie en milieu; datacenters",
+   "opschriftpad": "subparagraaf 6.2.2.7",
+   "annotatie": null,
+   "vraag_route": null
+  }
+ },
+ {
+  "id": 24,
+  "vraag": "Welke regels gelden hier t.a.v. het doden van zwervende damherten?",
+  "locatie": {
+   "pdok_q": "WKP00 F 2523",
+   "verwacht": "WKP00) F 2523"
+  },
+  "documenten": [
+   {
+    "titel": [
+     "omgevingsverordening zeeland"
+    ],
+    "type": "ow",
+    "match": [
+     {
+      "artikel": "12.6"
+     },
+     {
+      "artikel": "2.153"
+     }
+    ]
+   }
+  ],
+  "kenmerk": {
+   "soort": "gebiedsaanwijzing",
+   "naam": "damherten"
+  },
+  "negatief": false,
+  "onderwerp": "natuur",
+  "sub": "natuur en bomen",
+  "sub_fijn": "flora en fauna",
+  "onderwerp_d": "d-natuur",
+  "termen_d": [
+   "damhert",
+   "doden"
+  ],
+  "benchmark30": true,
+  "excel_n": true,
+  "excel_o": false,
+  "excel": {
+   "locatie": "Perceel Westkapelle (WKP00) F 2523",
+   "bevoegd_gezag": "Provincie Zeeland",
+   "type_bron": "OV",
+   "im": "OW",
+   "bron": "Omgevingsverordening Zeeland",
+   "datum_bron": "2026-01-01",
+   "verwacht_antwoord": "nieuw: 12.6; artikel 2.153, voorwaarden",
+   "annotatie_toeleiding": "Gebiedsaanwijzing",
+   "annotatie_naam": "beheergebied zwervende damherten",
+   "filter_op_kenmerken": "vindbaar met 'hert'",
+   "toeleiding": "Natuur, bomen en landschap; natuur en bomen",
+   "opschriftpad": "12.6 (en veel andere artikelen)",
+   "annotatie": "12.6 ontbreekt",
+   "vraag_route": "teveel artikelen"
+  }
+ },
+ {
+  "id": 25,
+  "vraag": "Welke regels gelden hier t.a.v. het doden van zwervende damherten?",
+  "locatie": {
+   "pdok_q": "1012JS 1",
+   "verwacht": "Dam 1"
+  },
+  "documenten": [
+   {
+    "titel": [
+     "omgevingsverordening nh2022"
+    ],
+    "type": "ow"
+   }
+  ],
+  "kenmerk": {
+   "soort": "gebiedsaanwijzing",
+   "naam": "damherten"
+  },
+  "negatief": true,
+  "onderwerp": null,
+  "sub": null,
+  "sub_fijn": null,
+  "onderwerp_d": null,
+  "termen_d": [],
+  "benchmark30": true,
+  "excel_n": false,
+  "excel_o": false,
+  "excel": {
+   "locatie": "Dam 1, 1012JS Amsterdam",
+   "bevoegd_gezag": "Provincie Noord-Holland",
+   "type_bron": "OV",
+   "im": "OW",
+   "bron": "Omgevingsverordening NH2022",
+   "datum_bron": "2026-02-12",
+   "verwacht_antwoord": "niet bekend, verwijzing naar faunabeheerplan",
+   "annotatie_toeleiding": null,
+   "annotatie_naam": "",
+   "filter_op_kenmerken": "niet vindbaar",
+   "toeleiding": null,
+   "opschriftpad": null,
+   "annotatie": null,
+   "vraag_route": null
+  }
+ },
+ {
+  "id": 26,
+  "vraag": "Is de aalscholver hier een beschermde diersoort?",
+  "locatie": {
+   "pdok_q": "9003XT 1",
+   "verwacht": "De Sayter 1"
+  },
+  "documenten": [
+   {
+    "titel": [
+     "alde feanen"
+    ],
+    "type": "ow",
+    "match": [
+     {
+      "artikel": "2"
+     }
+    ]
+   }
+  ],
+  "kenmerk": {
+   "soort": "gebiedsaanwijzing",
+   "naam": "alde feanen"
+  },
+  "negatief": false,
+  "onderwerp": "landbouw",
+  "sub": null,
+  "sub_fijn": null,
+  "onderwerp_d": "d-landbouw",
+  "termen_d": [
+   "aalscholver",
+   "diersoort",
+   "beschermd"
+  ],
+  "benchmark30": true,
+  "excel_n": false,
+  "excel_o": false,
+  "excel": {
+   "locatie": "De Sayter 1, 9003XT Warten",
+   "bevoegd_gezag": "Ministerie LVVN",
+   "type_bron": "N2000",
+   "im": "OW",
+   "bron": "Aanwijzingsbesluit Natura 2000-gebied Alde Feanen",
+   "datum_bron": "2025-12-17",
+   "verwacht_antwoord": "ja, artikel 2 lid 3",
+   "annotatie_toeleiding": "Gebiedsaanwijzing",
+   "annotatie_naam": "Vogelrichtlijngebied Alde Feanen",
+   "filter_op_kenmerken": "vindbaar met 'vogel'",
+   "toeleiding": "Landbouw en dieren",
+   "opschriftpad": "aanwijzingsbesluit ontbreekt",
+   "annotatie": null,
+   "vraag_route": "niet gevonden"
+  }
+ },
+ {
+  "id": 27,
+  "vraag": "Is de aalscholver hier een beschermde diersoort?",
+  "locatie": {
+   "pdok_q": "9263RB 23",
+   "verwacht": "Inialoane 23"
+  },
+  "documenten": [
+   {
+    "titel": [
+     "alde feanen"
+    ],
+    "type": "ow",
+    "afwezig": true
+   }
+  ],
+  "kenmerk": {
+   "soort": "gebiedsaanwijzing",
+   "naam": "alde feanen"
+  },
+  "negatief": true,
+  "onderwerp": null,
+  "sub": null,
+  "sub_fijn": null,
+  "onderwerp_d": null,
+  "termen_d": [],
+  "benchmark30": true,
+  "excel_n": false,
+  "excel_o": false,
+  "excel": {
+   "locatie": "Inialoane 23, 9263RB Garyp",
+   "bevoegd_gezag": "Ministerie LVVN",
+   "type_bron": "N2000",
+   "im": "OW",
+   "bron": "Aanwijzingsbesluit Natura 2000-gebied Alde Feanen",
+   "datum_bron": "=$H$27",
+   "verwacht_antwoord": "niet bepaald, buiten N2000",
+   "annotatie_toeleiding": null,
+   "annotatie_naam": null,
+   "filter_op_kenmerken": "niet bepaald",
+   "toeleiding": "",
+   "opschriftpad": "",
+   "annotatie": null,
+   "vraag_route": null
+  }
+ },
+ {
+  "id": 28,
+  "vraag": "Wat is hier de overstromingskans?",
+  "locatie": {
+   "pdok_q": "9264TE 9",
+   "verwacht": "9264TE"
+  },
+  "documenten": [
+   {
+    "titel": [
+     "omgevingsverordening frysl"
+    ],
+    "type": "ow",
+    "match": [
+     {
+      "artikel": "3.9"
+     }
+    ]
+   }
+  ],
+  "kenmerk": {
+   "soort": "omgevingswaarde",
+   "naam": "overstromingskans bebouwd gebied"
+  },
+  "negatief": false,
+  "onderwerp": "waterkering",
+  "sub": null,
+  "sub_fijn": null,
+  "onderwerp_d": "d-bodem-water",
+  "termen_d": [
+   "overstroming"
+  ],
+  "benchmark30": true,
+  "excel_n": true,
+  "excel_o": true,
+  "excel": {
+   "locatie": "Krúspaed 9, 9264TE Earnewâld",
+   "bevoegd_gezag": "Provincie Fryslân",
+   "type_bron": "OV",
+   "im": "OW",
+   "bron": "Omgevingsverordening Fryslân 2022",
+   "datum_bron": "2026-04-24",
+   "verwacht_antwoord": "artikel 3.9, eens in 100 jaar",
+   "annotatie_toeleiding": "Omgevingswaarde",
+   "annotatie_naam": "Overstromingskans bebouwd gebied",
+   "filter_op_kenmerken": "vindbaar met 'overstroming'",
+   "toeleiding": "Waterkeringen en grondwater;",
+   "opschriftpad": "3.9 staat erbij (als je goede document selecteert)",
+   "annotatie": "3.9 staat erbij",
+   "vraag_route": "3.9 staat erbij"
+  }
+ },
+ {
+  "id": 29,
+  "vraag": "Wat is hier de overstromingskans?",
+  "locatie": {
+   "pdok_q": "OTM00 K 530",
+   "verwacht": "OTM00) K 530"
+  },
+  "documenten": [
+   {
+    "titel": [
+     "omgevingsverordening frysl"
+    ],
+    "type": "ow",
+    "match": [
+     {
+      "artikel": "3.9"
+     }
+    ]
+   }
+  ],
+  "kenmerk": {
+   "soort": "omgevingswaarde",
+   "naam": "overstromingskans grasland"
+  },
+  "negatief": false,
+  "onderwerp": "waterkering",
+  "sub": null,
+  "sub_fijn": null,
+  "onderwerp_d": "d-bodem-water",
+  "termen_d": [
+   "overstroming"
+  ],
+  "benchmark30": true,
+  "excel_n": true,
+  "excel_o": true,
+  "excel": {
+   "locatie": "Perceel Oostermeer (OTM00) K 530",
+   "bevoegd_gezag": "Provincie Fryslân",
+   "type_bron": "OV",
+   "im": "OW",
+   "bron": "Omgevingsverordening Fryslân 2022",
+   "datum_bron": "2026-04-24",
+   "verwacht_antwoord": "artikel 3.9, eens in 10 jaar",
+   "annotatie_toeleiding": "Omgevingswaarde",
+   "annotatie_naam": "Overstromingskans grasland",
+   "filter_op_kenmerken": "vindbaar met 'overstroming'",
+   "toeleiding": "Waterkeringen en grondwater",
+   "opschriftpad": "3.9 staat erbij (als je goede document selecteert)",
+   "annotatie": "3.9 staat erbij",
+   "vraag_route": "3.9 staat erbij"
+  }
+ },
+ {
+  "id": 30,
+  "vraag": "Wat is hier de overstromingskans?",
+  "locatie": {
+   "pdok_q": "HLM05 A 424",
+   "verwacht": "HLM05) A 424"
+  },
+  "documenten": [
+   {
+    "titel": [
+     "omgevingsverordening frysl"
+    ],
+    "type": "ow"
+   }
+  ],
+  "kenmerk": {
+   "soort": "omgevingswaarde",
+   "naam": "overstromingskans"
+  },
+  "negatief": true,
+  "onderwerp": "waterkering",
+  "sub": null,
+  "sub_fijn": null,
+  "onderwerp_d": "d-bodem-water",
+  "termen_d": [
+   "overstroming"
+  ],
+  "benchmark30": true,
+  "excel_n": false,
+  "excel_o": false,
+  "excel": {
+   "locatie": "Perceel Hallum (HLM05) A 424",
+   "bevoegd_gezag": "Provincie Fryslân",
+   "type_bron": "OV",
+   "im": "OW",
+   "bron": "Omgevingsverordening Fryslân 2022",
+   "datum_bron": "2026-04-24",
+   "verwacht_antwoord": "niet bepaald, geen omgevingswaarde",
+   "annotatie_toeleiding": null,
+   "annotatie_naam": null,
+   "filter_op_kenmerken": "niet vindbaar",
+   "toeleiding": "Waterkeringen en grondwater",
+   "opschriftpad": "veel regels",
+   "annotatie": "geen regels gevonden",
+   "vraag_route": "geen melding dat er geen regels zijn"
+  }
+ },
+ {
+  "id": 31,
+  "vraag": "Wat is hier de kans op wateroverlast?",
+  "locatie": {
+   "pdok_q": "SDR00 W 583",
+   "verwacht": "SDR00) W 583"
+  },
+  "documenten": [
+   {
+    "titel": [
+     "omgevingsverordening gelderland"
+    ],
+    "type": "ow",
+    "match": [
+     {
+      "artikel": "3.11"
+     }
+    ]
+   }
+  ],
+  "kenmerk": {
+   "soort": "omgevingswaarde",
+   "naam": "wateroverlast"
+  },
+  "negatief": false,
+  "onderwerp": "waterkering",
+  "sub": null,
+  "sub_fijn": null,
+  "onderwerp_d": "d-bodem-water",
+  "termen_d": [
+   "wateroverlast"
+  ],
+  "benchmark30": true,
+  "excel_n": true,
+  "excel_o": true,
+  "excel": {
+   "locatie": "Perceel Steenderen (SDR00) W 583",
+   "bevoegd_gezag": "Provincie Gelderland",
+   "type_bron": "OV",
+   "im": "OW",
+   "bron": "Omgevingsverordening Gelderland",
+   "datum_bron": "2025-11-14",
+   "verwacht_antwoord": "artikel 3.11, 1:10 per jaar",
+   "annotatie_toeleiding": "Omgevingswaarde",
+   "annotatie_naam": "wateroverlast in het beheergebied van waterschap Rijn en IJssel",
+   "filter_op_kenmerken": "vindbaar met 'wateroverlast'",
+   "toeleiding": "Waterkeringen en grondwater",
+   "opschriftpad": "3.11 staat erbij (als je goede document kiest)",
+   "annotatie": "3.11 staat erbij",
+   "vraag_route": "3.11 staat erbij"
+  }
+ },
+ {
+  "id": 32,
+  "vraag": "Wat is hier de kans op wateroverlast?",
+  "locatie": {
+   "pdok_q": "7201HX 16",
+   "verwacht": "Groenmarkt 16"
+  },
+  "documenten": [
+   {
+    "titel": [
+     "omgevingsverordening gelderland"
+    ],
+    "type": "ow",
+    "match": [
+     {
+      "artikel": "3.11"
+     }
+    ]
+   }
+  ],
+  "kenmerk": {
+   "soort": "omgevingswaarde",
+   "naam": "wateroverlast"
+  },
+  "negatief": false,
+  "onderwerp": "waterkering",
+  "sub": null,
+  "sub_fijn": null,
+  "onderwerp_d": "d-bodem-water",
+  "termen_d": [
+   "wateroverlast"
+  ],
+  "benchmark30": true,
+  "excel_n": false,
+  "excel_o": true,
+  "excel": {
+   "locatie": "Groenmarkt 16, 7201HX Zutphen",
+   "bevoegd_gezag": "Provincie Gelderland",
+   "type_bron": "OV",
+   "im": "OW",
+   "bron": "Omgevingsverordening Gelderland",
+   "datum_bron": "2025-11-14",
+   "verwacht_antwoord": "artikel 3.11, 1:100 per jaar",
+   "annotatie_toeleiding": "Omgevingswaarde",
+   "annotatie_naam": "wateroverlast in het beheergebied van waterschap Rijn en IJssel",
+   "filter_op_kenmerken": "vindbaar met 'wateroverlast'",
+   "toeleiding": "Waterkeringen en grondwater",
+   "opschriftpad": "3.11 niet gevonden",
+   "annotatie": "3.11 staat erbij",
+   "vraag_route": "3.11 staat erbij"
+  }
+ },
+ {
+  "id": 33,
+  "vraag": "Wat is hier de kans op wateroverlast?",
+  "locatie": {
+   "pdok_q": "7411CC 23D",
+   "verwacht": "Welle 23D"
+  },
+  "documenten": [
+   {
+    "titel": [
+     "omgevingsverordening provincie"
+    ],
+    "bron": "/pv23/",
+    "type": "ow",
+    "match": [
+     {
+      "artikel": "2.7"
+     }
+    ]
+   }
+  ],
+  "kenmerk": null,
+  "negatief": false,
+  "onderwerp": "waterkering",
+  "sub": null,
+  "sub_fijn": null,
+  "onderwerp_d": "d-bodem-water",
+  "termen_d": [
+   "wateroverlast"
+  ],
+  "benchmark30": true,
+  "excel_n": true,
+  "excel_o": false,
+  "excel": {
+   "locatie": "Welle 23D, 7411CC Deventer",
+   "bevoegd_gezag": "Provincie Overijssel",
+   "type_bron": "OV",
+   "im": "OW",
+   "bron": "Omgevingsverordening Overijssel",
+   "datum_bron": "2025-05-01",
+   "verwacht_antwoord": "artikel 2.7, 1/100 per jaar",
+   "annotatie_toeleiding": null,
+   "annotatie_naam": null,
+   "filter_op_kenmerken": null,
+   "toeleiding": "Waterkeringen en grondwater",
+   "opschriftpad": "2.7 gevonden",
+   "annotatie": "2.7 niet gevonden",
+   "vraag_route": "2.7 niet gevonden"
+  }
+ },
+ {
+  "id": 34,
+  "vraag": "Wat is hier het beleid t.a.v. hoogwaterbescherming?",
+  "locatie": {
+   "pdok_q": "6916BC 1",
+   "verwacht": "Rijnstraat 1"
+  },
+  "documenten": [
+   {
+    "titel": [
+     "integraal riviermanagement"
+    ],
+    "type": "ow",
+    "match": [
+     {
+      "sectie": "2.3"
+     }
+    ]
+   }
+  ],
+  "kenmerk": null,
+  "negatief": false,
+  "onderwerp": "waterkering",
+  "sub": null,
+  "sub_fijn": null,
+  "onderwerp_d": "d-bodem-water",
+  "termen_d": [
+   "hoogwater"
+  ],
+  "benchmark30": true,
+  "excel_n": false,
+  "excel_o": false,
+  "excel": {
+   "locatie": "Rijnstraat 1-13, 6916BC Tolkamer",
+   "bevoegd_gezag": "Ministerie IenW",
+   "type_bron": "PR",
+   "im": "OW",
+   "bron": "Programma Integraal Riviermanagement",
+   "datum_bron": "2025-04-10",
+   "verwacht_antwoord": "meerdere teksten, o.a. par 2.3",
+   "annotatie_toeleiding": null,
+   "annotatie_naam": null,
+   "filter_op_kenmerken": null,
+   "toeleiding": "Waterkeringen en grondwater",
+   "opschriftpad": "doc niet gevonden",
+   "annotatie": null,
+   "vraag_route": "100-en niet relavente resultaten"
+  }
+ },
+ {
+  "id": 35,
+  "vraag": "Welke regels gelden hier over aanvragen van subsidie voor natuur- en landschapsbeheer?",
+  "locatie": {
+   "pdok_q": "LLS00 R 214",
+   "verwacht": "LLS00) R 214"
+  },
+  "documenten": [
+   {
+    "titel": [
+     "natuurbeheerplan",
+     "flevoland"
+    ],
+    "type": "ow",
+    "match": [
+     {
+      "sectie": "4"
+     }
+    ]
+   }
+  ],
+  "kenmerk": null,
+  "negatief": false,
+  "onderwerp": "natuur",
+  "sub": null,
+  "sub_fijn": null,
+  "onderwerp_d": "d-natuur",
+  "termen_d": [
+   "subsidie",
+   "beheer"
+  ],
+  "benchmark30": true,
+  "excel_n": false,
+  "excel_o": false,
+  "excel": {
+   "locatie": "Perceel Lelystad (LLS00) R 214",
+   "bevoegd_gezag": "Provincie Flevoland",
+   "type_bron": "PR",
+   "im": "OW",
+   "bron": "Natuurbeheerplan Flevoland",
+   "datum_bron": "2025-09-02",
+   "verwacht_antwoord": "H.4 subsidiemogelijkheden",
+   "annotatie_toeleiding": null,
+   "annotatie_naam": null,
+   "filter_op_kenmerken": null,
+   "toeleiding": "Natuur, bomen en landschap",
+   "opschriftpad": "doc niet gevonden",
+   "annotatie": null,
+   "vraag_route": null
+  }
+ },
+ {
+  "id": 36,
+  "vraag": "Welke regels gelden hier over aanvragen van subsidie voor natuur- en landschapsbeheer?",
+  "locatie": {
+   "rd": [
+    170239,
+    489741
+   ]
+  },
+  "documenten": [
+   {
+    "titel": [
+     "natuurbeheerplan",
+     "flevoland"
+    ],
+    "type": "ow",
+    "match": [
+     {
+      "sectie": "4"
+     }
+    ]
+   }
+  ],
+  "kenmerk": null,
+  "negatief": false,
+  "onderwerp": null,
+  "sub": null,
+  "sub_fijn": null,
+  "onderwerp_d": null,
+  "termen_d": [],
+  "benchmark30": true,
+  "excel_n": false,
+  "excel_o": false,
+  "excel": {
+   "locatie": "170239, 489741",
+   "bevoegd_gezag": "Provincie Flevoland",
+   "type_bron": "PR",
+   "im": "OW",
+   "bron": "Natuurbeheerplan Flevoland",
+   "datum_bron": "2025-09-02",
+   "verwacht_antwoord": "H.4 subsidiemogelijkheden",
+   "annotatie_toeleiding": null,
+   "annotatie_naam": null,
+   "filter_op_kenmerken": null,
+   "toeleiding": null,
+   "opschriftpad": "zoeken op punt",
+   "annotatie": null,
+   "vraag_route": null
+  }
+ },
+ {
+  "id": 37,
+  "vraag": "Welke visie is hier op de spoorwegverbinding tussen het noorden en de Randstad?",
+  "locatie": {
+   "pdok_q": "9263RB 23",
+   "verwacht": "Inialoane 23"
+  },
+  "documenten": [
+   {
+    "titel": [
+     "nota ruimte"
+    ],
+    "type": "ow",
+    "match": [
+     {
+      "sectie": "9.5"
+     }
+    ]
+   }
+  ],
+  "kenmerk": null,
+  "negatief": false,
+  "onderwerp": "openbare-ruimte",
+  "sub": null,
+  "sub_fijn": null,
+  "onderwerp_d": "d-verkeer",
+  "termen_d": [
+   "spoor"
+  ],
+  "benchmark30": true,
+  "excel_n": false,
+  "excel_o": false,
+  "excel": {
+   "locatie": "Inialoane 23, 9263RB Garyp",
+   "bevoegd_gezag": "Ministerie VRO",
+   "type_bron": "OVi",
+   "im": "OW",
+   "bron": "Ontwerp Nota Ruimte",
+   "datum_bron": "2025-10-06",
+   "verwacht_antwoord": "par 9.5, Lelylijn, zie tekst",
+   "annotatie_toeleiding": null,
+   "annotatie_naam": null,
+   "filter_op_kenmerken": null,
+   "toeleiding": "Openbare ruimte en verkeer",
+   "opschriftpad": "doc niet gevonden",
+   "annotatie": null,
+   "vraag_route": "100-en niet relevante resultaten"
+  }
+ },
+ {
+  "id": 38,
+  "vraag": "Welke lange termijnvisie is hier op een doorontwikkeling van de Betuwelijn?",
+  "locatie": {
+   "pdok_q": "Saneringsweg 3a IJzendoorn",
+   "verwacht": "Saneringsweg 3A"
+  },
+  "documenten": [
+   {
+    "titel": [
+     "omgevingsvisie",
+     "neder-betuwe"
+    ],
+    "type": "ow"
+   }
+  ],
+  "kenmerk": null,
+  "negatief": false,
+  "onderwerp": "openbare-ruimte",
+  "sub": null,
+  "sub_fijn": null,
+  "onderwerp_d": "d-verkeer",
+  "termen_d": [
+   "betuwelijn"
+  ],
+  "benchmark30": true,
+  "excel_n": false,
+  "excel_o": false,
+  "excel": {
+   "locatie": "Saneringsweg 3a, IJzendoorn",
+   "bevoegd_gezag": "Ministerie VRO, Gemeente Neder-Betuwe",
+   "type_bron": "OVi",
+   "im": "OW",
+   "bron": "Ontwerp Nota Ruimte,",
+   "datum_bron": "06-10-2025,",
+   "verwacht_antwoord": "Lange termijn niet bepaald in visie Rijk. In Omgevingsvisie Neder-Betuwe tekst over geluidwering",
+   "annotatie_toeleiding": null,
+   "annotatie_naam": null,
+   "filter_op_kenmerken": null,
+   "toeleiding": "Openbare ruime en verkeer",
+   "opschriftpad": "doc niet gevonden",
+   "annotatie": null,
+   "vraag_route": "teveel niet relevante teksten"
+  }
+ },
+ {
+  "id": 39,
+  "vraag": "Welke ambitie is hier t.a.v. het terugdringen van broeikasgassen?",
+  "locatie": {
+   "pdok_q": "7334DP 701",
+   "verwacht": "Laan van Westenenk 701"
+  },
+  "documenten": [
+   {
+    "titel": [
+     "gaaf gelderland"
+    ],
+    "type": "wro"
+   }
+  ],
+  "kenmerk": null,
+  "negatief": false,
+  "onderwerp": null,
+  "sub": null,
+  "sub_fijn": null,
+  "onderwerp_d": null,
+  "termen_d": [],
+  "benchmark30": true,
+  "excel_n": false,
+  "excel_o": false,
+  "excel": {
+   "locatie": "Laan van Westenenk 701, 7334DP Apeldoorn",
+   "bevoegd_gezag": "Provincie Gelderland",
+   "type_bron": "SV",
+   "im": "RO",
+   "bron": "Omgevingsvisie Gaaf Gelderland",
+   "datum_bron": "2018-12-19",
+   "verwacht_antwoord": "H4 par 1, ambitie 2050 is Gelderland klimaatneutraal, tussendoel 2030 55% broeikasgasreductie in Gelderland",
+   "annotatie_toeleiding": null,
+   "annotatie_naam": null,
+   "filter_op_kenmerken": null,
+   "toeleiding": null,
+   "opschriftpad": "ro",
+   "annotatie": null,
+   "vraag_route": null
+  }
+ },
+ {
+  "id": 40,
+  "vraag": "Kunnen er nog zienswijzen worden ingediend op het plan voor de aanleg van een windpark hier?",
+  "locatie": {
+   "pdok_q": "Saneringsweg 3a IJzendoorn",
+   "verwacht": "Saneringsweg 3A"
+  },
+  "documenten": [
+   {
+    "titel": [
+     "windpark",
+     "echteld"
+    ],
+    "type": "ow"
+   }
+  ],
+  "kenmerk": null,
+  "negatief": false,
+  "onderwerp": "bedrijven",
+  "sub": null,
+  "sub_fijn": null,
+  "onderwerp_d": "d-werken",
+  "termen_d": [
+   "windpark",
+   "zienswijze"
+  ],
+  "benchmark30": true,
+  "excel_n": false,
+  "excel_o": false,
+  "excel": {
+   "locatie": "Saneringsweg 3a, IJzendoorn",
+   "bevoegd_gezag": "Provincie Gelderland",
+   "type_bron": "PB",
+   "im": "OW",
+   "bron": "Projectbesluit Windpark Echteld – Lienden",
+   "datum_bron": "2024-12-23",
+   "verwacht_antwoord": "einde inzagetermijn van ontwerpbesluit was 19-02-2025",
+   "annotatie_toeleiding": null,
+   "annotatie_naam": null,
+   "filter_op_kenmerken": null,
+   "toeleiding": "Bedrijven, energie en milieu",
+   "opschriftpad": "doc niet gevonden",
+   "annotatie": null,
+   "vraag_route": "teveel niet relevante resultaten"
+  }
+ }
+]
