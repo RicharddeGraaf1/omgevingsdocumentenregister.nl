@@ -33,7 +33,7 @@ D_NAAM = {
     "d-verkeer": "Verkeer en infrastructuur",
 }
 VARIANTEN = [("pad", "A · opschriftpad"), ("imow", "B · annotatie"), ("hybride", "C · hybride"),
-             ("stelsel", "D · thema-en-activiteit")]
+             ("stelsel", "D · thema-en-activiteit"), ("meervoudig", "E · meervoudig")]
 KOP = Font(bold=True, color="FFFFFF")
 KOPVULLING = PatternFill("solid", fgColor="2F5D62")
 AGENT = PatternFill("solid", fgColor="FFF2CC")
@@ -95,6 +95,7 @@ def main():
             D_NAAM.get(c.get("onderwerp_d")), ", ".join(c.get("termen_d") or []) or None,
             (k.get("soort", "") + ": " + k.get("naam", "")) if k else None,
             "ja" if c.get("negatief") else None,
+            c.get("buiten_scope"),
             "ja" if c.get("benchmark30") else None,
             ("ja" if c.get("excel_n") else "nee") if c.get("benchmark30") else None,
             ("ja" if c.get("excel_o") else "nee") if c.get("benchmark30") else None,
@@ -104,9 +105,9 @@ def main():
     blad(ws, ["nr", "vraag", "locatie (Excel)", "locatie (opgelost, PDOK)", "bevoegd gezag", "type bron", "IM",
               "bron (document)", "verwacht antwoord", "verwacht artikel / sectie",
               "tegel (toeleiding)", "subonderwerp", "fijne chip", "herkomst tegel",
-              "tegel variant D", "zoekwoorden chips D", "kenmerk op het punt", "negatieve vraag",
-              "in Excel-set (30)", "handmatig N (opschriftpad)", "handmatig O (annotatie)"],
-         rijen, [5, 34, 22, 26, 18, 8, 6, 26, 34, 18, 22, 20, 22, 14, 18, 16, 26, 9, 9, 10, 10])
+              "tegel variant D/E", "zoekwoorden chips D/E", "kenmerk op het punt", "negatieve vraag",
+              "buiten bereik", "in Excel-set (30)", "handmatig N (opschriftpad)", "handmatig O (annotatie)"],
+         rijen, [5, 34, 22, 26, 18, 8, 6, 26, 34, 18, 22, 20, 22, 14, 18, 16, 26, 9, 22, 9, 10, 10])
     for r in agent_rijen:
         for col in (11, 12, 14):
             ws.cell(row=r, column=col).fill = AGENT
@@ -114,7 +115,7 @@ def main():
     # ── Scores ──
     ws2 = wb.create_sheet("Scores")
     srijen = []
-    totaal = {m: {"30": 0.0, "40": 0.0, "g30": 0, "g40": 0} for m, _ in VARIANTEN}
+    totaal = {m: {"30": 0.0, "40": 0.0, "g30": 0, "g40": 0, "h28": 0.0, "h38": 0.0} for m, _ in VARIANTEN}
     for c in golden:
         t = per.get(c["id"], {}).get("toegang") or {}
         rij = [c["id"], c["vraag"], TEGELNAAM.get(c.get("onderwerp")) if c.get("onderwerp") else None]
@@ -127,11 +128,16 @@ def main():
             for s in ("40",) + (("30",) if c.get("benchmark30") else ()):
                 totaal[m][s] += v.get("score", 0) or 0
                 totaal[m]["g" + s] += bool(v.get("gevonden"))
+            if not c.get("buiten_scope"):   # haalbaar: negatief telt als goed als hij terecht leeg is
+                h = 1.0 if v.get("terecht_leeg") else (v.get("score", 0) or 0)
+                totaal[m]["h38"] += h
+                if c.get("benchmark30"):
+                    totaal[m]["h28"] += h
         srijen.append(rij)
     kop = ["nr", "vraag", "tegel"]
     for _, naam in VARIANTEN:
         kop += [naam + " · gevonden", "artikelen", "score", "via / reden"]
-    blad(ws2, kop, srijen, [5, 34, 20] + [9, 9, 7, 28] * 4)
+    blad(ws2, kop, srijen, [5, 34, 20] + [9, 9, 7, 28] * len(VARIANTEN))
     ws2.append([])
     for s, label in (("30", "Totaal Excel-set (vragen 11–40)"), ("40", "Totaal alle 40 vragen")):
         rij = [None, label, None]
@@ -140,6 +146,17 @@ def main():
         ws2.append(rij)
         for cel in ws2[ws2.max_row]:
             cel.font = Font(bold=True)
+    n28 = sum(1 for c in golden if c.get("benchmark30") and not c.get("buiten_scope"))
+    n38 = sum(1 for c in golden if not c.get("buiten_scope"))
+    for s, label in (("h28", f"Haalbaar, Excel-set (noemer {n28})"), ("h38", f"Haalbaar, alle vragen (noemer {n38})")):
+        rij = [None, label, None]
+        for m, _ in VARIANTEN:
+            rij += [None, None, round(totaal[m][s], 1), None]
+        ws2.append(rij)
+        for cel in ws2[ws2.max_row]:
+            cel.font = Font(bold=True)
+    ws2.append([None, "Haalbaar = zonder de vragen buiten bereik (37, 40); een negatieve vraag telt als goed als het kenmerk "
+                      "terecht ontbreekt."])
     ws2.append([None, "Handmatig (Excel 20-10): kolom N 7/30 (eigenlijk 6, zie vraag 33), kolom O 5/30"])
 
     # ── Toelichting ──
@@ -166,13 +183,21 @@ def main():
                                     "Bestaat (nog) niet op de site."),
         ("Wro op de site", "De Wro-onderwerpen staan op productie in de API, maar de site toont ze pas met de "
                            "register-branch wro-onderwerpen (niet live). De Wro-scores meten dus die branch."),
-        ("Negatieve vragen", "17, 25, 27, 30: er is geen artikel om te vinden; langs een tegel niet te scoren."),
+        ("E · meervoudig", "Simulatie (24-10-2026): de tegels en chips van D, maar een artikel staat onder élke tegel "
+                           "waarover het iets regelt: opschriftpad, alle IMOW-thema's, gebiedsaanwijzingen, "
+                           "activiteitengroepen, en bij Wro de functies uit het hoofddeel van de bestemmingsomschrijving."),
+        ("Tegelkeuze per variant", "D en E bieden andere tegels; bij 26 (aalscholver) en 39 (broeikasgassen) kiest de "
+                                   "bezoeker daar Natuur en landschap resp. Energie en klimaat (curatie 24-10, akkoord gebruiker)."),
+        ("Negatieve vragen", "4, 6, 17, 25, 27, 30: er is geen artikel om te vinden. In 'haalbaar' tellen ze als goed als het "
+                             "kenmerk binnen het verwachte document terecht ontbreekt."),
+        ("Buiten bereik", "37 (ontwerp-Nota Ruimte: het register toont alleen geldende documenten) en 40 (einde "
+                          "inzagetermijn: procedure-informatie, staat in geen regel)."),
     ]
     blad(ws3, ["onderdeel", "uitleg"], regels, [24, 110])
     wb.save(doel)
     print(f"geschreven: {doel}")
     for m, naam in VARIANTEN:
-        print(f"  {naam:26} 30: {totaal[m]['30']:.1f} ({totaal[m]['g30']} gevonden) · 40: {totaal[m]['40']:.1f}")
+        print(f"  {naam:26} 30: {totaal[m]['30']:.1f} · 40: {totaal[m]['40']:.1f} · haalbaar 28: {totaal[m]['h28']:.1f} · 38: {totaal[m]['h38']:.1f}")
 
 
 if __name__ == "__main__":

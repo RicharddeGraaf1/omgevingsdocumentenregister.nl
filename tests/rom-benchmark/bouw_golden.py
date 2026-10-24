@@ -73,12 +73,12 @@ C = {
           kenmerk=dict(soort="wro", naam="parkeernormen 2018", object_type="Gebiedsaanduiding")),
  15: dict(sub_fijn="dakkapellen, dakopbouwen en dakterrassen", loc=("pdok", "3453MD 30", "Does 30"), docs=[dict(titel=["omgevingsplan gemeente utrecht"], type="ow", match=[{"artikel": "4.26"}])],   # Excel: 4.22 (versie 2024-12-27); geldend 2026-08-19: 4.26
           kenmerk=dict(soort="activiteit", naam="dakopbouw")),
- 16: dict(loc=("pdok", "7941LC 3", "Vledderstraat 3"),
+ 16: dict(toeleiding_agent="Erfgoed en monumenten", loc=("pdok", "7941LC 3", "Vledderstraat 3"),
           docs=[dict(titel=["omgevingsplan gemeente meppel"], type="ow", match=[{"sectie": "8.3"}]),
                 dict(titel=["voorbereidingsbesluit", "monumenten"], type="ow", match=[{"artikel": "2.2"}])],
           kenmerk=dict(soort="activiteit", naam="monument")),
  17: dict(loc=("pdok", "9713DD 8", "Zagerij 8"), docs=[dict(titel=["omgevingsplan gemeente groningen"], type="ow")],
-          negatief=True),   # 'Dakkapel bouwen' ligt hier wél, maar op het landelijke ambtsgebied (Bbl): geen toetsbaar negatief kenmerk
+          kenmerk=dict(soort="activiteit", naam="dakkapel"), negatief=True),   # alleen binnen het omgevingsplan getoetst: 'Dakkapel bouwen' uit het Bbl telt niet
  18: dict(sub_fijn="dakkapellen, dakopbouwen en dakterrassen", loc=("pdok", "3453MD 30", "Does 30"), docs=[dict(titel=["omgevingsplan gemeente utrecht"], type="ow", match=[{"artikel": "4.24"}])],   # Excel: 4.20 (versie 2024-12-27); geldend 2026-08-19: 4.24
           kenmerk=dict(soort="activiteit", naam="dakkapel")),
  19: dict(sub_fijn="dakkapellen, dakopbouwen en dakterrassen", loc=("pdok", "3453MD 30", "Does 30"), docs=[dict(titel=["omgevingsplan gemeente utrecht"], type="ow", match=[{"artikel": "4.42"}])],   # Excel: 4.31 (versie 2024-12-27); geldend 2026-08-19: 4.42
@@ -88,7 +88,7 @@ C = {
  21: dict(loc=("pdok", "ODB04 F 405", "ODB04) F 405"), docs=[dict(titel=["waterschapsverordening", "frysl"], type="ow",
           match=[{"sectie": "3.7"}] + [{"artikel": "3.%d" % i} for i in range(8, 17)])],
           kenmerk=dict(soort="activiteit", naam="grondwater onttrekken")),
- 22: dict(loc=("rd", 172304, 607360), docs=[dict(titel=["waterschapsverordening", "frysl"], type="ow", match=[{"artikel": "3.5"}])],
+ 22: dict(toeleiding_agent="Waterkeringen en grondwater", loc=("rd", 172304, 607360), docs=[dict(titel=["waterschapsverordening", "frysl"], type="ow", match=[{"artikel": "3.5"}])],
           kenmerk=dict(soort="activiteit", naam="oppervlaktewater onttrekken")),
  23: dict(loc=("pdok", "1812PW 34", "Laanenderweg 34"), docs=[dict(titel=["omgevingsverordening nh2022"], type="ow", match=[{"artikel": "6.32b"}])],
           kenmerk=dict(soort="gebiedsaanwijzing", naam="datacenters uitgesloten")),
@@ -113,17 +113,18 @@ C = {
  33: dict(loc=("pdok", "7411CC 23D", "Welle 23D"), docs=[dict(titel=["omgevingsverordening provincie"], bron="/pv23/", type="ow", match=[{"artikel": "2.7"}])]),
  34: dict(loc=("pdok", "6916BC 1", "Rijnstraat 1"), docs=[dict(titel=["integraal riviermanagement"], type="ow", match=[{"sectie": "2.3"}])]),
  35: dict(loc=("pdok", "LLS00 R 214", "LLS00) R 214"), docs=[dict(titel=["natuurbeheerplan", "flevoland"], type="ow", match=[{"sectie": "4"}])]),
- 36: dict(loc=("rd", 170239, 489741), docs=[dict(titel=["natuurbeheerplan", "flevoland"], type="ow", match=[{"sectie": "4"}])]),
- 37: dict(loc=("pdok", "9263RB 23", "Inialoane 23"), docs=[dict(titel=["nota ruimte"], type="ow", match=[{"sectie": "9.5"}])]),
- 38: dict(loc=("pdok", "Saneringsweg 3a IJzendoorn", "Saneringsweg 3A"), docs=[dict(titel=["omgevingsvisie", "neder-betuwe"], type="ow")]),
+ 36: dict(toeleiding_agent="Natuur, bomen en landschap", loc=("rd", 170239, 489741), docs=[dict(titel=["natuurbeheerplan", "flevoland"], type="ow", match=[{"sectie": "4"}])]),
+ 37: dict(buiten_scope="ontwerp (Nota Ruimte) — het register toont alleen geldende documenten", loc=("pdok", "9263RB 23", "Inialoane 23"), docs=[dict(titel=["nota ruimte"], type="ow", match=[{"sectie": "9.5"}])]),
+ 38: dict(loc=("pdok", "Saneringsweg 3a IJzendoorn", "Saneringsweg 3A"), docs=[dict(titel=["omgevingsvisie", "neder-betuwe"], type="ow", match=[{"opschrift": "Waardenkaart"}])]),
  39: dict(toeleiding_agent="Bedrijven, energie en milieu", loc=("pdok", "7334DP 701", "Laan van Westenenk 701"),
           docs=[dict(titel=["gaaf gelderland"], type="wro", match=[{"opschrift": "§ 1 Energietransitie"}])]),
- 40: dict(loc=("pdok", "Saneringsweg 3a IJzendoorn", "Saneringsweg 3A"), docs=[dict(titel=["windpark", "echteld"], type="ow")]),
+ 40: dict(buiten_scope="procedure-informatie (einde inzagetermijn) — staat in geen regel", loc=("pdok", "Saneringsweg 3a IJzendoorn", "Saneringsweg 3A"), docs=[dict(titel=["windpark", "echteld"], type="ow")]),
 }
 
 # Kolom M (Toeleiding) -> tegel-id van RomThema (zelfde namen als thema.js) + subonderwerp.
 # Dit is de route waarlangs de tester zocht; kolom N en O zeggen of het lukte.
 TEGEL = {
+ "erfgoed en monumenten": "erfgoed",
  "bouwen en wonen": "bouwen", "bedrijven, energie en milieu": "bedrijven", "bodem en graven": "bodem",
  "waterkeringen en grondwater": "waterkering", "natuur, bomen en landschap": "natuur",
  "landbouw en dieren": "landbouw", "openbare ruimte en verkeer": "openbare-ruimte", "openbare ruime en verkeer": "openbare-ruimte",
@@ -137,7 +138,12 @@ TEGEL = {
 # naar Natuur en landschap. Die won vraag 26 puur door de tegelkeuze (+1,0) en verloor vraag 20.
 D_UIT_M = {"bouwen": "d-bouwen", "bedrijven": "d-werken", "bodem": "d-bodem-water", "waterkering": "d-bodem-water",
            "natuur": "d-natuur", "landbouw": "d-landbouw", "openbare-ruimte": "d-verkeer", "erfgoed": "d-erfgoed"}
-D_TEGEL = {}
+# Tegelkeuze per variant (2026-10-24, gebruiker akkoord): D en E bieden een eigen tegel voor energie en
+# een natuur-tegel zonder "dieren"; een bezoeker kiest uit wat die variant aanbiedt, op grond van de vraag,
+# zonder te weten waar het artikel staat. Alleen waar D/E een tegel heeft die beter bij de vraag past dan
+# de vertaling van kolom M: 39 (broeikasgassen) -> Energie en klimaat, 26 (aalscholver, wilde vogel) ->
+# Natuur en landschap. 20 (warmtepomp "in de bodem") blijft Bodem en water.
+D_TEGEL = {26: "d-natuur", 39: "d-energie"}
 # Niveau 2 van D: de chips (subonderwerp uit het pad, activiteitnaam, naam van de gebiedsaanwijzing).
 # De bezoeker herkent een chip aan een woord uit zijn eigen vraag; alleen woorden die (als stam) in de
 # vraag staan. Het meetpunt is optimistisch: matchen meerdere chips, dan kiest hij de beste.
@@ -146,10 +152,10 @@ D_TERMEN = {
  5: ["bouwhoogte"], 7: ["bebouwingspercentage"], 8: ["winkel"], 9: ["winkel"], 11: ["houtzagerij"],
  12: ["houtzagerij"], 13: ["boten", "verhuur"], 14: ["parkeer"], 39: ["broeikas"],
  15: ["dakopbouw"], 18: ["dakkapel"], 19: ["dakterras"], 20: ["warmtepomp", "bodem"],
- 21: ["grondwater", "onttrek", "besproei", "gewas"], 23: ["datacenter"], 24: ["damhert", "doden"],
+ 21: ["grondwater", "onttrek", "besproei", "gewas"], 22: ["onttrek"], 23: ["datacenter"], 24: ["damhert", "doden"],
  26: ["aalscholver", "diersoort", "beschermd"], 28: ["overstroming"], 29: ["overstroming"],
  30: ["overstroming"], 31: ["wateroverlast"], 32: ["wateroverlast"], 33: ["wateroverlast"],
- 34: ["hoogwater"], 35: ["subsidie", "beheer"], 37: ["spoor"], 38: ["betuwelijn"],
+ 34: ["hoogwater"], 35: ["subsidie", "beheer"], 36: ["subsidie", "beheer"], 37: ["spoor"], 38: ["betuwelijn"],
  40: ["windpark", "zienswijze"],
 }
 
@@ -197,7 +203,7 @@ for r in excel:
     uit.append({
         "id": r["nr"], "vraag": r["vraag"].strip(), "locatie": loc, "documenten": c["docs"],
         "kenmerk": c.get("kenmerk"), "negatief": c.get("negatief", False),
-        "onderwerp": t and t["tegel"], "sub": t and t["sub"], "sub_fijn": c.get("sub_fijn"), "toeleiding_bron": t_bron,
+        "onderwerp": t and t["tegel"], "sub": t and t["sub"], "sub_fijn": c.get("sub_fijn"), "toeleiding_bron": t_bron, "buiten_scope": c.get("buiten_scope"),
         "onderwerp_d": t and D_TEGEL.get(r["nr"], D_UIT_M[t["tegel"]]), "termen_d": D_TERMEN.get(r["nr"], []),
         "benchmark30": r["nr"] in BENCHMARK_30,
         "excel_n": r["nr"] in EXCEL_N_JA, "excel_o": r["nr"] in EXCEL_O_JA,

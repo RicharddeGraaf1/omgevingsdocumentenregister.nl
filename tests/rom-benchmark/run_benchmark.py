@@ -288,10 +288,25 @@ def kandidaten_kenmerk(obj, k):
     raise ValueError(s)
 
 
-def toets_kenmerk(obj, k, negatief):
+def regelingen_van(o):
+    """Uit welke regeling(en) komt dit object op het punt? (objecten-endpoint, per soort anders)"""
+    uit = list(o.get("regelingen") or [])
+    for sleutel in ("regeling", "plan"):
+        if o.get(sleutel):
+            uit.append(o[sleutel])
+    return uit
+
+
+def toets_kenmerk(obj, k, negatief, docs=None):
     if not k:
         return {"status": "n.v.t."}
     treffers = [o for naam, o in kandidaten_kenmerk(obj, k) if norm(k["naam"]) in norm(naam)]
+    if negatief and docs:
+        # Een negatieve vraag gaat over het verwachte document: "Dakkapel bouwen" uit het Bbl
+        # (landelijk ambtsgebied) maakt "het omgevingsplan regelt hier niets" niet onwaar.
+        def uit_verwacht(o):
+            return any(all(norm(f) in norm(r) for f in d["titel"]) for d in docs for r in regelingen_van(o))
+        treffers = [o for o in treffers if uit_verwacht(o)]
     namen = sorted({o.get("naam") for o in treffers if o.get("naam")})
     if negatief:
         return {"status": "FAIL" if treffers else "PASS", "gevonden": namen,
@@ -387,7 +402,10 @@ def raakt_matcher(m, nummer, wid, secties, opschrift=None):
 
 
 def is_groot_rijk(doc):
-    return doc.get("bestuurslaag") == "rijk" and not re.match(r"^voorbeschermings", doc.get("documenttype") or "", re.I)
+    # Programma's en visies (via=gebied) zijn klein; zonder boom vond de sectie-matcher par. 2.3 van het
+    # Programma Integraal Riviermanagement niet (vraag 34) — dat was een gat in de test, niet in de data.
+    return doc.get("bestuurslaag") == "rijk" and doc.get("via") != "gebied" \
+        and not re.match(r"^voorbeschermings", doc.get("documenttype") or "", re.I)
 
 
 def analyseer_document(api, loc, doc):
@@ -434,7 +452,7 @@ def analyseer_document(api, loc, doc):
                 p = {"categorie": r["categorie"], "sub": r.get("subcategorie")}
             a = artikelen[sleutel] = {
                 "wid": aw, "nummer": r.get("artikel_nummer") or "", "opschrift": r.get("artikel_opschrift") or r.get("artikel") or "",
-                "pad": p, "imow": imow.get(aw) if aw else None, "rij_wids": [],
+                "pad": p, "imow": imow.get(aw) if aw else None, "rij_wids": [], "inhoud": r.get("inhoud"),
                 "ann": ann.get(aw) or {"act": [], "ga": []}}
         if r.get("wid"):
             a["rij_wids"].append(r["wid"])
@@ -568,18 +586,57 @@ def toegang(raak, alle, tegel, sub, modus, sub_fijn=None):
 
 
 MODI_D = {"stelsel": False, "stelsel_act": True}   # modus -> activiteitengroep op niveau 1
-MODI = ("pad", "imow", "hybride") + tuple(MODI_D)
+MODI_E = ("meervoudig",)
+MODI = ("pad", "imow", "hybride") + tuple(MODI_D) + MODI_E
+
+# ── Variant E: D + meer tegels per artikel (2026-10-24) ──
+# Zelfde tegels en chips als D, maar een artikel staat onder ELKE tegel waarover het iets regelt:
+# het opschriftpad, alle IMOW-thema's (ook naast het pad), elke gebiedsaanwijzing en activiteitengroep,
+# en bij Wro de functies uit de bestemmingsomschrijving (alleen het hoofddeel, vóór "ondergeschikt").
+# Doel: vragen waarvan het antwoord in een artikel over iets anders staat ("houtzagerij" -> Wonen - A1,
+# dat bedrijven van categorie 1 en 2 toelaat). Risico: vollere tegels, dus lagere weging.
+FUNCTIE_E = [
+    (r"bedrij|winkel|detailhandel|horeca|kantoor|dienstverlen|verhuur|pension|bed (?:en|&) breakfast|logies",
+     "d-werken"),
+    (r"recreati|sport|kampe|jachthaven|ligplaats", "d-werken"),
+    (r"agrari|landbouw|veehouder|glastuin|paardenhouder", "d-landbouw"),
+    (r"natuur|bos\b|landschapswaarde", "d-natuur"),
+    (r"waterstaat|waterkering|waterberging", "d-bodem-water"),
+    (r"verkeer|parkeer|spoor", "d-verkeer"),
+    (r"archeolog|monument|cultuurhistor", "d-erfgoed"),
+    (r"energie|windturbine|zonne", "d-energie"),
+    (r"wonen|woning", "d-bouwen"),
+]
 
 
-def toegang_d(raak, alle, tegel, termen, met_actgroep):
+def tegels_e(a):
+    """Variant E: (tegels, chips, herkomst)."""
+    uit, chips, herkomst = tegels_d(a, True)
+    uit = [t for t in uit if t != "niet-ingedeeld"]
+    for th in a.get("imow") or []:
+        t = THEMA_D.get(th)
+        if t and t not in uit:
+            uit.append(t)
+            herkomst = herkomst or "annotatie"
+    if re.search(r"bestemmingsomschrijving", a.get("opschrift") or "", re.I) and a.get("inhoud"):
+        hoofd = re.split(r"ondergeschikt", a["inhoud"], 1, flags=re.I)[0].lower()
+        for patroon, t in FUNCTIE_E:
+            if re.search(patroon, hoofd) and t not in uit:
+                uit.append(t)
+                herkomst = herkomst or "bestemmingsomschrijving"
+    return uit or ["niet-ingedeeld"], chips, herkomst
+
+
+def toegang_d(raak, alle, tegel, termen, met_actgroep, fn=None):
     """Variant D: valt het artikel onder de D-tegel, en tussen hoeveel artikelen staat het? Herkent de
     bezoeker een chip van het artikel aan een woord uit zijn vraag, dan telt die chip (de kleinste)."""
-    per = [(a,) + tegels_d(a, met_actgroep) for a in alle]
+    fn = fn or (lambda a: tegels_d(a, met_actgroep))
+    per = [(a,) + fn(a) for a in alle]
     in_tegel = [x for x in per if tegel in x[1]]
     termen = [norm(t) for t in termen or []]
     beste = None
     for a in raak:
-        t, chips, _ = tegels_d(a, met_actgroep)
+        t, chips, _ = fn(a)
         if tegel not in t:
             continue
         n, via = len(in_tegel), "onderwerp"
@@ -593,7 +650,7 @@ def toegang_d(raak, alle, tegel, termen, met_actgroep):
             beste = kand
     if beste:
         return beste
-    waar = sorted({t for a in raak for t in tegels_d(a, met_actgroep)[0]})
+    waar = sorted({t for a in raak for t in fn(a)[0]})
     return {"gevonden": False, "score": 0.0, "uitleg": "artikel valt onder %s" % ("+".join(waar) or "?")}
 
 
@@ -611,7 +668,7 @@ def draai_case(api, c, met_vraag=True):
     uit["documenten_op_punt"] = len(docs)
 
     obj = api.get("/v1/viewer/objecten?x=%d&y=%d" % (loc["x"], loc["y"]))
-    kt = toets_kenmerk(obj, c.get("kenmerk"), c.get("negatief"))
+    kt = toets_kenmerk(obj, c.get("kenmerk"), c.get("negatief"), c["documenten"])
     uit["kenmerk"] = kt
     R["kenmerk"] = kt["status"]
 
@@ -678,25 +735,26 @@ def draai_case(api, c, met_vraag=True):
             if c.get("onderwerp_d"):
                 du["toegang"].update({m: toegang_d(raak, alle, c["onderwerp_d"], c.get("termen_d"), act)
                                       for m, act in MODI_D.items()})
+                du["toegang"]["meervoudig"] = toegang_d(raak, alle, c["onderwerp_d"], c.get("termen_d"), True, tegels_e)
         du["indeling"] = {}
         for modus in MODI:
             per = []
             for a in raak:
-                if modus in MODI_D:
-                    t, chips, h = tegels_d(a, MODI_D[modus])
+                if modus in MODI_D or modus in MODI_E:
+                    t, chips, h = tegels_d(a, MODI_D[modus]) if modus in MODI_D else tegels_e(a)
                     s = " · ".join(chips) or None
                 else:
                     t, s, h = tegels(a, modus)
                 per.append({"artikel": a["nummer"] or a["opschrift"] or (a["wid"] or "").split("__")[-1],
                             "tegels": t, "sub": s, "herkomst": h})
             du["indeling"][modus] = per
-            doel_tegel = c.get("onderwerp_d") if modus in MODI_D else c.get("onderwerp")
+            doel_tegel = c.get("onderwerp_d") if (modus in MODI_D or modus in MODI_E) else c.get("onderwerp")
             if doel_tegel:
                 ond_st[modus].append("PASS" if any(doel_tegel in p["tegels"] for p in per) else "FAIL")
             else:
                 ond_st[modus].append("info")
 
-    uit["toegang"] = toegang_case(c, uit["documenten"])
+    uit["toegang"] = toegang_case(c, uit["documenten"], kt)
     R["document"] = ("PASS" if all(doc_ok) else ("DEELS" if any(doc_ok) else "FAIL")) if doc_ok else "n.v.t."
     R["artikel"] = samen(art_st)
     for modus, lijst in ond_st.items():
@@ -722,12 +780,19 @@ def draai_case(api, c, met_vraag=True):
     return uit
 
 
-def toegang_case(c, documenten):
-    """Per indeling: de beste toegang over de verwachte documenten, of de reden dat er geen is."""
-    def geen(reden):
-        return {m: {"gevonden": False, "score": 0.0, "uitleg": reden} for m in MODI}
+def toegang_case(c, documenten, kenmerk=None):
+    """Per indeling: de beste toegang over de verwachte documenten, of de reden dat er geen is.
+
+    Negatieve vraag: niet te vinden langs een tegel, maar "terecht leeg" als het kenmerk terecht
+    ontbreekt (telt in het totaal 'haalbaar'). Buiten bereik (37, 40): telt in 'haalbaar' niet mee."""
+    def geen(reden, **extra):
+        return {m: dict({"gevonden": False, "score": 0.0, "uitleg": reden}, **extra) for m in MODI}
+    if c.get("buiten_scope"):
+        return geen("buiten bereik: " + c["buiten_scope"], buiten_scope=True)
     if c.get("negatief"):
-        return geen("negatieve vraag: er is geen artikel om te vinden")
+        leeg = bool(kenmerk and kenmerk.get("status") == "PASS")
+        return geen("negatieve vraag: " + ("terecht leeg" if leeg else "kenmerk staat er ten onrechte of is niet getoetst"),
+                    terecht_leeg=leeg)
     if not c.get("onderwerp"):
         return geen("geen toeleiding (kolom M) in het Excel")
     if not any(s.get("match") for s in c["documenten"]):
@@ -765,7 +830,7 @@ def samen(lijst):
 # ── rapport ──
 KOLOMMEN = [("locatie", "Loc"), ("document", "Doc"), ("kenmerk", "Kenmerk"), ("artikel", "Artikel"),
             ("pad", "Opschriftpad"), ("imow", "Annotatie"), ("hybride", "Hybride"), ("stelsel", "Thema+act"),
-            ("stelsel_act", "Thema+actgroep"), ("vraag", "Vraag")]
+            ("stelsel_act", "Thema+actgroep"), ("meervoudig", "Meervoudig"), ("vraag", "Vraag")]
 
 
 def excel_ja(v):
@@ -779,7 +844,8 @@ def excel_ja(v):
 
 
 VARIANTEN = [("pad", "A · opschriftpad"), ("imow", "B · annotatie"), ("hybride", "C · hybride"),
-             ("stelsel", "D · thema-en-activiteitindeling"), ("stelsel_act", "D′ · + activiteitengroep als tegel")]
+             ("stelsel", "D · thema-en-activiteitindeling"), ("stelsel_act", "D′ · + activiteitengroep als tegel"),
+             ("meervoudig", "E · meervoudig (D + meer tegels per artikel)")]
 
 
 def toegang_cel(t):
@@ -806,6 +872,17 @@ def toegang_sectie(resultaten, g):
             naam, sum(1 for y in t if y["gevonden"]), len(rij), sum(y["score"] for y in t), len(rij),
             round(100 * sum(y["score"] for y in t) / len(rij)),
             ("%d / %d (kolom %s)" % (excel[m], len(rij), "N" if m == "pad" else "O")) if m in excel else "—"))
+    # Haalbaar: zonder de vragen buiten bereik, en een negatieve vraag telt als goed als hij terecht leeg is.
+    for label, ids in (("vragen 11–40", [x for x in rij]), ("alle 40 vragen", resultaten)):
+        tel = [x for x in ids if not g[x["id"]].get("buiten_scope")]
+        r += ["", "**Haalbaar, %s** (noemer %d: zonder buiten bereik; negatief = goed als terecht leeg):" % (label, len(tel)), "",
+              "| Variant | Gewogen score |", "|---|---|"]
+        for m, naam in VARIANTEN:
+            sc = 0.0
+            for x in tel:
+                t = (x.get("toegang") or {}).get(m) or {}
+                sc += 1.0 if t.get("terecht_leeg") else (t.get("score") or 0)
+            r.append("| %s | %.1f / %d (%d%%) |" % (naam, sc, len(tel), round(100 * sc / max(len(tel), 1))))
     r += ["", "| # | Toeleiding (M) | Excel N | A · opschriftpad | Excel O | B · annotatie | C · hybride |",
           "|---|---|---|---|---|---|---|"]
     for x in rij:
