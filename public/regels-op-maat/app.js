@@ -492,8 +492,14 @@
     else toonOnderwerpen(nr);
   }
 
+  /** De documenten achter de tegels: de lokale Ow-regels plus de Wro-plannen die hier
+   *  onder het overgangsrecht nog gelden (sinds 2026-10-24). Een bezoeker die bij Bouwen
+   *  zoekt, weet niet of zijn perceel al onder het omgevingsplan valt of nog onder een
+   *  bestemmingsplan. Een Wro-plan zonder indeling (oudere API) telt vanzelf niet mee. */
   function lokaleDocs() {
-    return staat.docs.filter(function (d) { return d.bron_type === 'ow' && groepVan(d) === 'lokaal'; });
+    return staat.docs.filter(function (d) {
+      return d.bron_type === 'wro' || (d.bron_type === 'ow' && groepVan(d) === 'lokaal');
+    });
   }
 
   /** Analyse per lokaal document (hoofdregeling + aanvullende regels samen); een
@@ -537,7 +543,7 @@
     var blok = el('section', { class: 'onderwerpen', 'aria-labelledby': 'ow-kop' }, [
       el('div', { class: 'ow-kopregel' }, [
         el('h2', { class: 'label', id: 'ow-kop', text: 'Onderwerpen op deze locatie' }),
-        el('span', { class: 'muted', text: 'gemeente · provincie · waterschap' })
+        el('span', { class: 'muted', text: 'gemeente · provincie · waterschap · bestemmingsplannen' })
       ]),
       el('p', { class: 'laden', text: 'Onderwerpen tellen…' })
     ]);
@@ -613,7 +619,8 @@
           meervoudigTekst(meervoudig) })
       ]));
       blok.appendChild(el('p', { class: 'ow-noot', text:
-        'Onderwerpindeling van het register, per artikel. Landelijke regels, beleid en Wro-plannen tellen hier niet mee.' }));
+        'Onderwerpindeling van het register, per artikel. Bestemmingsplannen die hier onder het overgangsrecht nog gelden tellen mee; ' +
+        'landelijke regels en beleid niet.' }));
     });
   }
 
@@ -632,7 +639,7 @@
       doel.removeChild(laden);
       var met = res.filter(function (r) { return r.a.tegels[id] > 0; });
       if (!met.length) {
-        doel.appendChild(el('p', { class: 'leeg-melding', text: 'Op deze locatie staan geen regels van gemeente, provincie of waterschap over dit onderwerp' +
+        doel.appendChild(el('p', { class: 'leeg-melding', text: 'Op deze locatie staan geen regels van gemeente, provincie, waterschap of bestemmingsplan over dit onderwerp' +
           (staat.indeling === 'hybride' ? '.' : ' — volgens ' + ROUTE[staat.indeling] + '. Een andere indeling kan er wel regels onder vinden.') }));
         return;
       }
@@ -641,7 +648,7 @@
         nl(totaal) + (totaal === 1 ? ' regel' : ' regels') + ' in ' + (met.length === 1 ? '1 document' : met.length + ' documenten') +
         '. Klap een document open; het staat al gefilterd op dit onderwerp.' }));
       var sectie = el('section', { class: 'groep' });
-      met.forEach(function (r) { sectie.appendChild(documentKaart(r.doc, 'lokaal', nr, id)); });
+      met.forEach(function (r) { sectie.appendChild(documentKaart(r.doc, groepVan(r.doc), nr, id)); });
       doel.appendChild(sectie);
     });
   }
@@ -1137,7 +1144,8 @@
     // imow_themas dekt alle artikelen; annotatie_themas alleen de gaten van het
     // pad (terugval voor een API van vóór 2026-10-23).
     var imow = (ond && (ond.imow_themas || ond.annotatie_themas)) || {};
-    if (indelingOpgehaald) {
+    // Alleen Ow heeft een onderwerpen-antwoord; Wro draagt zijn indeling per rij.
+    if (indelingOpgehaald && ond && ond.categorieen) {
       ond.categorieen.forEach(function (c) {
         var viaAnnot = {};
         (c.wids_annotatie || []).forEach(function (w) { viaAnnot[w] = true; });
