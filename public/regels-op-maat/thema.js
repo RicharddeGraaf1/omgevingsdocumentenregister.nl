@@ -183,10 +183,15 @@
     return THEMA_D[categorie] || null;
   }
 
-  /** Variant E voor één artikel: {ids, herkomst: 'pad'|'annotatie'|null}.
+  /** Stelseltegels voor één artikel: {ids, herkomst: 'pad'|'annotatie'|null}.
+   *  variant: 'stelsel' (D: kopjes, anders thema, + type gebiedsaanwijzing),
+   *           'stelsel_act' (F: D + activiteitengroep),
+   *           'meervoudig' (E, standaard: F + alle thema's + Wro-functies + trefwoorden in namen).
+   *  Gelijk aan tegels_d / tegels_e in tests/rom-benchmark/run_benchmark.py.
    *  art: {pad: {categorie, sub}|null, imow: [thema's]|null,
    *        kenmerken: {activiteiten, gebiedsaanwijzingen}|null, opschrift, inhoud}. */
-  function stelselVan(art) {
+  function stelselVan(art, variant) {
+    variant = variant || 'meervoudig';
     var uit = [], herkomst = null;
     function voeg(t, h) { if (t && uit.indexOf(t) < 0) { uit.push(t); herkomst = herkomst || h; } }
     var themas = art.imow || [];
@@ -198,7 +203,9 @@
     }
     var k = art.kenmerken || {};
     (k.gebiedsaanwijzingen || []).forEach(function (g) { voeg(GA_TYPE_D[klein(g.type)], 'annotatie'); });
+    if (variant === 'stelsel') return { ids: uit.length ? uit : ['niet-ingedeeld'], herkomst: herkomst };
     (k.activiteiten || []).forEach(function (a) { voeg(THEMA_D[ACTGROEP_THEMA[klein(a.groep)]], 'annotatie'); });
+    if (variant === 'stelsel_act') return { ids: uit.length ? uit : ['niet-ingedeeld'], herkomst: herkomst };
     themas.forEach(function (t) { voeg(THEMA_D[t], 'annotatie'); });
     if (/bestemmingsomschrijving/i.test(art.opschrift || '') && art.inhoud) {
       var hoofd = String(art.inhoud).split(/ondergeschikt/i)[0].toLowerCase();

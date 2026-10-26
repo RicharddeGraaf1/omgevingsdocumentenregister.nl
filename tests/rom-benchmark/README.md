@@ -73,9 +73,9 @@ Wat de bezoeker merkt; de techniek staat in de secties hieronder.
 | A | kopjes | Onder een tegel staan de artikelen waarvan de kopjes erboven (hoofdstuk, afdeling, paragraaf) over dat onderwerp gaan. | indeling *Opschriftpad* |
 | B | label van de overheid | Alleen het thema dat de overheid zelf als label aan haar regel hing telt. Gemeenten doen dat zelden. | indeling *IMOW-annotatie* |
 | C | kopjes, anders label | Eerst de kopjes; zeggen die niets, dan het label van de overheid. | indeling *Hybride* (standaard) |
-| D | negen tegels | Een grovere set van negen tegels (voorstel Brigitte), bijvoorbeeld *Bouwen en gebruik* en *Energie en klimaat*. Een artikel staat onder de tegel van zijn kopjes of label, plus een tegel voor het soort gebied dat het aanwijst (een boringsvrije zone valt onder *Bodem en water*). | nee |
-| E | negen tegels, onder elke passende tegel | Als F, en daarnaast onder elke tegel die de naam van de activiteit, het gebied of de bestemming noemt. Een regel over bodemenergie in een boringsvrije zone staat dan onder *Bodem en water* én *Energie en klimaat*. | indeling *Stelsel, meervoudig (proef)* |
-| F | negen tegels + soort activiteit | Als D, en ook de soort activiteit telt. Een regel bij een monumentenactiviteit komt dan ook onder *Erfgoed*. Heette tot 24-10 D′. | nee |
+| D | negen tegels | Een grovere set van negen tegels (voorstel Brigitte), bijvoorbeeld *Bouwen en gebruik* en *Energie en klimaat*. Een artikel staat onder de tegel van zijn kopjes of label, plus een tegel voor het soort gebied dat het aanwijst (een boringsvrije zone valt onder *Bodem en water*). | indeling *D · Stelsel: kopjes + gebiedsaanwijzing (proef)* |
+| E | negen tegels, onder elke passende tegel | Als F, en daarnaast onder elke tegel die de naam van de activiteit, het gebied of de bestemming noemt. Een regel over bodemenergie in een boringsvrije zone staat dan onder *Bodem en water* én *Energie en klimaat*. | indeling *E · Stelsel, meervoudig (proef)* |
+| F | negen tegels + soort activiteit | Als D, en ook de soort activiteit telt. Een regel bij een monumentenactiviteit komt dan ook onder *Erfgoed*. Heette tot 24-10 D′. | indeling *F · Stelsel: + activiteitengroep (proef)* |
 
 "Stelsel" is de werktitel in de code voor de negen tegels van D, E en F (modi `stelsel`,
 `stelsel_act` en `meervoudig`).
@@ -121,8 +121,8 @@ tegel staat waar het iets over regelt. Die tegels komen uit:
 
 Het risico zijn vollere tegels en dus een lagere weging. De benchmark meet die prijs mee.
 
-**Op de site sinds 2026-10-24.** Kies bij Indeling *Stelsel, meervoudig (proef)*
-(`?indeling=meervoudig`). De logica staat in `public/regels-op-maat/thema.js` (`stelselVan`) en
+**Op de site sinds 2026-10-24** (D en F sinds 2026-10-26). Kies bij Indeling *E · Stelsel, meervoudig (proef)*
+(`?indeling=meervoudig`; D = `stelsel`, F = `stelsel_act`). De i-knop naast Indeling legt elke indeling uit. De logica staat in `public/regels-op-maat/thema.js` (`stelselVan`) en
 is dezelfde als in `tegels_e` hier: wijzig ze samen. Op niveau 2 toont de site het subonderwerp,
 de activiteiten en de gebiedsaanwijzingen. Bij meer dan 17 chips zijn dat de eerste 15, met een
 zoekveld en "+N meer". De benchmark telt de best passende chip die de bezoeker herkent aan een

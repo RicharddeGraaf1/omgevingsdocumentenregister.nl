@@ -14,7 +14,7 @@
      overrulet de zone-TTL de _headers en draait men anders 4 uur de oude versie. -->
 <link rel="stylesheet" href="/vendor/ol/ol.css?v=10.10.0">
 <link rel="stylesheet" href="/stijl.css?v=2026-09-16b">
-<link rel="stylesheet" href="/regels-op-maat/rom.css?v=2026-10-24a">
+<link rel="stylesheet" href="/regels-op-maat/rom.css?v=2026-10-26a">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect x='4' y='3' width='24' height='26' rx='2' fill='%23fff' stroke='%23bfc5d2'/><rect x='9' y='10' width='14' height='2.5' fill='%23262a33'/><rect x='9' y='15' width='11' height='2.5' fill='%23262a33'/><rect x='9' y='20' width='8' height='2.5' fill='%234256b8'/></svg>">
 </head>
 <body>
@@ -49,19 +49,26 @@
     </button>
   </span>
   <span class="context-telling muted" id="context-telling"></span>
-  <label class="context-pil indeling-pil" for="indeling" title="Waar het onderwerp van een artikel vandaan komt">
-    <span class="label">Indeling</span>
+  <span class="context-pil indeling-pil">
+    <label class="label" for="indeling" title="Waar het onderwerp van een artikel vandaan komt">Indeling</label>
     <select id="indeling">
-      <option value="hybride">Hybride (opschriftpad + IMOW-annotatie)</option>
-      <option value="pad">Opschriftpad</option>
-      <option value="imow">IMOW-annotatie</option>
-      <option value="meervoudig">Stelsel, meervoudig (proef)</option>
+      <option value="pad">A · Opschriftpad</option>
+      <option value="imow">B · IMOW-annotatie</option>
+      <option value="hybride">C · Hybride (opschriftpad + IMOW-annotatie)</option>
+      <option value="stelsel">D · Stelsel: kopjes + gebiedsaanwijzing (proef)</option>
+      <option value="meervoudig">E · Stelsel, meervoudig (proef)</option>
+      <option value="stelsel_act">F · Stelsel: + activiteitengroep (proef)</option>
     </select>
-  </label>
+    <button type="button" class="pil-knop info-knop" id="indeling-info" aria-expanded="false" aria-controls="indeling-uitleg"
+            aria-label="Hoe werkt deze indeling?" title="Hoe werkt deze indeling?">
+      <svg class="icoon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="10" r="7.5"/><path d="M10 9v5"/><path d="M10 6.2v.1"/></svg>
+    </button>
+  </span>
   <span class="weergave" role="group" aria-label="Weergave van de regeltekst">
     <button type="button" class="weergave-knop" data-weergave="juridisch" aria-pressed="true">Juridisch</button>
     <button type="button" class="weergave-knop" data-weergave="begrijpelijk" aria-pressed="false">Begrijpelijk</button>
   </span>
+  <section class="indeling-uitleg" id="indeling-uitleg" hidden aria-labelledby="indeling-uitleg-kop"></section>
 </div>
 
 <div class="werkvlak">
@@ -112,8 +119,8 @@
 
 <script src="/vendor/ol/ol.js?v=10.10.0"></script>
 <script src="/vendor/ocd-regeltekst.js?v=2026-09-16b"></script>
-<script src="/regels-op-maat/thema.js?v=2026-10-24a"></script>
+<script src="/regels-op-maat/thema.js?v=2026-10-26a"></script>
 <script src="/regels-op-maat/kaart.js?v=2026-09-18a"></script>
-<script src="/regels-op-maat/app.js?v=2026-10-24c"></script>
+<script src="/regels-op-maat/app.js?v=2026-10-26a"></script>
 </body>
 </html>

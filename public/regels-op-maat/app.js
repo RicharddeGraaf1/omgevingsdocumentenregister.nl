@@ -33,8 +33,12 @@
   //   meervoudig  variant E (proef, 2026-10-24): de stelseltegels, en een artikel staat
   //            onder elke tegel waarover het iets regelt (RomThema.stelselVan); chips
   //            op niveau 2 zijn subonderwerp, activiteit en gebiedsaanwijzing
-  var INDELINGEN = { hybride: 1, pad: 1, imow: 1, meervoudig: 1 };
-  function tegelset() { return staat.indeling === 'meervoudig' ? 'stelsel' : 'site'; }
+  //   stelsel     variant D (proef): stelseltegels uit kopjes/thema + type gebiedsaanwijzing
+  //   stelsel_act variant F (proef): D + activiteitengroep
+  var INDELINGEN = { hybride: 1, pad: 1, imow: 1, stelsel: 1, stelsel_act: 1, meervoudig: 1 };
+  var STELSEL_MODI = { stelsel: 1, stelsel_act: 1, meervoudig: 1 };   // de negen stelseltegels
+  function isStelsel() { return !!STELSEL_MODI[staat.indeling]; }
+  function tegelset() { return isStelsel() ? 'stelsel' : 'site'; }
   // Koepelthema's tellen alleen mee als een artikel geen specifieker thema heeft:
   // "milieu" hangt naast bijna alles. Zelfde lijst als _KOEPELTHEMAS in de OCD-API.
   var KOEPELTHEMAS = { 'milieu': 1, 'procedures': 1, 'planologisch gebruik': 1 };
@@ -591,7 +595,9 @@
                'Kies bij Indeling de IMOW-annotatie of hybride, of bekijk de regels via alle documenten.',
           imow: 'Gemeente, provincie en waterschap hebben op dit punt geen IMOW-thema aan hun regels gegeven. ' +
                 'Gemeenten doen dat zelden. Kies bij Indeling het opschriftpad of hybride, of bekijk de regels via alle documenten.',
-          meervoudig: 'De regels op dit punt zijn (nog) niet op onderwerp ingedeeld. Bekijk ze via alle documenten.'
+          meervoudig: 'De regels op dit punt zijn (nog) niet op onderwerp ingedeeld. Bekijk ze via alle documenten.',
+          stelsel: 'De regels op dit punt zijn (nog) niet op onderwerp ingedeeld. Bekijk ze via alle documenten.',
+          stelsel_act: 'De regels op dit punt zijn (nog) niet op onderwerp ingedeeld. Bekijk ze via alle documenten.'
         }[staat.indeling] }));
         return;
       }
@@ -625,7 +631,12 @@
           imow: 'Alleen het thema dat de overheid zelf aan haar regels gaf telt; de kopjes blijven buiten beschouwing. Zonder subcategorie.',
           meervoudig: 'Proef (variant E): de negen tegels uit het voorstel voor een thema- en activiteitindeling. Een regel staat onder ' +
             'elke tegel waarover hij iets regelt — uit de kopjes, de IMOW-thema’s, de gebiedsaanwijzingen, de activiteitengroep en ' +
-            'de naam van de activiteit. Binnen een tegel kiest u een subonderwerp, activiteit of gebiedsaanwijzing.'
+            'de naam van de activiteit. Binnen een tegel kiest u een subonderwerp, activiteit of gebiedsaanwijzing.',
+          stelsel: 'Proef (variant D): de negen tegels uit het voorstel voor een thema- en activiteitindeling. Een regel staat onder ' +
+            'de tegel van zijn kopjes (anders van het thema van de overheid), en daarnaast onder de tegel van het type van elke ' +
+            'gebiedsaanwijzing. Binnen een tegel kiest u een subonderwerp, activiteit of gebiedsaanwijzing.',
+          stelsel_act: 'Proef (variant F): als variant D, en daarnaast onder de tegel van de groep van elke activiteit bij de regel. ' +
+            'Binnen een tegel kiest u een subonderwerp, activiteit of gebiedsaanwijzing.'
         }[staat.indeling]) + meervoudigTekst(meervoudig) })
       ]));
       blok.appendChild(el('p', { class: 'ow-noot', text:
@@ -1223,8 +1234,8 @@
     var tegels = {}, viaAnnotatie = {}, herkomst = { pad: 0, annotatie: 0, geen: 0 }, meervoudig = 0;
     an.artikelen.forEach(function (a) {
       a.subs = null;
-      if (modus === 'meervoudig') {
-        var e = RomThema.stelselVan(a);
+      if (STELSEL_MODI[modus]) {
+        var e = RomThema.stelselVan(a, modus);
         a.onderwerpen = e.ids; a.herkomst = e.herkomst; a.themas = a.imow;
         // Zonder pad: het label van de eerste stelseltegel, zodat het artikel iets toont.
         a.categorie = a.pad ? a.pad.categorie : (e.herkomst ? RomThema.naam(e.ids[0]).toLowerCase() : null);
@@ -1315,7 +1326,9 @@
 
   // ── Teksten die van de gekozen indeling afhangen ──
   var ROUTE = { pad: 'het opschriftpad', imow: 'de IMOW-annotatie',
-    meervoudig: 'het opschriftpad, de annotaties en de namen van activiteiten en gebiedsaanwijzingen' };
+    meervoudig: 'het opschriftpad, de annotaties en de namen van activiteiten en gebiedsaanwijzingen',
+    stelsel: 'het opschriftpad, het thema en het type gebiedsaanwijzing',
+    stelsel_act: 'het opschriftpad, het thema, het type gebiedsaanwijzing en de activiteitengroep' };
 
   /** Eén regel dekking voor de pure varianten: hoeveel artikelen kregen een onderwerp. */
   function dekkingTekst(h) {
@@ -1326,7 +1339,7 @@
 
   function meervoudigTekst(m) {
     if (!m) return '';
-    if (staat.indeling === 'meervoudig') {
+    if (isStelsel()) {
       return ' ' + nl(m) + (m === 1 ? ' artikel staat' : ' artikelen staan') +
         ' onder meer dan één tegel; de tegels tellen daarom niet op.';
     }
@@ -1339,6 +1352,7 @@
     if (staat.indeling === 'pad') return 'geen onderwerp in de kopjes boven dit artikel';
     if (staat.indeling === 'imow') return 'geen IMOW-thema in de annotatie van de regels';
     if (staat.indeling === 'meervoudig') return 'geen onderwerp in de kopjes, de annotaties of de namen van activiteiten';
+    if (isStelsel()) return 'geen onderwerp in de kopjes, het thema of de annotaties';
     return 'geen onderwerp in de kopjes en geen thema in de annotatie';
   }
 
@@ -1372,7 +1386,9 @@
         hybride: 'Nog niet op onderwerp ingedeeld',
         pad: 'Geen onderwerp uit de kopjes',
         imow: 'Geen IMOW-thema geannoteerd',
-        meervoudig: 'Nog niet op onderwerp ingedeeld'
+        meervoudig: 'Nog niet op onderwerp ingedeeld',
+        stelsel: 'Nog niet op onderwerp ingedeeld',
+        stelsel_act: 'Nog niet op onderwerp ingedeeld'
       }[staat.indeling] })];
     }
     var ids = gesorteerd(a.tegels).filter(function (k) { return !RomThema.isKlein(k); });
@@ -1471,7 +1487,7 @@
       });
       var sleutels = Object.keys(tel).sort(function (x, y) { return tel[y] - tel[x]; });
       // Variant E: de lege bak achteraan, anders staat hij tussen tientallen activiteiten.
-      if (staat.indeling === 'meervoudig') sleutels.sort(function (x, y) { return (x === ' > ') - (y === ' > '); });
+      if (isStelsel()) sleutels.sort(function (x, y) { return (x === ' > ') - (y === ' > '); });
       // Subs die niet meer bestaan (ander onderwerp gekozen) vallen uit het filter.
       Object.keys(actiefSub).forEach(function (k) { if (!tel[k]) delete actiefSub[k]; });
       if (sleutels.length < 2) { subRij.hidden = true; return; }   // één sub zegt niets
@@ -1951,6 +1967,109 @@
   }
 
   // ── Indeling: opschriftpad / IMOW-annotatie / hybride ──
+  // ── Uitleg bij de gekozen indeling (i-knop in de contextbalk) ──
+  // Per indeling: titel en een reeks [kop, tekst | [opsomming]]. Gebruikersverzoek 2026-10-25.
+  var BESTEMMINGSPLANNEN = 'Bij een bestemmingsplan komt het onderwerp uit de bestemming waar het artikel bij hoort ' +
+    '(de bestemmingshoofdgroep, bijvoorbeeld wonen of bedrijf), en anders uit de kopjes.';
+  var UITLEG = {
+    hybride: { titel: 'C · Hybride: opschriftpad, anders IMOW-annotatie (standaard)', delen: [
+      ['Tegels', 'De twaalf onderwerpen van Regels op maat, zoals Bouwen en wonen en Natuur, bomen en landschap.'],
+      ['Onderwerp', 'Eerst uit de kopjes boven het artikel: hoofdstuk, afdeling en paragraaf (het opschriftpad). ' +
+        'Het register zet die kopjes met vaste regels om naar een onderwerp en een subonderwerp. Zeggen de kopjes ' +
+        'niets (bijvoorbeeld ‘Algemene bepalingen’), dan telt het thema dat de overheid zelf aan haar regel gaf: ' +
+        'het attribuut thema van de juridische regel in IMOW, uit de waardelijst Thema.'],
+      ['Subonderwerp', 'Alleen via de kopjes. Een thema van de overheid heeft geen tweede niveau.'],
+      ['Bestemmingsplannen', BESTEMMINGSPLANNEN],
+      ['Let op', 'Heeft een artikel meer dan één thema, dan staat het onder elk van die tegels; de tegels tellen dan niet op. ' +
+        'Onder ‘Waar komt de indeling vandaan?’ ziet u hoeveel artikelen via de kopjes en hoeveel via het thema zijn ingedeeld.']
+    ] },
+    pad: { titel: 'A · Opschriftpad', delen: [
+      ['Tegels', 'De twaalf onderwerpen van Regels op maat.'],
+      ['Onderwerp', 'Alleen uit de kopjes boven het artikel: hoofdstuk, afdeling en paragraaf. Het register zet die ' +
+        'kopjes met vaste regels om naar een onderwerp en een subonderwerp. Het thema dat de overheid aan haar regels gaf ' +
+        'telt niet mee.'],
+      ['Bestemmingsplannen', BESTEMMINGSPLANNEN],
+      ['Let op', 'Een artikel met kopjes die niets over het onderwerp zeggen, blijft niet ingedeeld.']
+    ] },
+    imow: { titel: 'B · IMOW-annotatie', delen: [
+      ['Tegels', 'De twaalf onderwerpen van Regels op maat.'],
+      ['Onderwerp', 'Alleen het thema dat de overheid zelf aan haar regels gaf: het attribuut thema van de juridische ' +
+        'regel in IMOW, uit de waardelijst Thema (bijvoorbeeld bodem, bouwen, water of natuur). Een regel aan een lid telt mee ' +
+        'voor het artikel. Brede thema’s (milieu, procedures, planologisch gebruik) tellen alleen als er geen specifieker thema is. ' +
+        'De kopjes tellen niet mee.'],
+      ['Subonderwerp', 'Geen: een thema heeft geen tweede niveau.'],
+      ['Let op', 'Het thema is niet verplicht. Provincies, waterschappen en het Rijk geven het bijna altijd, ' +
+        'gemeenten zelden; een omgevingsplan blijft hier daarom vaak leeg. Bestemmingsplannen hebben geen IMOW-annotatie.']
+    ] },
+    stelsel: { titel: 'D · Stelsel: kopjes + gebiedsaanwijzing (proef)', delen: [
+      ['Tegels', 'Negen andere onderwerpen, uit een voorstel voor een thema- en activiteitindeling: Bouwen en gebruik, ' +
+        'Werken en recreëren, Landbouw en veehouderij, Erfgoed, Natuur en landschap, Bodem en water, ' +
+        'Milieu, gezondheid en veiligheid, Energie en klimaat, Verkeer en infrastructuur.'],
+      ['Onderwerp', ['Een artikel staat onder de tegel(s) die volgen uit:',
+        'de kopjes boven het artikel, en als die niets zeggen het thema dat de overheid aan de regel gaf (zoals bij Hybride);',
+        'het type van elke gebiedsaanwijzing bij de regel (waardelijst TypeGebiedsaanwijzing; een gebied van het type ' +
+          'Water en watersysteem valt onder Bodem en water). De typen functie, ruimtelijk gebruik en beperkingengebied tellen ' +
+          'niet: die zeggen wat voor gebied het is, niet waar het over gaat.']],
+      ['Subonderwerp', 'Het subonderwerp uit de kopjes, plus elke activiteit en elke gebiedsaanwijzing bij het artikel. ' +
+        'Dat kunnen er veel zijn; gebruik dan het zoekveld.'],
+      ['Bestemmingsplannen', BESTEMMINGSPLANNEN],
+      ['Let op', 'Dit is een proef. Alles komt uit de kopjes en uit waardelijsten van de overheid; er zitten geen trefwoorden van het ' +
+        'register in. Een artikel kan onder meer tegels staan, de tegels tellen dan niet op.']
+    ] },
+    stelsel_act: { titel: 'F · Stelsel: + activiteitengroep (proef)', delen: [
+      ['Tegels', 'Dezelfde negen onderwerpen als bij D.'],
+      ['Onderwerp', ['Als D, en daarnaast:',
+        'de groep van elke activiteit bij de regel, ingedeeld zoals de waardelijst Activiteitengroep dat zelf doet ' +
+          '(een monumentenactiviteit valt onder Erfgoed, een milieubelastende activiteit onder Milieu).']],
+      ['Subonderwerp', 'Het subonderwerp uit de kopjes, plus elke activiteit en elke gebiedsaanwijzing bij het artikel. ' +
+        'Dat kunnen er veel zijn; gebruik dan het zoekveld.'],
+      ['Bestemmingsplannen', BESTEMMINGSPLANNEN],
+      ['Let op', 'Dit is een proef. Alles komt uit de kopjes en uit waardelijsten van de overheid; er zitten geen trefwoorden van het ' +
+        'register in. Een artikel kan onder meer tegels staan, de tegels tellen dan niet op.']
+    ] },
+    meervoudig: { titel: 'E · Stelsel, meervoudig (proef)', delen: [
+      ['Tegels', 'Negen andere onderwerpen, uit een voorstel voor een thema- en activiteitindeling: Bouwen en gebruik, ' +
+        'Werken en recreëren, Landbouw en veehouderij, Erfgoed, Natuur en landschap, Bodem en water, ' +
+        'Milieu, gezondheid en veiligheid, Energie en klimaat, Verkeer en infrastructuur.'],
+      ['Onderwerp', ['Een artikel staat onder élke tegel waarover het iets regelt. Het register kijkt naar (de eerste vier zoals bij F):',
+        'de kopjes boven het artikel, en als die niets zeggen het thema van de overheid;',
+        'álle thema’s die de overheid aan de regel gaf, ook naast de kopjes;',
+        'het type van elke gebiedsaanwijzing bij de regel (waardelijst TypeGebiedsaanwijzing; een gebied van het type ' +
+          'Water en watersysteem valt onder Bodem en water);',
+        'de groep van elke activiteit bij de regel (waardelijst Activiteitengroep; een milieubelastende activiteit valt onder Milieu);',
+        'trefwoorden in de namen van activiteiten en gebiedsaanwijzingen (‘Bodemenergiesystemen aanleggen’ valt ook onder ' +
+          'Energie en klimaat, een monument ook onder Bouwen en gebruik);',
+        'bij een bestemmingsplan: de functies in het hoofddeel van de bestemmingsomschrijving (‘bedrijven’, ‘horeca’).']],
+      ['Subonderwerp', 'Het subonderwerp uit de kopjes, plus elke activiteit en elke gebiedsaanwijzing bij het artikel. ' +
+        'Dat kunnen er veel zijn; gebruik dan het zoekveld.'],
+      ['Let op', 'Dit is een proef. Waardelijsten en thema’s komen van de overheid; de trefwoordenlijst voor de namen is van het ' +
+        'register zelf en kan ernaast zitten. Omdat een artikel onder meer tegels staat, tellen de tegels niet op.']
+    ] }
+  };
+
+  function tekenUitleg() {
+    var vak = $('indeling-uitleg'), u = UITLEG[staat.indeling] || UITLEG.hybride;
+    leeg(vak);
+    var dl = el('dl');
+    u.delen.forEach(function (d) {
+      var inhoud = typeof d[1] === 'string' ? [d[1]]
+        : [d[1][0], el('ul', {}, d[1].slice(1).map(function (t) { return el('li', { text: t }); }))];
+      dl.appendChild(el('dt', { text: d[0] }));
+      dl.appendChild(el('dd', {}, inhoud));
+    });
+    vak.appendChild(el('h2', { id: 'indeling-uitleg-kop', text: u.titel }));
+    vak.appendChild(dl);
+    vak.appendChild(el('button', { type: 'button', class: 'pil-knop sluit', 'aria-label': 'Uitleg sluiten',
+      onclick: function () { zetUitleg(false); } }, [icoon('M5 5l10 10M15 5L5 15')]));
+  }
+
+  function zetUitleg(open) {
+    var knop = $('indeling-info'), vak = $('indeling-uitleg');
+    knop.setAttribute('aria-expanded', open ? 'true' : 'false');
+    vak.hidden = !open;
+    if (open) tekenUitleg(); else knop.focus();
+  }
+
   /** Wisselen tekent de lopende weergave opnieuw; de analyses blijven in de
    *  cache en indelen() rekent ze om. replaceState: een andere bril op dezelfde
    *  plek is geen nieuwe stap in de geschiedenis. */
@@ -1958,8 +2077,15 @@
     var keuze = $('indeling');
     staat.indeling = indelingUitUrl();
     keuze.value = staat.indeling;
+    $('indeling-info').addEventListener('click', function () {
+      zetUitleg($('indeling-info').getAttribute('aria-expanded') !== 'true');
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && !$('indeling-uitleg').hidden) zetUitleg(false);
+    });
     keuze.addEventListener('change', function () {
       staat.indeling = INDELINGEN[keuze.value] ? keuze.value : 'hybride';
+      if (!$('indeling-uitleg').hidden) tekenUitleg();
       // Andere tegelset: een gekozen tegel bestaat daar niet, dus terug naar het overzicht.
       if (staat.view.onderwerp && !RomThema.inSet(staat.view.onderwerp, tegelset())) staat.view = {};
       if (!staat.loc) return;

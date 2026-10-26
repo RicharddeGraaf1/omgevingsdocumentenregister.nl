@@ -39,6 +39,26 @@ body { display: flex; flex-direction: column; min-height: 100vh; }
   padding: 3px 2px; max-width: 290px; cursor: pointer; border-radius: 3px;
 }
 .indeling-pil select:hover { background: var(--grond); }
+.indeling-pil .label { cursor: pointer; }
+/* Smal scherm: het keuzemenu krimpt, zodat de i-knop in de pil past */
+.indeling-pil { max-width: 100%; }
+.indeling-pil select { min-width: 0; text-overflow: ellipsis; }
+@media (max-width: 600px) { .indeling-pil select { max-width: calc(100vw - 150px); } }
+.info-knop[aria-expanded="true"] { background: var(--acc-zacht); color: var(--acc); }
+/* Uitleg bij de gekozen indeling: volle breedte onder de contextbalk */
+.indeling-uitleg {
+  flex-basis: 100%; position: relative; max-width: 760px; padding: 12px 40px 12px 14px;
+  background: var(--blad); box-shadow: var(--blad-schaduw); border-radius: 3px; border-left: 3px solid var(--acc);
+  font-size: 13.5px; line-height: 1.5;
+}
+.indeling-uitleg[hidden] { display: none; }
+.indeling-uitleg h2 { font-size: 14px; margin: 0 0 6px; }
+.indeling-uitleg dl { margin: 0; display: grid; grid-template-columns: max-content 1fr; gap: 4px 12px; }
+.indeling-uitleg dt { font-weight: 700; color: var(--inkt-2); }
+.indeling-uitleg dd { margin: 0; }
+.indeling-uitleg ul { margin: 0; padding-left: 18px; }
+.indeling-uitleg .sluit { position: absolute; top: 6px; right: 6px; }
+@media (max-width: 600px) { .indeling-uitleg dl { grid-template-columns: 1fr; } .indeling-uitleg dt { margin-top: 6px; } }
 .weergave { margin-left: auto; display: inline-flex; border-bottom: 1px solid var(--lijn); }
 .weergave-knop { border: 0; background: none; padding: 5px 10px; color: var(--inkt-2); cursor: pointer; margin-bottom: -1px; border-bottom: 2px solid transparent; }
 .weergave-knop[aria-pressed="true"] { color: var(--inkt); font-weight: 700; border-bottom-color: var(--inkt); }
