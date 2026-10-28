@@ -356,7 +356,7 @@ def boom_index(boom):
 
     def loop(knoop, art, pad):
         t = knoop.get("type")
-        a = knoop.get("wid") if t == "Artikel" else art
+        a = knoop.get("wid") if t in ("Artikel", "Divisietekst") else art   # vrije tekst: tekstdeel-annotaties (2026-10-28)
         p = pad + ([str(knoop.get("nummer"))] if t != "Artikel" and knoop.get("nummer") else [])
         if t == "Artikel" and knoop.get("nummer"):
             nummers[norm_nr(knoop["nummer"])] = knoop.get("opschrift") or ""

@@ -136,7 +136,8 @@
   function ouderArtikelen(boom) {
     var kaart = {};
     function loop(knoop, art) {
-      var a = knoop.type === 'Artikel' ? knoop.wid : art;
+      // Divisietekst = de eenheid van vrije tekst (visies, programma's), net als Artikel.
+      var a = (knoop.type === 'Artikel' || knoop.type === 'Divisietekst') ? knoop.wid : art;
       if (knoop.wid && a) kaart[knoop.wid] = a;
       (knoop.kinderen || []).forEach(function (k) { loop(k, a); });
     }
@@ -166,7 +167,8 @@
       lijst.push(item);
     }
     function loop(knoop, art) {
-      var a = knoop.type === 'Artikel' ? knoop.wid : art;
+      // Divisietekst = de eenheid van vrije tekst (visies, programma's), net als Artikel.
+      var a = (knoop.type === 'Artikel' || knoop.type === 'Divisietekst') ? knoop.wid : art;
       var ann = knoop.annotaties || {};
       if (a) {
         (ann.activiteiten || []).forEach(function (x) {
