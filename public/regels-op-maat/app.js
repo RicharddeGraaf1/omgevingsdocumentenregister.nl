@@ -2000,7 +2000,7 @@
       ['Let op', 'Heeft een artikel meer dan één thema, dan staat het onder elk van die tegels; de tegels tellen dan niet op. ' +
         'Onder ‘Waar komt de indeling vandaan?’ ziet u hoeveel artikelen via opschriftpad en hoeveel via IMOW-thema zijn ingedeeld.']
     ] },
-    stelsel: { titel: 'D · Stelsel: gebiedsaanwijzing plus opschriftpad-met-IMOW-thema-fallback', delen: [
+    stelsel: { titel: 'D · gebiedsaanwijzing plus opschriftpad-met-IMOW-thema-fallback', delen: [
       ['Tegels', NEGEN],
       ['Onderwerp', ['Een artikel staat onder de tegel(s) die volgen uit:',
         'opschriftpad, en als die nietszeggend is via IMOW-thema (zoals bij Hybride);',
