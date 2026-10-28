@@ -1,4 +1,4 @@
-// Cloudflare Pages Function — server-side proxy naar de OCD-API op Railway.
+// Cloudflare Pages Function — server-side proxy naar de OCD-API (api.ponsenkaart.nl).
 //
 // Waarom een proxy en niet rechtstreeks vanuit de browser:
 //   1. OCD_API_KEY_PUBLIC blijft server-side (staat nooit in de HTML)
@@ -14,7 +14,9 @@
 // via zone-Purge-Everything te legen, waardoor een foute response uren blijft
 // hangen (geleerd op omgevingsvergunningenregister.nl, 2026-06-01).
 
-const UPSTREAM = 'https://ocd-api-production.up.railway.app';
+// Het eigen domein, niet het Railway-adres: de OCD-API draait sinds 2026-10-28 op
+// Hetzner (zie c:/GIT/OCD/docs/railway-naar-hetzner-plan.md).
+const UPSTREAM = 'https://api.ponsenkaart.nl';
 
 const ALLOWED_PREFIXES = [
   '/health',
