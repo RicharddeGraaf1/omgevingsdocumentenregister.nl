@@ -1969,81 +1969,72 @@
   // ── Indeling: opschriftpad / IMOW-annotatie / hybride ──
   // ── Uitleg bij de gekozen indeling (i-knop in de contextbalk) ──
   // Per indeling: titel en een reeks [kop, tekst | [opsomming]]. Gebruikersverzoek 2026-10-25.
-  var BESTEMMINGSPLANNEN = 'Bij een bestemmingsplan komt het onderwerp uit de bestemming waar het artikel bij hoort ' +
-    '(de bestemmingshoofdgroep, bijvoorbeeld wonen of bedrijf), en anders uit de kopjes.';
+  var BESTEMMINGSPLANNEN = 'Bij een bestemmingsplan komt het onderwerp uit de bestemming waar het artikel bij hoort, ' +
+    'en anders via het opschriftpad.';
+  var NEGEN = 'Negen onderwerpen, uit een voorstel voor een indeling meer gericht op thema’s en activiteiten.';
+  var NIET_IN_GA = 'het type van elke gebiedsaanwijzing bij de juridische regel, behalve de typen: functie, ruimtelijk gebruik ' +
+    'en beperkingengebied';
+  // Teksten van de gebruiker (indelingTeksten - A t-m F.docx, 2026-10-28), letterlijk op vier technische
+  // correcties na: E-titel aangevuld, "(de eerste drie zoals bij F)" weg, punt na "opschriftpad" bij C,
+  // puntkomma in de opsomming van F.
   var UITLEG = {
-    hybride: { titel: 'C · Hybride: opschriftpad, anders IMOW-annotatie (standaard)', delen: [
-      ['Tegels', 'De twaalf onderwerpen van Regels op maat, zoals Bouwen en wonen en Natuur, bomen en landschap.'],
-      ['Onderwerp', 'Eerst uit de kopjes boven het artikel: hoofdstuk, afdeling en paragraaf (het opschriftpad). ' +
-        'Het register zet die kopjes met vaste regels om naar een onderwerp en een subonderwerp. Zeggen de kopjes ' +
-        'niets (bijvoorbeeld ‘Algemene bepalingen’), dan telt het thema dat de overheid zelf aan haar regel gaf: ' +
-        'het attribuut thema van de juridische regel in IMOW, uit de waardelijst Thema.'],
-      ['Subonderwerp', 'Alleen via de kopjes. Een thema van de overheid heeft geen tweede niveau.'],
-      ['Bestemmingsplannen', BESTEMMINGSPLANNEN],
-      ['Let op', 'Heeft een artikel meer dan één thema, dan staat het onder elk van die tegels; de tegels tellen dan niet op. ' +
-        'Onder ‘Waar komt de indeling vandaan?’ ziet u hoeveel artikelen via de kopjes en hoeveel via het thema zijn ingedeeld.']
-    ] },
     pad: { titel: 'A · Opschriftpad', delen: [
       ['Tegels', 'De twaalf onderwerpen van Regels op maat.'],
-      ['Onderwerp', 'Alleen uit de kopjes boven het artikel: hoofdstuk, afdeling en paragraaf. Het register zet die ' +
-        'kopjes met vaste regels om naar een onderwerp en een subonderwerp. Het thema dat de overheid aan haar regels gaf ' +
-        'telt niet mee.'],
+      ['Onderwerp', 'Alleen uit de kopjes boven het artikel: hoofdstuk, afdeling en paragraaf. Het register zet die kopjes met ' +
+        'vaste regels om naar een onderwerp en een subonderwerp. Het thema dat de overheid aan haar regels gaf telt niet mee.'],
       ['Bestemmingsplannen', BESTEMMINGSPLANNEN],
       ['Let op', 'Een artikel met kopjes die niets over het onderwerp zeggen, blijft niet ingedeeld.']
     ] },
-    imow: { titel: 'B · IMOW-annotatie', delen: [
+    imow: { titel: 'B · IMOW-thema', delen: [
       ['Tegels', 'De twaalf onderwerpen van Regels op maat.'],
-      ['Onderwerp', 'Alleen het thema dat de overheid zelf aan haar regels gaf: het attribuut thema van de juridische ' +
-        'regel in IMOW, uit de waardelijst Thema (bijvoorbeeld bodem, bouwen, water of natuur). Een regel aan een lid telt mee ' +
-        'voor het artikel. Brede thema’s (milieu, procedures, planologisch gebruik) tellen alleen als er geen specifieker thema is. ' +
-        'De kopjes tellen niet mee.'],
-      ['Subonderwerp', 'Geen: een thema heeft geen tweede niveau.'],
-      ['Let op', 'Het thema is niet verplicht. Provincies, waterschappen en het Rijk geven het bijna altijd, ' +
-        'gemeenten zelden; een omgevingsplan blijft hier daarom vaak leeg. Bestemmingsplannen hebben geen IMOW-annotatie.']
+      ['Onderwerp', 'Thema van juridische regel. Thema’s van leden tellen bij het Artikel, brede thema’s (milieu, ' +
+        'procedures, planologisch gebruik) tellen alleen als er geen specifieker thema is. Er zijn geen subonderwerpen.'],
+      ['Let op', 'Het thema is niet verplicht. Provincies, waterschappen en het Rijk geven het bijna altijd, gemeenten zelden; ' +
+        'een omgevingsplan blijft hier daarom vaak leeg. Bestemmingsplannen hebben geen IMOW-annotatie.']
     ] },
-    stelsel: { titel: 'D · Stelsel: kopjes + gebiedsaanwijzing (proef)', delen: [
-      ['Tegels', 'Negen andere onderwerpen, uit een voorstel voor een thema- en activiteitindeling: Bouwen en gebruik, ' +
-        'Werken en recreëren, Landbouw en veehouderij, Erfgoed, Natuur en landschap, Bodem en water, ' +
-        'Milieu, gezondheid en veiligheid, Energie en klimaat, Verkeer en infrastructuur.'],
+    hybride: { titel: 'C · Hybride: opschriftpad-met-IMOW-thema-fallback', delen: [
+      ['Tegels', 'De twaalf onderwerpen van Regels op maat, zoals Bouwen en wonen en Natuur, bomen en landschap.'],
+      ['Onderwerp', 'Eerst via opschriftpad. Als het opschriftpad nietszeggend is (bijvoorbeeld ‘Algemene bepalingen’), ' +
+        'dan via IMOW-thema. Subonderwerp werkt alleen bij het opschriftpad.'],
+      ['Bestemmingsplannen', BESTEMMINGSPLANNEN],
+      ['Let op', 'Heeft een artikel meer dan één thema, dan staat het onder elk van die tegels; de tegels tellen dan niet op. ' +
+        'Onder ‘Waar komt de indeling vandaan?’ ziet u hoeveel artikelen via opschriftpad en hoeveel via IMOW-thema zijn ingedeeld.']
+    ] },
+    stelsel: { titel: 'D · Stelsel: gebiedsaanwijzing plus opschriftpad-met-IMOW-thema-fallback', delen: [
+      ['Tegels', NEGEN],
       ['Onderwerp', ['Een artikel staat onder de tegel(s) die volgen uit:',
-        'de kopjes boven het artikel, en als die niets zeggen het thema dat de overheid aan de regel gaf (zoals bij Hybride);',
-        'het type van elke gebiedsaanwijzing bij de regel (waardelijst TypeGebiedsaanwijzing; een gebied van het type ' +
-          'Water en watersysteem valt onder Bodem en water). De typen functie, ruimtelijk gebruik en beperkingengebied tellen ' +
-          'niet: die zeggen wat voor gebied het is, niet waar het over gaat.']],
-      ['Subonderwerp', 'Het subonderwerp uit de kopjes, plus elke activiteit en elke gebiedsaanwijzing bij het artikel. ' +
+        'opschriftpad, en als die nietszeggend is via IMOW-thema (zoals bij Hybride);',
+        NIET_IN_GA + '.']],
+      ['Subonderwerp', 'Het subonderwerp via opschriftpad, plus elke activiteit en elke gebiedsaanwijzing bij het artikel. ' +
         'Dat kunnen er veel zijn; gebruik dan het zoekveld.'],
       ['Bestemmingsplannen', BESTEMMINGSPLANNEN],
-      ['Let op', 'Dit is een proef. Alles komt uit de kopjes en uit waardelijsten van de overheid; er zitten geen trefwoorden van het ' +
-        'register in. Een artikel kan onder meer tegels staan, de tegels tellen dan niet op.']
+      ['Let op', 'Een artikel kan onder meer tegels staan, de tegels tellen dan niet op.']
     ] },
-    stelsel_act: { titel: 'F · Stelsel: + activiteitengroep (proef)', delen: [
-      ['Tegels', 'Dezelfde negen onderwerpen als bij D.'],
-      ['Onderwerp', ['Als D, en daarnaast:',
+    meervoudig: { titel: 'E · opschriftpad + thema + gebiedsaanwijzing + activiteitengroep + trefwoorden', delen: [
+      ['Tegels', NEGEN],
+      ['Onderwerp', ['Een artikel staat onder élke tegel waarover het iets regelt. Het register kijkt naar:',
+        'opschriftpad;',
+        'álle IMOW-thema’s die geannoteerd zijn;',
+        NIET_IN_GA + ';',
+        'de groep van elke activiteit bij de regel (waardelijst Activiteitengroep; een milieubelastende activiteit valt onder Milieu);',
+        'de naam van de activiteiten en gebiedsaanwijzingen worden gematcht op trefwoorden (‘Bodemenergiesystemen aanleggen’ ' +
+          'valt ook onder Energie en klimaat, een monument ook onder Bouwen en gebruik);',
+        'bij een bestemmingsplan: de functies in het hoofddeel van de bestemmingsomschrijving (alles na het woord ' +
+          '‘ondergeschikt’ wordt genegeerd).']],
+      ['Subonderwerp', 'Het subonderwerp uit de kopjes, plus elke activiteit en elke gebiedsaanwijzing bij het artikel.'],
+      ['Let op', 'Omdat een artikel onder meer tegels staat, tellen de tegels niet op. De trefwoorden vanuit de namen van ' +
+        'activiteiten en gebiedsaanwijzingen heeft geleid tot een lijst die niet bestaat in de standaarden.']
+    ] },
+    stelsel_act: { titel: 'F · gebiedsaanwijzing + activiteitengroep + opschriftpad-met-IMOW-thema-fallback', delen: [
+      ['Tegels', NEGEN],
+      ['Onderwerp', ['Een artikel staat onder de tegel(s) die volgen uit:',
+        'opschriftpad, en als die nietszeggend is via IMOW-thema (zoals bij Hybride);',
+        NIET_IN_GA + ';',
         'de groep van elke activiteit bij de regel, ingedeeld zoals de waardelijst Activiteitengroep dat zelf doet ' +
           '(een monumentenactiviteit valt onder Erfgoed, een milieubelastende activiteit onder Milieu).']],
-      ['Subonderwerp', 'Het subonderwerp uit de kopjes, plus elke activiteit en elke gebiedsaanwijzing bij het artikel. ' +
-        'Dat kunnen er veel zijn; gebruik dan het zoekveld.'],
+      ['Subonderwerp', 'Het subonderwerp via het opschriftpad, plus elke activiteit en elke gebiedsaanwijzing bij het artikel.'],
       ['Bestemmingsplannen', BESTEMMINGSPLANNEN],
-      ['Let op', 'Dit is een proef. Alles komt uit de kopjes en uit waardelijsten van de overheid; er zitten geen trefwoorden van het ' +
-        'register in. Een artikel kan onder meer tegels staan, de tegels tellen dan niet op.']
-    ] },
-    meervoudig: { titel: 'E · Stelsel, meervoudig (proef)', delen: [
-      ['Tegels', 'Negen andere onderwerpen, uit een voorstel voor een thema- en activiteitindeling: Bouwen en gebruik, ' +
-        'Werken en recreëren, Landbouw en veehouderij, Erfgoed, Natuur en landschap, Bodem en water, ' +
-        'Milieu, gezondheid en veiligheid, Energie en klimaat, Verkeer en infrastructuur.'],
-      ['Onderwerp', ['Een artikel staat onder élke tegel waarover het iets regelt. Het register kijkt naar (de eerste drie zoals bij F):',
-        'de kopjes boven het artikel, en als die niets zeggen het thema van de overheid;',
-        'het type van elke gebiedsaanwijzing bij de regel (waardelijst TypeGebiedsaanwijzing; een gebied van het type ' +
-          'Water en watersysteem valt onder Bodem en water);',
-        'de groep van elke activiteit bij de regel (waardelijst Activiteitengroep; een milieubelastende activiteit valt onder Milieu);',
-        'álle thema’s die de overheid aan de regel gaf, ook naast de kopjes;',
-        'trefwoorden in de namen van activiteiten en gebiedsaanwijzingen (‘Bodemenergiesystemen aanleggen’ valt ook onder ' +
-          'Energie en klimaat, een monument ook onder Bouwen en gebruik);',
-        'bij een bestemmingsplan: de functies in het hoofddeel van de bestemmingsomschrijving (‘bedrijven’, ‘horeca’).']],
-      ['Subonderwerp', 'Het subonderwerp uit de kopjes, plus elke activiteit en elke gebiedsaanwijzing bij het artikel. ' +
-        'Dat kunnen er veel zijn; gebruik dan het zoekveld.'],
-      ['Let op', 'Dit is een proef. Waardelijsten en thema’s komen van de overheid; de trefwoordenlijst voor de namen is van het ' +
-        'register zelf en kan ernaast zitten. Omdat een artikel onder meer tegels staat, tellen de tegels niet op.']
+      ['Let op', 'Omdat een artikel onder meer tegels staat, tellen de tegels niet op.']
     ] }
   };
 
