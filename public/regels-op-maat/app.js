@@ -2031,12 +2031,12 @@
       ['Tegels', 'Negen andere onderwerpen, uit een voorstel voor een thema- en activiteitindeling: Bouwen en gebruik, ' +
         'Werken en recreëren, Landbouw en veehouderij, Erfgoed, Natuur en landschap, Bodem en water, ' +
         'Milieu, gezondheid en veiligheid, Energie en klimaat, Verkeer en infrastructuur.'],
-      ['Onderwerp', ['Een artikel staat onder élke tegel waarover het iets regelt. Het register kijkt naar (de eerste vier zoals bij F):',
+      ['Onderwerp', ['Een artikel staat onder élke tegel waarover het iets regelt. Het register kijkt naar (de eerste drie zoals bij F):',
         'de kopjes boven het artikel, en als die niets zeggen het thema van de overheid;',
-        'álle thema’s die de overheid aan de regel gaf, ook naast de kopjes;',
         'het type van elke gebiedsaanwijzing bij de regel (waardelijst TypeGebiedsaanwijzing; een gebied van het type ' +
           'Water en watersysteem valt onder Bodem en water);',
         'de groep van elke activiteit bij de regel (waardelijst Activiteitengroep; een milieubelastende activiteit valt onder Milieu);',
+        'álle thema’s die de overheid aan de regel gaf, ook naast de kopjes;',
         'trefwoorden in de namen van activiteiten en gebiedsaanwijzingen (‘Bodemenergiesystemen aanleggen’ valt ook onder ' +
           'Energie en klimaat, een monument ook onder Bouwen en gebruik);',
         'bij een bestemmingsplan: de functies in het hoofddeel van de bestemmingsomschrijving (‘bedrijven’, ‘horeca’).']],
