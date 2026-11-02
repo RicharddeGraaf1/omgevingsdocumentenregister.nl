@@ -128,6 +128,38 @@ de activiteiten en de gebiedsaanwijzingen. Bij meer dan 17 chips zijn dat de eer
 zoekveld en "+N meer". De benchmark telt de best passende chip die de bezoeker herkent aan een
 woord uit zijn vraag (`D_TERMEN`); op de site doet het zoekveld dat.
 
+### Niveau 3: verfijnen binnen een subonderwerp (2026-10-30)
+
+Geldt voor alle zes varianten; het is een laag onder het subonderwerp, geen eigen indeling.
+Op de site kiest de bezoeker de vorm met het keuzemenu *Verfijnen* naast *Indeling*
+(2026-11-02): *Inhoudsopgave* (standaard), *Derde chiprij* (`?verfijn=chips`) of *Uit*
+(`?verfijn=uit`). In de test gaat het uit met `--zonder-niveau3`; de test meet de groepjes,
+niet de vorm, dus inhoudsopgave en chiprij scoren gelijk.
+
+- **Inhoudsopgave**: de lijst klapt in tot de kopjes (met het aantal regels); een vaag of te vol
+  kopje heeft subgroepen per activiteit. Twee kopjes met dezelfde naam onder een ander
+  hoofdstuk blijven twee groepen.
+- **Derde chiprij**: een rij *Verfijn* onder de subonderwerpen.
+
+Beide verschijnen zodra de bezoeker een subonderwerp kiest (of als er maar één is) en er dan
+nog meer dan 10 artikelen over zijn. De groepjes:
+
+- het kopje direct boven het artikel (paragraaf, afdeling, …);
+- is dat kopje vaag (`KOPJE_VAAG`: *Algemeen*, *Inleidende regels*, …), of staan er zelf meer
+  dan 10 artikelen onder, dan de activiteit(en) van het artikel. Dat geldt niet voor
+  structuurlabels (`ACT_STRUCTUUR`: *Activiteit gereguleerd in …*, aansluitactiviteiten) en niet
+  voor artikelen met meer dan 3 activiteiten: die houden hun kopje;
+- de rij komt er alleen bij minstens twee chips en gemiddeld minstens twee artikelen per chip.
+
+In de test kiest de bezoeker een verfijn-chip alleen als er een woord uit zijn vraag in staat
+(`D_TERMEN`), net als bij de chips van D/E/F. De regel staat twee keer, in `verfijn_sleutels()`
+hier en `verfijnSleutels()` in `public/regels-op-maat/app.js`: wijzig ze samen.
+
+Gemeten op productie (2026-10-30, alle niet-rijks Ow-documenten op de 40 punten, indeling C):
+889 subonderwerpen hebben meer dan 10 artikelen, samen 23.188. De rij verschijnt bij 751
+daarvan. Daarna staat 77% van die artikelen in een groepje van hooguit 10, meestal met 7 chips
+(p90 13, max 48).
+
 ### Tegelkeuze per tegelset (2026-10-24)
 
 Een variant bestaat uit een tegelset en een indeling. De bezoeker kiest per vraag een

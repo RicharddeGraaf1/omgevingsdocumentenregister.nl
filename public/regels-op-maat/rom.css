@@ -135,6 +135,18 @@ details.sectie > summary { cursor: pointer; list-style-position: outside; }
 .sectie-kop .label { font-size: 10.5px; }
 .sectie-titel { font-family: var(--serif); font-size: 14.5px; color: var(--inkt-2); }
 
+/* Niveau 3 als inhoudsopgave: kopjes ingeklapt, met het aantal regels erachter */
+.inhoudsopgave { display: flex; flex-direction: column; }
+.inhoudsopgave[hidden], .artikelen[hidden] { display: none; }
+.toc-uitleg { font-size: 12.5px; color: var(--inkt-3); margin: 0 0 4px; }
+.inhoudsopgave details.sectie { border-top: 1px solid var(--lijn-2); }
+.inhoudsopgave details.sectie > summary { padding: 7px 0; }
+.inhoudsopgave details.sectie[open] > summary { padding-bottom: 3px; }
+.inhoudsopgave .toc-sub { padding-left: 14px; }
+.toc-context { font-size: 12.5px; color: var(--inkt-3); }
+.toc-aantal { font-size: 12px; color: var(--inkt-3); margin-left: 6px; font-variant-numeric: tabular-nums; }
+.inhoudsopgave details[open] > .art, .inhoudsopgave .toc-sub[open] > .art { margin-left: 14px; }
+
 .art { border-top: 1px solid var(--lijn-2); }
 .art-kop {
   display: flex; gap: 8px; align-items: flex-start; width: 100%; text-align: left;

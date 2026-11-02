@@ -25,7 +25,7 @@
   var MAX_ART_OPEN_RENDER = 400;   // boven dit aantal artikelen starten hoofdstukken dichtgeklapt
 
   // view: {} = tussenscherm met onderwerpen · {onderwerp: id} · {alles: true}
-  var staat = { loc: null, weergave: 'juridisch', indeling: 'hybride', volgnr: 0, docs: null, view: {} };
+  var staat = { loc: null, weergave: 'juridisch', indeling: 'hybride', verfijn: 'toc', volgnr: 0, docs: null, view: {} };
 
   //   pad      alleen de kopjes boven het artikel — onderwerp én subcategorie
   //   imow     alleen het IMOW-thema van de juridische regels — geen subcategorie
@@ -36,6 +36,9 @@
   //   stelsel     variant D (proef): stelseltegels uit kopjes/thema + type gebiedsaanwijzing
   //   stelsel_act variant F (proef): D + activiteitengroep
   var INDELINGEN = { hybride: 1, pad: 1, imow: 1, stelsel: 1, stelsel_act: 1, meervoudig: 1 };
+  // Hoe niveau 3 (verfijnen binnen een subonderwerp) eruitziet: inhoudsopgave in de lijst,
+  // een derde chiprij, of niet. Los van de indeling: het verandert niet wáár een artikel staat.
+  var VERFIJN_VORMEN = { toc: 1, chips: 1, uit: 1 };
   var STELSEL_MODI = { stelsel: 1, stelsel_act: 1, meervoudig: 1 };   // de negen stelseltegels
   function isStelsel() { return !!STELSEL_MODI[staat.indeling]; }
   function tegelset() { return isStelsel() ? 'stelsel' : 'site'; }
@@ -145,6 +148,26 @@
     return kaart;
   }
 
+  /** Artikel-wid -> opschrift van het diepste kopje erboven (paragraaf, afdeling, …),
+   *  en -> het pad van kopjes met opschrift ({type, nummer, opschrift}, van boven naar onder).
+   *  Bron voor niveau 3: verfijnen binnen een subonderwerp. */
+  var KOPJE_TYPES = { Hoofdstuk: 1, Titel: 1, Afdeling: 1, Paragraaf: 1, Subparagraaf: 1, Subsubparagraaf: 1, Deel: 1, Boek: 1, Divisie: 1 };
+  function kopjesUitBoom(boom) {
+    var kaart = { kop: {}, pad: {} };
+    function loop(knoop, pad) {
+      if (KOPJE_TYPES[knoop.type] && knoop.opschrift) {
+        pad = pad.concat([{ type: knoop.type, nummer: knoop.nummer || '', opschrift: knoop.opschrift }]);
+      }
+      if ((knoop.type === 'Artikel' || knoop.type === 'Divisietekst') && knoop.wid) {
+        kaart.pad[knoop.wid] = pad;
+        kaart.kop[knoop.wid] = pad.length ? pad[pad.length - 1].opschrift : null;
+      }
+      (knoop.kinderen || []).forEach(function (k) { loop(k, pad); });
+    }
+    (boom || []).forEach(function (k) { loop(k, []); });
+    return kaart;
+  }
+
   /** Artikel-wid -> de locaties waar het geldt, uit de annotaties in de boom.
    *  De boom draagt per lid de activiteit-locatieaanduiding en de
    *  gebiedsaanwijzing, elk met hun locatie_id; de vectortiles tekenen precies
@@ -221,6 +244,7 @@
       else if (staat.view.onderwerp) q.set('onderwerp', staat.view.onderwerp);
       else if (staat.view.alles) q.set('weergave', 'alle-documenten');
       if (staat.indeling !== 'hybride') q.set('indeling', staat.indeling);
+      if (staat.verfijn !== 'toc') q.set('verfijn', staat.verfijn);
     }
     var url = location.pathname + (loc ? '?' + q.toString() : '');
     if (vervang) history.replaceState(loc, '', url); else history.pushState(loc, '', url);
@@ -243,6 +267,12 @@
     if (o && RomThema.bestaat(o)) return { onderwerp: o };
     if (q.get('weergave') === 'alle-documenten') return { alles: true };
     return {};
+  }
+
+  /** ?verfijn=chips|uit; zonder parameter de inhoudsopgave. */
+  function verfijnUitUrl() {
+    var v = new URLSearchParams(location.search).get('verfijn');
+    return VERFIJN_VORMEN[v] ? v : 'toc';
   }
 
   function indelingUitUrl() {
@@ -1157,6 +1187,7 @@
   function bouwAnalyse(doc, rijen, ond, boom) {
     var ouder = boom ? ouderArtikelen(boom) : {};
     var locatiesPerArtikel = boom ? locatiesUitBoom(boom) : {};
+    var kopjes = boom ? kopjesUitBoom(boom) : { kop: {}, pad: {} };
     // Beide routes ruw per artikel-wid; welke telt beslist indelen().
     // Pad: de categorieën minus wat de API via de annotatie aanvulde.
     var padIndeling = {}, indelingOpgehaald = !!(ond && ond.categorieen);
@@ -1207,6 +1238,8 @@
         var vak = (artWid && locatiesPerArtikel[artWid]) || null;
         a.locaties = vak ? vak.locaties : [];
         a.kenmerken = vak;
+        a.kopje = (artWid && kopjes.kop[artWid]) || null;
+        a.kopjePad = (artWid && kopjes.pad[artWid]) || [];
         artikelen.push(a);
       }
       if (r.wid && r.wid !== artWid) a.leden.push({ nummer: r.lid_nummer || '', wid: r.wid });
@@ -1294,6 +1327,70 @@
       if (id !== 'niet-ingedeeld' && uit.indexOf(id) < 0) uit.push(id);
     });
     return uit.length ? uit : ['niet-ingedeeld'];
+  }
+
+  // ── Niveau 3: verfijnen binnen een subonderwerp (2026-10-30) ──
+  // Het kopje direct boven het artikel. Is dat kopje vaag, of staan er zelf meer dan
+  // VERFIJN_GRENS regels onder, dan de activiteit(en) van het artikel. Gemeten op prod
+  // (889 subonderwerpen > 10): 83% van de artikelen komt daarna in een groepje van
+  // hooguit 10, meestal met 7 chips. Spiegel van verfijn_sleutels() in
+  // tests/rom-benchmark/run_benchmark.py: wijzig ze samen.
+  var VERFIJN_GRENS = 10;
+  var KOPJE_VAAG = /^(algeme(en|ne)( bepalingen| regels)?|inleidende (regels|bepalingen)|aanvraagvereisten|toepassingsbereik|begripsbepalingen|begrippen|overige( bepalingen| regels)?|slotbepalingen|overgangsrecht|overgangs- en slotbepalingen)$/i;
+  function kopjeVaag(k) { return !k || KOPJE_VAAG.test(String(k).trim()); }
+  // Activiteiten die de structuur van het plan benoemen, niet wat je gaat doen (bruidsschat,
+  // aansluitdocumenten). Een artikel met meer dan MAX_ACT activiteiten houdt zijn kopje.
+  var ACT_STRUCTUUR = /^(activiteit (gereguleerd|met|die)|aansluit|.* gereguleerd (in|bij) )/i;
+  var MAX_ACT = 3;
+
+  /** De activiteiten waarop een artikel verfijnd kan worden: uniek, gesorteerd, zonder
+   *  structuuractiviteiten; meer dan MAX_ACT telt als geen (het artikel houdt zijn kopje). */
+  function activiteitenVan(a) {
+    var acts = ((a.kenmerken && a.kenmerken.activiteiten) || []).map(function (x) { return x.naam; })
+      .filter(function (n, i, l) { return n && l.indexOf(n) === i && !ACT_STRUCTUUR.test(n); }).sort();
+    return acts.length <= MAX_ACT ? acts : [];
+  }
+
+  /** arts -> per artikel (zelfde volgorde) de labels van zijn verfijn-chips. */
+  function verfijnSleutels(arts) {
+    var tel = {};
+    arts.forEach(function (a) { if (!kopjeVaag(a.kopje)) tel[a.kopje] = (tel[a.kopje] || 0) + 1; });
+    return arts.map(function (a) {
+      var acts = activiteitenVan(a);
+      if ((kopjeVaag(a.kopje) || tel[a.kopje] > VERFIJN_GRENS) && acts.length) return acts;
+      return [kopjeVaag(a.kopje) ? 'overig' : a.kopje];
+    });
+  }
+
+  /** Dezelfde regel als verfijnSleutels, als boom: [{pad, xs, subs}] in documentvolgorde.
+   *  Groep = het diepste kopje (met zijn pad, dus twee keer "Algemeen" blijft twee groepen).
+   *  Is dat kopje vaag of staan er meer dan VERFIJN_GRENS regels onder, dan subgroepen per
+   *  activiteit (een artikel met twee activiteiten staat onder beide). */
+  function inhoudsopgave(xs) {
+    var groepen = [], perSleutel = {};
+    xs.forEach(function (x) {
+      var pad = x.art.kopjePad || [];
+      var sl = (x.doc && x.doc.bron_id) + '|' + pad.map(function (p) { return p.type + ' ' + p.nummer + ' ' + p.opschrift; }).join(' › ');
+      var g = perSleutel[sl];
+      if (!g) { g = perSleutel[sl] = { pad: pad, xs: [], subs: null }; groepen.push(g); }
+      g.xs.push(x);
+    });
+    groepen.forEach(function (g) {
+      var kop = g.pad.length ? g.pad[g.pad.length - 1].opschrift : null;
+      if (!kopjeVaag(kop) && g.xs.length <= VERFIJN_GRENS) return;
+      var per = {}, volgorde = [];
+      g.xs.forEach(function (x) {
+        var acts = activiteitenVan(x.art);
+        (acts.length ? acts : ['']).forEach(function (n) {
+          if (!per[n]) { per[n] = []; volgorde.push(n); }
+          per[n].push(x);
+        });
+      });
+      if (volgorde.length < 2) return;
+      g.subs = volgorde.map(function (n) { return { naam: n, xs: per[n] }; })
+        .sort(function (p, q) { return (!p.naam) - (!q.naam) || q.xs.length - p.xs.length; });
+    });
+    return groepen;
   }
 
   function chipInhoud(id, aantal) {
@@ -1462,6 +1559,15 @@
     var MAX_SUBS = 15;     // variant E: tientallen activiteiten per tegel (G-169); de rest achter een knop
     var alleSubs = false, subZoek = '';
 
+    // Niveau 3: verfijnen. Verschijnt zodra er een subonderwerp gekozen is (of er maar één
+    // is) en er dan nog meer dan VERFIJN_GRENS artikelen over zijn.
+    var fijnRij = el('div', { class: 'chips sub-chips fijn-chips', role: 'group', 'aria-label': 'Verfijn binnen het subonderwerp', hidden: true });
+    var actiefFijn = {};   // label -> true
+    var fijnVan = {};      // art.sleutel -> [labels], berekend op de huidige selectie
+    var alleFijn = false, fijnZoek = '';
+    // Of als inhoudsopgave: de lijst ingeklapt tot kopjes met aantallen (staat.verfijn = 'toc').
+    var tocLijst = el('div', { class: 'inhoudsopgave', hidden: true });
+
     /** Een artikel kan via de annotatie onder meerdere onderwerpen vallen. */
     function opActiefOnderwerp(art) {
       return art.onderwerpen.some(function (id) { return actief[id]; });
@@ -1538,6 +1644,118 @@
       zichtbaarheid();
     }
 
+    /** Artikelen die door onderwerp, herkomst en subonderwerp heen komen. */
+    function inSelectie(art) {
+      if (Object.keys(actief).length && !opActiefOnderwerp(art)) return false;
+      if (herkomstActief && art.herkomst !== herkomstActief) return false;
+      if (Object.keys(actiefSub).length && !subsVan(art).some(function (s) { return actiefSub[s.sleutel]; })) return false;
+      return true;
+    }
+
+    function tekenFijn() {
+      leeg(fijnRij);
+      fijnVan = {};
+      fijnRij.hidden = true;
+      leeg(tocLijst);
+      tocLijst.hidden = true;
+      lijst.hidden = false;
+      var opOnderwerp = Object.keys(actief).length > 0;
+      var opSub = Object.keys(actiefSub).length > 0;
+      var basisX = artEls.filter(function (x) { return inSelectie(x.art); });
+      var basis = basisX.map(function (x) { return x.art; });
+      if (staat.verfijn === 'uit' || !opOnderwerp || !(opSub || subRij.hidden) || basis.length <= VERFIJN_GRENS) {
+        actiefFijn = {}; return;
+      }
+      if (staat.verfijn === 'toc') { actiefFijn = {}; tekenInhoud(basisX); return; }
+      var sl = verfijnSleutels(basis), tel = {};
+      basis.forEach(function (art, i) {
+        fijnVan[art.sleutel] = sl[i];
+        sl[i].forEach(function (k) { tel[k] = (tel[k] || 0) + 1; });
+      });
+      Object.keys(actiefFijn).forEach(function (k) { if (!tel[k]) delete actiefFijn[k]; });
+      var labels = Object.keys(tel).sort(function (x, y) { return (x === 'overig') - (y === 'overig') || tel[y] - tel[x]; });
+      // Minstens twee chips, en gemiddeld minstens twee artikelen per chip: anders is de
+      // rij net zo lang als de lijst zelf.
+      if (labels.length < 2 || labels.length * 2 > basis.length) { fijnRij.hidden = true; actiefFijn = {}; return; }
+      fijnRij.hidden = false;
+      fijnRij.appendChild(el('span', { class: 'sub-label', text: 'Verfijn' }));
+      var veel = labels.length > MAX_SUBS + 2, knoppen = [];
+      var zoekVeld = veel ? el('input', { type: 'search', class: 'sub-zoek', value: fijnZoek,
+        placeholder: 'zoek, bv. lozen of dakkapel', 'aria-label': 'Zoek een kopje of activiteit' }) : null;
+      if (zoekVeld) fijnRij.appendChild(zoekVeld);
+      labels.forEach(function (label, i) {
+        var k = el('button', { type: 'button', class: 'chip chip-sub' + (label === 'overig' ? ' chip-leeg' : ''),
+          'aria-pressed': actiefFijn[label] ? 'true' : 'false',
+          title: label === 'overig' ? 'Artikelen zonder eigen kopje of activiteit' : null },
+          [label + ' ', el('b', { text: nl(tel[label]) })]);
+        k.addEventListener('click', function () {
+          if (actiefFijn[label]) delete actiefFijn[label]; else actiefFijn[label] = true;
+          k.setAttribute('aria-pressed', actiefFijn[label] ? 'true' : 'false');
+          pasFilterToe(true, true);
+        });
+        knoppen.push({ k: k, label: label, laag: label.toLowerCase(), i: i });
+        fijnRij.appendChild(k);
+      });
+      var meer = veel ? el('button', { type: 'button', class: 'chip chip-leeg', onclick: function () {
+        alleFijn = true; zichtbaar();
+      } }) : null;
+      if (meer) fijnRij.appendChild(meer);
+      function zichtbaar() {
+        var q = fijnZoek.trim().toLowerCase(), verborgen = 0;
+        knoppen.forEach(function (x) {
+          var toon = !veel || actiefFijn[x.label] || (q ? x.laag.indexOf(q) >= 0 : (alleFijn || x.i < MAX_SUBS));
+          x.k.hidden = !toon;
+          if (!toon) verborgen++;
+        });
+        if (meer) { meer.hidden = !!q || alleFijn || !verborgen; meer.textContent = '+' + nl(verborgen) + ' meer'; }
+      }
+      if (zoekVeld) zoekVeld.addEventListener('input', function () { fijnZoek = zoekVeld.value; zichtbaar(); });
+      zichtbaar();
+    }
+
+    /** Inhoudsopgave in plaats van de doorlopende lijst. Artikelen worden pas gebouwd als
+     *  een kopje opengaat: een subonderwerp kan honderden regels hebben. */
+    function tekenInhoud(xs) {
+      var groepen = inhoudsopgave(xs);
+      var genest = groepen.some(function (g) { return g.subs; });
+      if (groepen.length < 2 && !genest) return;
+      if (groepen.length * 2 > xs.length && !genest) return;   // bijna elk artikel een eigen kopje: dan liever de lijst
+      lijst.hidden = true;
+      tocLijst.hidden = false;
+      tocLijst.appendChild(el('p', { class: 'toc-uitleg', text: nl(xs.length) + ' regels onder ' + nl(groepen.length) +
+        (groepen.length === 1 ? ' kopje' : ' kopjes') + '. Klap een kopje open om de regels te zien.' }));
+      groepen.forEach(function (g) {
+        var diepst = g.pad[g.pad.length - 1], ouder = null;
+        for (var i = g.pad.length - 2; i >= 0 && !ouder; i--) if (!kopjeVaag(g.pad[i].opschrift)) ouder = g.pad[i];
+        var kop = [
+          diepst ? el('span', { class: 'label', text: diepst.type + (diepst.nummer ? ' ' + diepst.nummer : '') }) : null,
+          el('span', { class: 'sectie-titel', text: ' ' + (diepst ? diepst.opschrift : 'Zonder kopje') }),
+          ouder && kopjeVaag(diepst && diepst.opschrift) ? el('span', { class: 'toc-context', text: ' in ' + ouder.opschrift }) : null,
+          el('b', { class: 'toc-aantal', text: nl(g.xs.length) })
+        ];
+        tocLijst.appendChild(tocGroep('toc-groep', kop, g.subs ? function (det) {
+          g.subs.forEach(function (sub) {
+            det.appendChild(tocGroep('toc-sub', [
+              el('span', { class: 'label', text: sub.naam ? 'Activiteit' : '' }),
+              el('span', { class: 'sectie-titel', text: ' ' + (sub.naam || 'Overige regels') }),
+              el('b', { class: 'toc-aantal', text: nl(sub.xs.length) })
+            ], function (d) { vulArts(d, sub.xs); }));
+          });
+        } : function (det) { vulArts(det, g.xs); }));
+      });
+    }
+
+    function tocGroep(klasse, kop, vul) {
+      var det = el('details', { class: 'sectie ' + klasse }, [el('summary', { class: 'sectie-kop' }, kop)]);
+      var gevuld = false;
+      det.addEventListener('toggle', function () { if (det.open && !gevuld) { gevuld = true; vul(det); } });
+      return det;
+    }
+
+    function vulArts(det, xs) {
+      xs.forEach(function (x) { det.appendChild(artikelElement(x.art, x.doc)); });
+    }
+
     if (a.heeftIndeling) {
       var rij = el('div', { class: 'chips', role: 'group', 'aria-label': 'Filter op onderwerp' });
       var knoppen = gesorteerd(a.tegels).map(function (id) {
@@ -1578,6 +1796,7 @@
       body.appendChild(el('div', { class: 'filter' }, [
         rij,
         subRij,
+        fijnRij,
         el('span', { class: 'filter-uitleg', text: hybride
           ? 'Onderwerpindeling van het register · ' + nl(ingedeeld) + ' van ' + nl(a.totaal) + ' artikelen ingedeeld' +
             (a.herkomst.annotatie ? ', waarvan ' + nl(a.herkomst.annotatie) + ' via de IMOW-annotatie' : '') + '.' + meervoudigTekst(a.meervoudig)
@@ -1590,7 +1809,14 @@
     var herkomstActief = null;   // null | 'pad' | 'annotatie'
 
     var lijst = el('div', { class: 'artikelen' });
+    body.appendChild(tocLijst);
     body.appendChild(lijst);
+    // Andere verfijnvorm gekozen: dezelfde keuzes, alleen niveau 3 opnieuw tekenen.
+    function opVerfijnWissel() {
+      if (!document.body.contains(body)) { document.removeEventListener('rom-verfijn', opVerfijnWissel); return; }
+      pasFilterToe(true);
+    }
+    document.addEventListener('rom-verfijn', opVerfijnWissel);
     var meerDelen = delen.length > 1;
 
     delen.forEach(function (deel, i) {
@@ -1632,16 +1858,18 @@
       pasFilterToe();
     }
 
-    /** behoudSubs: true vanuit een sub-chip zelf, anders wordt de rij hertekend. */
-    function pasFilterToe(behoudSubs) {
+    /** behoudSubs: true vanuit een sub-chip zelf, anders wordt de rij hertekend.
+     *  behoudFijn: true vanuit een verfijn-chip; anders telt niveau 3 opnieuw. */
+    function pasFilterToe(behoudSubs, behoudFijn) {
       if (!behoudSubs) tekenSubs();
+      if (!behoudFijn) tekenFijn();
       var opOnderwerp = Object.keys(actief).length > 0;
       var opSub = Object.keys(actiefSub).length > 0;
-      var filterAan = opOnderwerp || opSub || !!herkomstActief;
+      var opFijn = Object.keys(actiefFijn).length > 0;
+      var filterAan = opOnderwerp || opSub || opFijn || !!herkomstActief;
       artEls.forEach(function (x) {
-        x.el.hidden = (opOnderwerp && !opActiefOnderwerp(x.art)) ||
-                      (opSub && !subsVan(x.art).some(function (s) { return actiefSub[s.sleutel]; })) ||
-                      (!!herkomstActief && x.art.herkomst !== herkomstActief);
+        x.el.hidden = !inSelectie(x.art) ||
+                      (opFijn && !(fijnVan[x.art.sleutel] || []).some(function (k) { return actiefFijn[k]; }));
       });
       // Secties zonder zichtbaar artikel verbergen.
       Array.prototype.slice.call(lijst.querySelectorAll('.sectie, .deel')).reverse().forEach(function (s) {
@@ -1662,7 +1890,7 @@
         var art = perWid[knoop.wid];
         geplaatst[knoop.wid] = true;
         var e = artikelElement(art, a.doc);
-        artEls.push({ art: art, el: e });
+        artEls.push({ art: art, el: e, doc: a.doc });
         return [e];
       }
       var kinderen = [];
@@ -1680,7 +1908,7 @@
     if (nietGeplaatst.length) {
       var rest = nietGeplaatst.map(function (art) {
         var e = artikelElement(art, a.doc);
-        artEls.push({ art: art, el: e });
+        artEls.push({ art: art, el: e, doc: a.doc });
         return e;
       });
       lijst.appendChild(sectieElement('Overig', '', 'Niet terug te vinden in de documentstructuur', rest, 0, false));
@@ -1694,7 +1922,7 @@
       var h = art.hoofdstuk || '';
       if (!perHfd[h]) { perHfd[h] = []; volgorde.push(h); }
       var e = artikelElement(art, a.doc);
-      artEls.push({ art: art, el: e });
+      artEls.push({ art: art, el: e, doc: a.doc });
       perHfd[h].push(e);
     });
     volgorde.forEach(function (h) {
@@ -2068,7 +2296,7 @@
    *  plek is geen nieuwe stap in de geschiedenis. */
   function initIndeling() {
     var keuze = $('indeling');
-    staat.indeling = indelingUitUrl();
+    staat.indeling = indelingUitUrl(); staat.verfijn = verfijnUitUrl();
     keuze.value = staat.indeling;
     $('indeling-info').addEventListener('click', function () {
       zetUitleg($('indeling-info').getAttribute('aria-expanded') !== 'true');
@@ -2084,6 +2312,18 @@
       if (!staat.loc) return;
       schrijfUrl({ x: staat.loc.x, y: staat.loc.y, label: staat.loc.label }, true);
       if (staat.docs) toon(staat.volgnr);
+    });
+  }
+
+  /** Keuzemenu Verfijnen: tekent alleen niveau 3 opnieuw, gekozen tegel en subonderwerp blijven staan. */
+  function initVerfijn() {
+    var keuze = $('verfijn');
+    staat.verfijn = verfijnUitUrl();
+    keuze.value = staat.verfijn;
+    keuze.addEventListener('change', function () {
+      staat.verfijn = VERFIJN_VORMEN[keuze.value] ? keuze.value : 'toc';
+      if (staat.loc) schrijfUrl({ x: staat.loc.x, y: staat.loc.y, label: staat.loc.label }, true);
+      document.dispatchEvent(new Event('rom-verfijn'));
     });
   }
 
@@ -2113,6 +2353,7 @@
     initZoeken();
     initWeergave();
     initIndeling();
+    initVerfijn();
 
     var uitUrl = leesUrl();
     if (uitUrl) kiesLocatie(uitUrl, { uitUrl: true, view: viewUitUrl() });
@@ -2120,8 +2361,9 @@
     window.addEventListener('popstate', function () {
       var loc = leesUrl();
       if (!loc) { location.reload(); return; }
-      staat.indeling = indelingUitUrl();
+      staat.indeling = indelingUitUrl(); staat.verfijn = verfijnUitUrl();
       $('indeling').value = staat.indeling;
+      $('verfijn').value = staat.verfijn;
       if (staat.loc && staat.docs && loc.x === staat.loc.x && loc.y === staat.loc.y) {
         staat.view = viewUitUrl();
         toon(staat.volgnr);
