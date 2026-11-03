@@ -372,6 +372,7 @@ button.chip-sub[aria-pressed="true"] b { color: var(--blad); }
 
 /* ── Onderwerpenboom en leesvenster (?nav=boom) ───────── */
 body.boom-weergave .werkvlak { grid-template-columns: minmax(0, 460px) minmax(0, 1fr); }
+body.lees-open .werkvlak { grid-template-columns: minmax(0, 480px) minmax(0, 520px) minmax(240px, 1fr); }
 body.boom-weergave.lees-open .werkvlak { grid-template-columns: minmax(0, 380px) minmax(0, 520px) minmax(240px, 1fr); }
 .boom { padding: 4px; }
 .boom-rij {
@@ -436,11 +437,18 @@ body.boom-weergave.lees-open .werkvlak { grid-template-columns: minmax(0, 380px)
 .kp-leeg { margin: 8px 0 2px; color: var(--inkt-2); }
 .kp-body .laden { margin: 8px 0 2px; }
 
-/* In het kenmerkenpaneel staan de kenmerken op de kaart, niet ook bij de tekst. */
-body.paneel-kenmerken .kenmerken { display: none; }
+/* Het kenmerkenpaneel staat bij de tekst: in het leesvenster of bij het open artikel. */
+.kenmerkenpaneel { margin-bottom: 10px; font-size: 13px; background: var(--grond); border-radius: 3px; }
+.kenmerkenpaneel .kp-body { border-top: 1px solid var(--lijn-2); max-height: none; }
+.kenmerkenpaneel .kp-sectie { background: none; }
+
+/* Verwijzingen: terug naar waar de bezoeker vandaan kwam */
+.lees-terug { display: inline-flex; align-items: center; gap: 6px; margin-bottom: 10px; padding: 4px 8px 4px 2px; border: 0; background: none; font: inherit; font-size: 13.5px; color: var(--acc); text-align: left; cursor: pointer; }
+.lees-terug:hover { text-decoration: underline; }
+.lid-doel { background: var(--acc-zacht); box-shadow: -8px 0 0 var(--acc-zacht), 8px 0 0 var(--acc-zacht); border-radius: 2px; }
 
 @media (max-width: 900px) {
-  body.boom-weergave .werkvlak, body.boom-weergave.lees-open .werkvlak { grid-template-columns: 1fr; }
+  body.boom-weergave .werkvlak, body.boom-weergave.lees-open .werkvlak, body.lees-open .werkvlak { grid-template-columns: 1fr; }
   .leesvenster { position: fixed; inset: 0; z-index: 20; border-left: 0; }
   .kaart-paneel { width: 280px; max-height: calc(100% - 50px); }
 }

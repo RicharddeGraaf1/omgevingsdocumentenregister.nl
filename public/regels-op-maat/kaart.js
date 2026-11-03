@@ -26,6 +26,22 @@
   var map, bron, locatie = null;
   var werkBron, werkLaag, werking = {};   // locatie_id -> {kleur, vulling, dekkend}
   var objLaag, wroLaag, objecten = {};    // kaartpaneel: id -> vulkleur
+  var grensBron;                          // de grens van één Wro-plan
+
+  function grensStijl() {
+    return new ol.style.Style({
+      fill: new ol.style.Fill({ color: cssKleur('--at', 0.08) }),
+      stroke: new ol.style.Stroke({ color: cssKleur('--at'), width: 2 })
+    });
+  }
+
+  /** Plangrens als GeoJSON in RD, of null om hem weg te halen. */
+  function toonPlangrens(geojson) {
+    if (!grensBron) return;
+    grensBron.clear();
+    if (!geojson) return;
+    grensBron.addFeature(new ol.Feature(new ol.format.GeoJSON().readGeometry(geojson)));
+  }
 
   function cssKleur(naam, alfa) {
     var v = getComputedStyle(document.documentElement).getPropertyValue(naam).trim() || '#4256b8';
@@ -74,6 +90,7 @@
         objectLaag('locaties'),
         objectLaag('planobjecten'),
         werkingLaag(),
+        new ol.layer.Vector({ className: 'plangrens', source: grensBron = new ol.source.Vector(), style: grensStijl }),
         new ol.layer.Vector({ className: 'overlay', source: bron, style: stijl })
       ],
       view: new ol.View({
@@ -200,7 +217,11 @@
       }),
       style: function (feature) {
         var kleur = objecten[feature.get('id')];
-        return kleur ? new ol.style.Style({ fill: new ol.style.Fill({ color: kleur }) }) : null;
+        if (!kleur) return null;
+        // Wro-figuren (gevellijnen, bouwvlakgrenzen) zijn lijnen; die hebben niets aan een vulling.
+        return /LineString$/.test(feature.getType()) && feature.getGeometry
+          ? new ol.style.Style({ stroke: new ol.style.Stroke({ color: kleur.replace(/\/ [\d.]+\)$/, ')'), width: 2 }) })
+          : new ol.style.Style({ fill: new ol.style.Fill({ color: kleur }) });
       }
     });
     if (laag === 'locaties') objLaag = l; else wroLaag = l;
@@ -258,5 +279,5 @@
   }
 
   global.RomKaart = { init: init, toonLocatie: toonLocatie, toonPerceel: toonPerceel,
-    naarLocatie: naarLocatie, toonWerkingsgebieden: toonWerkingsgebieden, toonObjecten: toonObjecten, herschaal: herschaal };
+    naarLocatie: naarLocatie, toonWerkingsgebieden: toonWerkingsgebieden, toonObjecten: toonObjecten, toonPlangrens: toonPlangrens, herschaal: herschaal };
 })(window);
