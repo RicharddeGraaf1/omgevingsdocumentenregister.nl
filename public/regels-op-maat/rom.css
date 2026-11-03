@@ -406,7 +406,7 @@ body.boom-weergave.lees-open .werkvlak { grid-template-columns: minmax(0, 380px)
 
 /* ── Kaartpaneel ──────────────────────────────────────── */
 .kaart-paneel {
-  position: absolute; top: 12px; left: 12px; z-index: 3; width: 320px; max-width: calc(100% - 76px); max-height: calc(100% - 96px);
+  position: absolute; right: 12px; bottom: 30px; z-index: 3; width: 320px; max-width: calc(100% - 24px); max-height: calc(100% - 170px);
   display: flex; flex-direction: column; overflow: hidden; border-radius: 3px; font-size: 13px;
 }
 .kaart-paneel[hidden] { display: none; }
@@ -414,7 +414,8 @@ body.boom-weergave.lees-open .werkvlak { grid-template-columns: minmax(0, 380px)
 .kp-kop b { flex: 1; min-width: 0; }
 .kp-telling { flex: none; font-size: 12px; color: var(--inkt-3); }
 .kp-kop .icoon { transition: transform .12s; color: var(--inkt-3); flex: none; }
-.kp-kop[aria-expanded="true"] .icoon { transform: rotate(180deg); }
+/* Het paneel staat rechtsonder en klapt naar boven open: dicht wijst de pijl omhoog. */
+.kp-kop[aria-expanded="false"] .icoon { transform: rotate(180deg); }
 .kp-body { min-height: 0; overflow-y: auto; padding: 0 10px 10px; border-top: 1px solid var(--lijn-2); }
 .kp-body[hidden] { display: none; }
 .kp-gereedschap { position: sticky; top: 0; z-index: 1; display: flex; gap: 6px; align-items: center; padding: 8px 0; background: var(--blad); }
@@ -441,5 +442,5 @@ body.paneel-kenmerken .kenmerken { display: none; }
 @media (max-width: 900px) {
   body.boom-weergave .werkvlak, body.boom-weergave.lees-open .werkvlak { grid-template-columns: 1fr; }
   .leesvenster { position: fixed; inset: 0; z-index: 20; border-left: 0; }
-  .kaart-paneel { width: 280px; max-height: calc(100% - 60px); }
+  .kaart-paneel { width: 280px; max-height: calc(100% - 50px); }
 }

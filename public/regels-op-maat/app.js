@@ -2172,8 +2172,9 @@
 
   // ── Onderwerpenboom (?nav=boom) ───────────────────────
   // Zelfde gegevens en zelfde tellingen als de tegels, andere weg ernaartoe:
-  // onderwerp › document › subonderwerp › kopje › artikel, en de tekst in een leesvenster
-  // rechts van de boom. Een laag met maar één kind slaan we over of klappen we meteen open.
+  // onderwerp › subonderwerp › document › kopje › artikel, en de tekst in een leesvenster
+  // rechts van de boom. Een subonderwerp gaat dus over de documenten heen. Een laag met maar
+  // één kind slaan we over of klappen we meteen open.
   var BOOM_MAX = 30;
 
   function toonBoom(nr) {
@@ -2193,19 +2194,19 @@
     Promise.all(lokaleDocs().map(function (d) {
       return Promise.all(delenVan(d).map(analyseer))
         .then(function (lijst) {
+          // doc: de bron van het artikel (ook aanvullende regels); hoofd: de rij in de boom.
           var xs = [];
-          lijst.forEach(function (an) { an.artikelen.forEach(function (art) { xs.push({ art: art, doc: an.doc }); }); });
+          lijst.forEach(function (an) { an.artikelen.forEach(function (art) { xs.push({ art: art, doc: an.doc, hoofd: d }); }); });
           return { doc: d, xs: xs };
         })
         .catch(function () { return null; });
     })).then(function (res) {
       if (nr !== staat.volgnr) return;
       blok.removeChild(blok.querySelector('.laden'));
-      res = res.filter(Boolean);
+      var alle = [];
+      res.filter(Boolean).forEach(function (r) { alle = alle.concat(r.xs); });
       var tel = {};
-      res.forEach(function (r) {
-        r.xs.forEach(function (x) { x.art.onderwerpen.forEach(function (id) { tel[id] = (tel[id] || 0) + 1; }); });
-      });
+      alle.forEach(function (x) { x.art.onderwerpen.forEach(function (id) { tel[id] = (tel[id] || 0) + 1; }); });
       var ids = Object.keys(tel).filter(function (k) { return !RomThema.isKlein(k); })
         .sort(function (a, b) { return tel[b] - tel[a]; });
       if (!ids.length) {
@@ -2219,9 +2220,7 @@
           kop: [el('span', { class: 'boom-icoon' }, [RomThema.icoon(id, 18)]), el('b', { class: 'boom-naam', text: RomThema.naam(id) })],
           aantal: tel[id],
           kinderen: function () {
-            return res.map(function (r) {
-              return { doc: r.doc, xs: r.xs.filter(function (x) { return x.art.onderwerpen.indexOf(id) >= 0; }) };
-            }).filter(function (r) { return r.xs.length; }).map(boomDocument);
+            return boomSubs(alle.filter(function (x) { return x.art.onderwerpen.indexOf(id) >= 0; }));
           },
           // Het open onderwerp staat in de link, en blijft staan bij een wissel naar de tegels.
           opWissel: function (open) {
@@ -2273,35 +2272,46 @@
     bak.appendChild(meer);
   }
 
-  function boomDocument(r) {
-    var isWro = r.doc.bron_type === 'wro';
-    return boomKnoop({
-      klasse: 'boom-document',
-      kop: [el('span', { class: 'tag' + (isWro ? '' : ' tag-ow'), text: isWro ? 'Wro' : 'Ow' }),
-        el('span', { class: 'boom-naam', text: r.doc.regeling || '(zonder titel)' })],
-      aantal: r.xs.length,
-      kinderen: function () { return boomSubs(r.xs); }
-    });
-  }
-
-  /** Subonderwerpen; bij maar één is die laag overbodig. */
+  /** Subonderwerpen, samengevoegd op naam: over de documenten heen is "lozen" één rij.
+   *  Bij maar één subonderwerp is die laag overbodig. */
   function boomSubs(xs) {
     var groepen = {}, volgorde = [];
     xs.forEach(function (x) {
       subsVan(x.art).forEach(function (s) {
-        if (!groepen[s.sleutel]) { groepen[s.sleutel] = { s: s, xs: [] }; volgorde.push(s.sleutel); }
-        groepen[s.sleutel].xs.push(x);
+        var naam = String(s.label || '').toLowerCase();
+        if (!groepen[naam]) { groepen[naam] = { s: s, xs: [] }; volgorde.push(naam); }
+        if (groepen[naam].xs.indexOf(x) < 0) groepen[naam].xs.push(x);
       });
     });
-    if (volgorde.length < 2) return boomKopjes(xs);
+    if (volgorde.length < 2) return boomDocumenten(xs);
     return volgorde.sort(function (p, q) {
-      return (p === ' > ') - (q === ' > ') || groepen[q].xs.length - groepen[p].xs.length;
-    }).map(function (sl) {
-      var g = groepen[sl];
+      return (p === 'zonder subonderwerp') - (q === 'zonder subonderwerp') || groepen[q].xs.length - groepen[p].xs.length;
+    }).map(function (naam) {
+      var g = groepen[naam];
       return boomKnoop({
-        kop: [el('span', { class: 'boom-naam' + (sl === ' > ' ? ' muted' : ''), text: g.s.label, title: g.s.soort || null })],
+        kop: [el('span', { class: 'boom-naam' + (naam === 'zonder subonderwerp' ? ' muted' : ''), text: g.s.label, title: g.s.soort || null })],
         aantal: g.xs.length,
-        kinderen: function () { return boomKopjes(g.xs); }
+        kinderen: function () { return boomDocumenten(g.xs); }
+      });
+    });
+  }
+
+  /** Per document, in de volgorde van de documentenlijst; aanvullende regels vallen onder hun hoofdregeling. */
+  function boomDocumenten(xs) {
+    var per = {}, volgorde = [];
+    xs.forEach(function (x) {
+      var id = x.hoofd.bron_id;
+      if (!per[id]) { per[id] = { doc: x.hoofd, xs: [] }; volgorde.push(id); }
+      per[id].xs.push(x);
+    });
+    return volgorde.map(function (id) {
+      var r = per[id], isWro = r.doc.bron_type === 'wro';
+      return boomKnoop({
+        klasse: 'boom-document',
+        kop: [el('span', { class: 'tag' + (isWro ? '' : ' tag-ow'), text: isWro ? 'Wro' : 'Ow' }),
+          el('span', { class: 'boom-naam', text: r.doc.regeling || '(zonder titel)' })],
+        aantal: r.xs.length,
+        kinderen: function () { return boomKopjes(r.xs); }
       });
     });
   }

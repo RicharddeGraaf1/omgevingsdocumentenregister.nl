@@ -158,7 +158,7 @@ daarvan. Daarna staat 77% van die artikelen in een groepje van hooguit 10, meest
 
 ### Keuzes over het scherm vallen buiten deze test (2026-11-03)
 
-*Navigatie* (`?nav=boom`: onderwerpenboom met leesvenster in plaats van tegels) en *Kaartpaneel*
+*Navigatie* (`?nav=boom`: onderwerpenboom onderwerp › subonderwerp › document › kopje › artikel, met leesvenster, in plaats van tegels) en *Kaartpaneel*
 (`?paneel=kenmerken`: de annotaties van het artikel in plaats van de objecten op de locatie)
 veranderen niet welke regels onder welk onderwerp vallen. De test meet ze niet. De boom gebruikt
 de groepering van G (`kopjesGroepen()` in `app.js`) als tussenlaag bij meer dan 10 regels, onder
