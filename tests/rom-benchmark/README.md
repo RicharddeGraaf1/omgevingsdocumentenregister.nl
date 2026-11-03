@@ -76,6 +76,7 @@ Wat de bezoeker merkt; de techniek staat in de secties hieronder.
 | D | negen tegels | Een grovere set van negen tegels (voorstel Brigitte), bijvoorbeeld *Bouwen en gebruik* en *Energie en klimaat*. Een artikel staat onder de tegel van zijn kopjes of label, plus een tegel voor het soort gebied dat het aanwijst (een boringsvrije zone valt onder *Bodem en water*). | indeling *D · Stelsel: kopjes + gebiedsaanwijzing (proef)* |
 | E | negen tegels, onder elke passende tegel | Als F, en daarnaast onder elke tegel die de naam van de activiteit, het gebied of de bestemming noemt. Een regel over bodemenergie in een boringsvrije zone staat dan onder *Bodem en water* én *Energie en klimaat*. | indeling *E · Stelsel, meervoudig (proef)* |
 | F | negen tegels + soort activiteit | Als D, en ook de soort activiteit telt. Een regel bij een monumentenactiviteit komt dan ook onder *Erfgoed*. Heette tot 24-10 D′. | indeling *F · Stelsel: + activiteitengroep (proef)* |
+| G | kopjes, anders label, met een derde niveau | Als C, en binnen een subonderwerp met meer dan 10 regels kiest de bezoeker verder op kopje of activiteit. | indeling *G · Hybride met derde niveau* |
 
 "Stelsel" is de werktitel in de code voor de negen tegels van D, E en F (modi `stelsel`,
 `stelsel_act` en `meervoudig`).
@@ -128,21 +129,16 @@ de activiteiten en de gebiedsaanwijzingen. Bij meer dan 17 chips zijn dat de eer
 zoekveld en "+N meer". De benchmark telt de best passende chip die de bezoeker herkent aan een
 woord uit zijn vraag (`D_TERMEN`); op de site doet het zoekveld dat.
 
-### Niveau 3: verfijnen binnen een subonderwerp (2026-10-30)
+### Variant G: C met een derde niveau (2026-10-30, eigen indeling sinds 2026-11-03)
 
-Geldt voor alle zes varianten; het is een laag onder het subonderwerp, geen eigen indeling.
-Op de site kiest de bezoeker de vorm met het keuzemenu *Verfijnen* naast *Indeling*
-(2026-11-02): *Inhoudsopgave* (standaard), *Derde chiprij* (`?verfijn=chips`) of *Uit*
-(`?verfijn=uit`). In de test gaat het uit met `--zonder-niveau3`; de test meet de groepjes,
-niet de vorm, dus inhoudsopgave en chiprij scoren gelijk.
+Indeling *G · Hybride met derde niveau* (`?indeling=hybride_verfijnd`): dezelfde tegels en
+subonderwerpen als C. Een rij *Verfijn* verschijnt zodra de bezoeker een subonderwerp kiest (of
+als er maar één is) en er dan nog meer dan 10 artikelen over zijn. A tot en met F hebben die rij
+niet. Op 2026-11-02 was het kort een schermkeuze voor alle varianten (menu *Verfijnen*); die is
+vervangen. In de test scoort G gelijk aan C (14,2 / 30, run `2026-11-03_092655`): geen enkele
+vraag verschilt, want de bezoeker kiest alleen een chip met een woord uit de vraag.
 
-- **Inhoudsopgave**: de lijst klapt in tot de kopjes (met het aantal regels); een vaag of te vol
-  kopje heeft subgroepen per activiteit. Twee kopjes met dezelfde naam onder een ander
-  hoofdstuk blijven twee groepen.
-- **Derde chiprij**: een rij *Verfijn* onder de subonderwerpen.
-
-Beide verschijnen zodra de bezoeker een subonderwerp kiest (of als er maar één is) en er dan
-nog meer dan 10 artikelen over zijn. De groepjes:
+De chips:
 
 - het kopje direct boven het artikel (paragraaf, afdeling, …);
 - is dat kopje vaag (`KOPJE_VAAG`: *Algemeen*, *Inleidende regels*, …), of staan er zelf meer
@@ -159,6 +155,14 @@ Gemeten op productie (2026-10-30, alle niet-rijks Ow-documenten op de 40 punten,
 889 subonderwerpen hebben meer dan 10 artikelen, samen 23.188. De rij verschijnt bij 751
 daarvan. Daarna staat 77% van die artikelen in een groepje van hooguit 10, meestal met 7 chips
 (p90 13, max 48).
+
+### Keuzes over het scherm vallen buiten deze test (2026-11-03)
+
+*Navigatie* (`?nav=boom`: onderwerpenboom met leesvenster in plaats van tegels) en *Kaartpaneel*
+(`?paneel=kenmerken`: de annotaties van het artikel in plaats van de objecten op de locatie)
+veranderen niet welke regels onder welk onderwerp vallen. De test meet ze niet. De boom gebruikt
+de groepering van G (`kopjesGroepen()` in `app.js`) als tussenlaag bij meer dan 10 regels, onder
+elke indeling.
 
 ### Tegelkeuze per tegelset (2026-10-24)
 

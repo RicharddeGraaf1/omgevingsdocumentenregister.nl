@@ -394,7 +394,6 @@ def boom_index(boom):
 # VERFIJN_GRENS regels onder, dan de activiteit(en) van het artikel.
 # Gemeten op prod 2026-10-30 (889 subonderwerpen > 10): 83% van de artikelen komt
 # daarna in een groepje <= 10, mediaan 7 chips.
-NIVEAU3 = True
 VERFIJN_GRENS = 10
 KOPJE_TYPES = {"Hoofdstuk", "Titel", "Afdeling", "Paragraaf", "Subparagraaf", "Subsubparagraaf", "Deel", "Boek", "Divisie"}
 KOPJE_VAAG = re.compile(r"^(algeme(en|ne)( bepalingen| regels)?|inleidende (regels|bepalingen)|aanvraagvereisten|"
@@ -430,7 +429,7 @@ def verfijn_sleutels(arts):
 
 def verfijn(selectie, a, termen, n, via):
     """Kan de bezoeker binnen de selectie (n artikelen) verder naar een verfijn-chip met een woord uit zijn vraag?"""
-    if not NIVEAU3 or n <= VERFIJN_GRENS or a not in selectie:
+    if n <= VERFIJN_GRENS or a not in selectie:
         return n, via
     sl = verfijn_sleutels(selectie)
     tel = {}
@@ -619,11 +618,12 @@ def past_sub(s, verwacht):
     return normsub(s) == normsub(verwacht) or normsub(s) in {normsub(f) for f in VERFIJND_UIT.get(norm(verwacht), ())}
 
 
-def toegang(raak, alle, tegel, sub, modus, sub_fijn=None, termen=None):
+def toegang(raak, alle, tegel, sub, modus, sub_fijn=None, termen=None, fijn=False):
     """Valt een gezocht artikel onder de verwachte tegel, en tussen hoeveel artikelen staat het?
     Met het verwachte subonderwerp telt de sub; zonder (of als het artikel een andere sub heeft) de tegel."""
     per = [(a,) + tegels(a, modus) for a in alle]
     in_tegel = [x for x in per if tegel in x[1]]
+    fijner = verfijn if fijn else (lambda sel, a, termen, n, via: (n, via))   # alleen indeling G
     beste = None
     for a in raak:
         t, s, h = tegels(a, modus)
@@ -633,16 +633,16 @@ def toegang(raak, alle, tegel, sub, modus, sub_fijn=None, termen=None):
         een_sub = len({normsub(x[2] or "") for x in in_tegel}) < 2   # site toont dan meteen niveau 3
         if sub_fijn:   # strenge lezing: alleen de chip die de bezoeker bij deze vraag kiest telt
             if s and normsub(s) == normsub(sub_fijn):
-                n, via = verfijn(in_sub, a, termen, len(in_sub), "chip '%s'" % s)
+                n, via = fijner(in_sub, a, termen, len(in_sub), "chip '%s'" % s)
             else:
                 n, via = len(in_tegel), "onderwerp — niet in chip '%s' maar in '%s'" % (sub_fijn, s or "–")
         elif past_sub(s, sub):
-            n, via = verfijn(in_sub, a, termen, len(in_sub),
-                             "subonderwerp" if normsub(s) == normsub(sub) else "subonderwerp '%s'" % s)
+            n, via = fijner(in_sub, a, termen, len(in_sub),
+                            "subonderwerp" if normsub(s) == normsub(sub) else "subonderwerp '%s'" % s)
         else:
             n, via = len(in_tegel), "onderwerp"
             if een_sub:
-                n, via = verfijn([x[0] for x in in_tegel], a, termen, n, via)
+                n, via = fijner([x[0] for x in in_tegel], a, termen, n, via)
         kand = {"gevonden": True, "artikel": a["nummer"] or a["opschrift"], "n": n, "via": via, "score": gewicht(n)}
         if not beste or kand["score"] > beste["score"] or (kand["score"] == beste["score"] and n < beste["n"]):
             beste = kand
@@ -730,12 +730,9 @@ def toegang_d(raak, alle, tegel, termen, met_actgroep, fn=None):
         n, via = len(in_tegel), "onderwerp"
         for chip in chips:
             if any(term in norm(chip) for term in termen):
-                sel = [x[0] for x in in_tegel if chip in x[2]]
-                m, v = verfijn(sel, a, termen, len(sel), "chip '%s'" % chip)
+                m = len([x for x in in_tegel if chip in x[2]])
                 if m < n:
-                    n, via = m, v
-        if len({c for x in in_tegel for c in x[2]}) < 2:   # één chip: site toont meteen niveau 3
-            n, via = verfijn([x[0] for x in in_tegel], a, termen, n, via)
+                    n, via = m, "chip '%s'" % chip
         kand = {"gevonden": True, "artikel": a["nummer"] or a["opschrift"], "n": n, "via": via, "score": gewicht(n)}
         if not beste or kand["score"] > beste["score"] or (kand["score"] == beste["score"] and n < beste["n"]):
             beste = kand
@@ -823,6 +820,8 @@ def draai_case(api, c, met_vraag=True):
         if c.get("onderwerp"):
             du["toegang"] = {m: toegang(raak, alle, c["onderwerp"], c.get("sub"), m, c.get("sub_fijn"), c.get("termen_d"))
                              for m in ("pad", "imow", "hybride")}
+            du["toegang"]["hybride_verfijnd"] = toegang(raak, alle, c["onderwerp"], c.get("sub"), "hybride", c.get("sub_fijn"),
+                                                        c.get("termen_d"), fijn=True)
             if c.get("onderwerp_d"):
                 du["toegang"].update({m: toegang_d(raak, alle, c["onderwerp_d"], c.get("termen_d"), act)
                                       for m, act in MODI_D.items()})
@@ -877,7 +876,7 @@ def toegang_case(c, documenten, kenmerk=None):
     Negatieve vraag: niet te vinden langs een tegel, maar "terecht leeg" als het kenmerk terecht
     ontbreekt (telt in het totaal 'haalbaar'). Buiten bereik (37, 40): telt in 'haalbaar' niet mee."""
     def geen(reden, **extra):
-        return {m: dict({"gevonden": False, "score": 0.0, "uitleg": reden}, **extra) for m in MODI}
+        return {m: dict({"gevonden": False, "score": 0.0, "uitleg": reden}, **extra) for m in list(MODI) + ["hybride_verfijnd"]}
     if c.get("buiten_scope"):
         return geen("buiten bereik: " + c["buiten_scope"], buiten_scope=True)
     if c.get("negatief"):
@@ -889,7 +888,7 @@ def toegang_case(c, documenten, kenmerk=None):
     if not any(s.get("match") for s in c["documenten"]):
         return geen("geen verwacht artikel om naar te zoeken")
     uit = {}
-    for m in MODI:
+    for m in list(MODI) + ["hybride_verfijnd"]:   # G is geen eigen tegelindeling, wel een eigen toegang
         kand = [d["toegang"][m] for d in documenten if d.get("toegang") and m in d["toegang"]]
         if kand:
             uit[m] = max(kand, key=lambda t: (t["score"], -t.get("n", 0)))
@@ -939,7 +938,8 @@ def excel_ja(v):
 VARIANTEN = [("pad", "A · kopjes (opschriftpad)"), ("imow", "B · label van de overheid (IMOW-annotatie)"),
              ("hybride", "C · kopjes, anders label (hybride, site-standaard)"),
              ("stelsel", "D · negen tegels"), ("meervoudig", "E · negen tegels, onder elke passende tegel"),
-             ("stelsel_act", "F · negen tegels + soort activiteit")]
+             ("stelsel_act", "F · negen tegels + soort activiteit"),
+             ("hybride_verfijnd", "G · C met derde niveau (kopje, anders activiteit)")]
 
 
 def toegang_cel(t):
@@ -1002,7 +1002,7 @@ def rapport(resultaten, golden, meta):
     r = ["# RoM-benchmark — run %s" % meta["start"], "",
          "API: `%s` · %d cases · %d API-aanroepen · %.0f s%s" % (meta["api"], len(resultaten), meta["aanroepen"], meta["duur"],
              (" · **tegelindeling van vóór 2026-10-23** (water zonder sub → Waterkeringen)" if meta.get("water_als_waterkering") else "") +
-             (" · niveau 3 (verfijnen) aan" if meta.get("niveau3") else " · **zonder niveau 3**")), "",
+             ""), "",
          "## Totalen", "", "| Route | PASS | DEELS | FAIL | overig | toetsbaar |", "|---|---|---|---|---|---|"]
     for k, naam in KOLOMMEN:
         st = [x["routes"].get(k, "n.v.t.") for x in resultaten]
@@ -1067,13 +1067,10 @@ def main():
     ap.add_argument("--zonder-vraag", action="store_true", help="sla de vraagroute over (scheelt de meeste tijd)")
     ap.add_argument("--water-als-waterkering", action="store_true",
                     help="tegelindeling van vóór 2026-10-23 (water zonder sub → Waterkeringen), zoals het Excel van 20-10 zag")
-    ap.add_argument("--zonder-niveau3", action="store_true",
-                    help="geen verfijn-chips onder het subonderwerp (zoals de site met ?niveau3=uit)")
     ap.add_argument("--uit", default=str(HIER / "runs"))
     a = ap.parse_args()
-    global WATER_OUD, NIVEAU3
+    global WATER_OUD
     WATER_OUD = a.water_als_waterkering
-    NIVEAU3 = not a.zonder_niveau3
 
     golden = json.load(open(a.golden, encoding="utf-8"))
     if a.case:
@@ -1092,7 +1089,7 @@ def main():
         print("%3d  %s  %s" % (c["id"], "  ".join("%s=%s" % (n, x["routes"].get(k, "-")) for k, n in KOLOMMEN),
                                ("FOUT " + x["fout"][:80]) if x.get("fout") else ""), flush=True)
 
-    meta = {"start": start.strftime("%Y-%m-%d %H:%M"), "api": a.api, "water_als_waterkering": WATER_OUD, "niveau3": NIVEAU3, "aanroepen": api.aanroepen,
+    meta = {"start": start.strftime("%Y-%m-%d %H:%M"), "api": a.api, "water_als_waterkering": WATER_OUD, "aanroepen": api.aanroepen,
             "duur": (datetime.datetime.now() - start).total_seconds(), "golden": a.golden, "cases": len(golden)}
     doel = Path(a.uit) / start.strftime("%Y-%m-%d_%H%M%S")
     doel.mkdir(parents=True, exist_ok=False)   # nooit een eerdere run overschrijven

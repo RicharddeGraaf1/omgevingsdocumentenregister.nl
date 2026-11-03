@@ -25,6 +25,7 @@
 
   var map, bron, locatie = null;
   var werkBron, werkLaag, werking = {};   // locatie_id -> {kleur, vulling, dekkend}
+  var objLaag, wroLaag, objecten = {};    // kaartpaneel: id -> vulkleur
 
   function cssKleur(naam, alfa) {
     var v = getComputedStyle(document.documentElement).getPropertyValue(naam).trim() || '#4256b8';
@@ -70,6 +71,8 @@
             })
           })
         }),
+        objectLaag('locaties'),
+        objectLaag('planobjecten'),
         werkingLaag(),
         new ol.layer.Vector({ className: 'overlay', source: bron, style: stijl })
       ],
@@ -176,6 +179,48 @@
     return new ol.style.Style({ fill: new ol.style.Fill({ color: a.dekkend ? a.waas : a.vulling }) });
   }
 
+  /* Het kaartpaneel: dezelfde tegels (Ow-locaties en Wro-planobjecten), andere keuze.
+     Ook hier geen contour en minZoom 9, om dezelfde redenen als hierboven. */
+  function objectLaag(laag) {
+    var l = new ol.layer.VectorTile({
+      className: 'object-' + laag, renderMode: 'vector', visible: false, minZoom: 9,
+      // Vaste tekenvolgorde. Doorzichtige vlakken mengen afhankelijk van de volgorde, en die
+      // verschilt per tegel: zonder deze regel verspringt de kleur op elke tegelrand.
+      renderOrder: function (a, b) { return String(a.get('id')) < String(b.get('id')) ? -1 : 1; },
+      source: new ol.source.VectorTile({
+        format: new ol.format.MVT(),
+        projection: RD,
+        tileGrid: new ol.tilegrid.TileGrid({
+          origin: [-285401.92, 903401.92],
+          resolutions: RESOLUTIES,
+          extent: RD.getExtent(),
+          tileSize: 256
+        }),
+        url: '/api/v1/tiles/' + laag + '/{z}/{x}/{y}.mvt'
+      }),
+      style: function (feature) {
+        var kleur = objecten[feature.get('id')];
+        return kleur ? new ol.style.Style({ fill: new ol.style.Fill({ color: kleur }) }) : null;
+      }
+    });
+    if (laag === 'locaties') objLaag = l; else wroLaag = l;
+    return l;
+  }
+
+  /** kaart: {id -> vulkleur}. Id's van Wro-planobjecten beginnen met NL.IMRO. */
+  function toonObjecten(kaart) {
+    objecten = kaart || {};
+    var ids = Object.keys(objecten);
+    var wro = ids.filter(function (i) { return i.indexOf('NL.IMRO') === 0; }).length;
+    if (objLaag) { objLaag.setVisible(ids.length > wro); objLaag.changed(); }
+    if (wroLaag) { wroLaag.setVisible(wro > 0); wroLaag.changed(); }
+  }
+
+  /** Na een wijziging in de kolommen (leesvenster open of dicht). */
+  function herschaal() {
+    if (map) map.updateSize();
+  }
+
   /** lijst: [{id, soort}] — soort 'gebiedsaanwijzing' of 'activiteit'. */
   function toonWerkingsgebieden(lijst) {
     werking = {};
@@ -213,5 +258,5 @@
   }
 
   global.RomKaart = { init: init, toonLocatie: toonLocatie, toonPerceel: toonPerceel,
-    naarLocatie: naarLocatie, toonWerkingsgebieden: toonWerkingsgebieden };
+    naarLocatie: naarLocatie, toonWerkingsgebieden: toonWerkingsgebieden, toonObjecten: toonObjecten, herschaal: herschaal };
 })(window);
