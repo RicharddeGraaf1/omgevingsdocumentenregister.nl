@@ -443,6 +443,7 @@
     legenda.hidden = false;
     $('legenda-perceel').textContent = 'Perceel';
     paneel.aan = {}; paneel.kenmerkAan = {}; paneel.zoek = '';
+    paneel.alleenArtikel = false; paneel.voorArtikel = null;
     staat.artikel = null;
     tekenPaneel();
 
@@ -2000,6 +2001,7 @@
     RomKaart.toonWerkingsgebieden([]);
     var wl = $('werking-legenda');
     if (wl) { leeg(wl); wl.hidden = true; }
+    if (paneel.alleenArtikel) herstelObjecten();
     if (staat.paneel === 'kenmerken') { RomKaart.toonObjecten({}); RomKaart.toonPlangrens(null); }
   }
 
@@ -2022,6 +2024,8 @@
       return;
     }
     RomKaart.toonWerkingsgebieden(art.locaties || []);
+    // De knop blijft aan bij het volgende artikel: de bezoeker leest dan zo door.
+    if (paneel.alleenArtikel) pasArtikelToeOpPaneel(art);
     if (!legenda) return;
     leeg(legenda);
     if (!(art.locaties || []).length) {
@@ -2140,6 +2144,7 @@
     }
 
     function vul() {
+      body.appendChild(alleenArtikelKnop(art));
       var lijst = el('dl', { class: 'kenmerken-lijst' });
       body.appendChild(lijst);
 
@@ -2242,6 +2247,8 @@
       vulKenmerkenPaneel(art.plek, art);
     } else if (art.wid && !art.kenmerkenBron) {
       art.plek.appendChild(kenmerkenBlok(art));
+    } else if (art.wroKenmerken) {
+      art.plek.appendChild(wroKenmerkenBlok(art));
     }
   }
 
@@ -2635,6 +2642,7 @@
   // bezoeker zelf aanzet.
   var PANEEL_MAX = 20;
   var paneel = { open: window.innerWidth > 900, aan: {}, kenmerkAan: {}, kenmerkenDicht: false, zoek: '', alles: {},
+    alleenArtikel: false, voorArtikel: null,
     dicht: { act: true, ong: true }, volgnr: 0 };
 
   /** Zelfde naam, zelfde kleur; dezelfde hash als de OCD-viewer (core/kleur.ts). */
@@ -2686,10 +2694,14 @@
 
   function metPunt(lijst) { return lijst.filter(Boolean).join(' · '); }
 
+  function normNaam(w) {
+    var waarde = w.waarde != null ? ' ' + String(w.waarde).replace('.', ',') + (w.eenheid ? ' ' + w.eenheid : '') : '';
+    return (w.naam || w.type_norm || '') + waarde;
+  }
+
   function objectSecties(d) {
     var norm = function (w) {
-      var waarde = w.waarde != null ? ' ' + String(w.waarde).replace('.', ',') + (w.eenheid ? ' ' + w.eenheid : '') : '';
-      return { naam: (w.naam || w.type_norm || '') + waarde, onder: metPunt([w.type_norm, w.regeling]), ids: w.locatie_ids || [] };
+      return { naam: normNaam(w), onder: metPunt([w.type_norm, w.regeling]), ids: w.locatie_ids || [] };
     };
     var secties = [
       paneelSectie('wro', 'Bestemmingen (Wro)', true, d.wro_bestemmingen, function (x) {
@@ -2709,7 +2721,48 @@
     ];
     // Structuuractiviteiten (aansluitdocumenten, "gereguleerd in …") achteraan.
     secties[3].rijen.sort(function (p, q) { return ACT_STRUCTUUR.test(p.naam) - ACT_STRUCTUUR.test(q.naam); });
-    return secties.filter(function (s) { return s.rijen.length; });
+    var uit = secties.filter(function (s) { return s.rijen.length; });
+    if (paneel.alleenArtikel && staat.artikel) {
+      var extra = artikelSectie(staat.artikel, uit);
+      if (extra.rijen.length) uit.unshift(extra);
+    }
+    return uit;
+  }
+
+  /** Wat het artikel noemt maar niet in de lijst staat. De lijst op een punt laat koepel-
+   *  activiteiten weg (meest-specifieke-wint in /v1/viewer/objecten), en het gebied dat daaraan
+   *  hangt ook: bij Dam 1 vond de knop zo bij 215 van de 697 artikelen niets. */
+  function artikelSectie(art, secties) {
+    var rijen = [], perId = {}, namen = {};
+    secties.forEach(function (s) {
+      s.rijen.forEach(function (r) {
+        namen[r.sleutel] = true;
+        if (s.id === 'ong' || s.id === 'wro') r.ids.forEach(function (i) { perId[i] = true; });
+      });
+    });
+    function voeg(r) {
+      if (!rijen.some(function (x) { return x.naam === r.naam; })) {
+        rijen.push({ naam: r.naam, onder: r.onder, ids: r.ids, plangrens: r.plangrens, sleutel: 'art|' + r.naam });
+      }
+    }
+    if (art.wroKenmerken) {
+      var d = art.wroKenmerken;
+      (d.objecten || []).forEach(function (o) {
+        if (!o.ids.some(function (i) { return perId[i]; })) voeg({ naam: o.naam, onder: o.object_type, ids: o.ids });
+      });
+      if (d.planbreed || !(d.objecten || []).length) {
+        voeg({ naam: 'Plangebied: ' + ((d.plan || {}).naam || ''), onder: (d.plan || {}).type_plan, ids: [], plangrens: d.plangrens });
+      }
+    } else {
+      var soort = { 'k-act': 'act', 'k-ga': 'ga', 'k-norm': 'norm' };
+      owKenmerkSecties(art).forEach(function (s) {
+        s.rijen.forEach(function (r) {
+          var aanwezig = s.id === 'k-wg' ? r.ids.some(function (i) { return perId[i]; }) : namen[soort[s.id] + '|' + r.naam];
+          if (!aanwezig) voeg(r);
+        });
+      });
+    }
+    return { id: 'art', titel: 'Uit dit artikel', aan: true, rijen: rijen };
   }
 
   function vulObjectenPaneel(body, telling, nr) {
@@ -2728,11 +2781,14 @@
       if (!alle.length) { body.appendChild(el('p', { class: 'kp-leeg', text: 'Geen objecten op deze locatie.' })); RomKaart.toonObjecten({}); return; }
       function aantalAan() { return alle.filter(function (r) { return paneel.aan[r.sleutel]; }).length; }
       function pasToe() {
-        var kaart = {};
+        var kaart = {}, grens = null;
         alle.forEach(function (r) {
-          if (paneel.aan[r.sleutel]) r.ids.forEach(function (i) { kaart[i] = kleurVoorNaam(r.naam).vlak; });
+          if (!paneel.aan[r.sleutel]) return;
+          r.ids.forEach(function (i) { kaart[i] = vlakVoor(i, r.naam); });
+          if (r.plangrens) grens = r.plangrens;
         });
         RomKaart.toonObjecten(kaart);
+        RomKaart.toonPlangrens(grens);
         telling.textContent = nl(aantalAan()) + ' van ' + nl(alle.length) + ' aan';
         bulk.textContent = aantalAan() ? 'Alles uit' : 'Standaard aan';
       }
@@ -2754,6 +2810,10 @@
         var q = paneel.zoek.trim().toLowerCase();
         secties.forEach(function (s) {
           var rijen = q ? s.rijen.filter(function (r) { return r.naam.toLowerCase().indexOf(q) >= 0; }) : s.rijen;
+          // Bij de knop eerst wat aanstaat: anders valt een activiteit achter "Toon nog".
+          if (paneel.alleenArtikel) {
+            rijen = rijen.slice().sort(function (p, q2) { return !!paneel.aan[q2.sleutel] - !!paneel.aan[p.sleutel]; });
+          }
           if (!rijen.length) return;
           var dicht = !q && paneel.dicht[s.id];
           lijst.appendChild(paneelKop(s.titel, s.rijen.filter(function (r) { return paneel.aan[r.sleutel]; }).length + '/' + s.rijen.length, dicht, function () {
@@ -2790,9 +2850,9 @@
     var kleur = kleurVoorNaam(r.naam);
     var vink = el('input', { type: 'checkbox' });
     vink.checked = aan;
-    vink.disabled = !r.ids.length;
+    vink.disabled = !r.ids.length && !r.plangrens;
     vink.addEventListener('change', function () { opWissel(vink.checked); });
-    return el('label', { class: 'kp-rij' + (r.ids.length ? '' : ' kp-rij-uit') }, [
+    return el('label', { class: 'kp-rij' + (r.ids.length || r.plangrens ? '' : ' kp-rij-uit') }, [
       vink,
       el('span', { class: 'kp-staal', style: 'background:' + kleur.vlak + ';border-color:' + kleur.rand }),
       el('span', { class: 'kp-tekst' }, [
@@ -2806,6 +2866,125 @@
   function vlakVoor(id, naam) {
     var k = kleurVoorNaam(naam).vlak;
     return String(id).indexOf('.ambtsgebied.') >= 0 ? k.replace(/\/ [\d.]+\)$/, '/ 0.08)') : k;
+  }
+
+  // ── Alleen de objecten van dit artikel in het objectenpaneel ──
+  /** Welke rijen van het objectenpaneel horen bij dit artikel? Activiteiten, gebiedsaanwijzingen
+   *  en normen op soort en naam: honderden activiteiten delen hetzelfde ambtsgebied, dus op
+   *  gebied koppelen zou ze allemaal aanvinken. Het werkingsgebied en Wro-objecten op id. */
+  function rijenVanArtikel(art, secties) {
+    var k = art.kenmerken || {}, wro = art.wroKenmerken;
+    function naamset(lijst, f) { var u = {}; (lijst || []).forEach(function (x) { u[f(x)] = true; }); return u; }
+    var acts = naamset(k.activiteiten, function (x) { return x.naam; });
+    var gas = naamset(k.gebiedsaanwijzingen, function (x) { return x.naam || x.type; });
+    var normen = naamset(k.normwaarden, normNaam);
+    var ids = naamset(k.werkingsgebieden, function (x) { return x.locatie_id; });
+    var wroIds = {};
+    ((wro && wro.objecten) || []).forEach(function (o) { o.ids.forEach(function (i) { wroIds[i] = true; }); });
+    function raakt(r, set) { return r.ids.some(function (i) { return set[i]; }); }
+    var uit = {};
+    secties.forEach(function (s) {
+      s.rijen.forEach(function (r) {
+        var ja = s.id === 'act' ? acts[r.naam] : s.id === 'ga' ? gas[r.naam] : s.id === 'norm' ? normen[r.naam]
+          : s.id === 'ong' ? raakt(r, ids) : s.id === 'wro' ? raakt(r, wroIds) : s.id === 'art';
+        if (ja) uit[r.sleutel] = true;
+      });
+    });
+    return uit;
+  }
+
+  /** Vink in het objectenpaneel alleen de objecten van dit artikel aan. */
+  function pasArtikelToeOpPaneel(art) {
+    Promise.all([objectenOpPunt(), haalKenmerken(art)]).then(function (r) {
+      var d = r[0];
+      if (!d || !paneel.alleenArtikel || staat.artikel !== art) return;
+      var secties = objectSecties(d), relevant = rijenVanArtikel(art, secties), n = Object.keys(relevant).length;
+      if (!paneel.voorArtikel) {
+        paneel.voorArtikel = { aan: {}, dicht: {} };
+        secties.forEach(function (s) {
+          paneel.voorArtikel.dicht[s.id] = paneel.dicht[s.id];
+          s.rijen.forEach(function (x) {
+            paneel.voorArtikel.aan[x.sleutel] = paneel.aan[x.sleutel] === undefined ? s.aan : paneel.aan[x.sleutel];
+          });
+        });
+      }
+      secties.forEach(function (s) {
+        var iets = false;
+        s.rijen.forEach(function (x) {
+          paneel.aan[x.sleutel] = !!relevant[x.sleutel];
+          iets = iets || !!relevant[x.sleutel];
+        });
+        if (iets) paneel.dicht[s.id] = false;
+      });
+      tekenPaneel();
+      toonAlleenStand(n === 1 ? '1 object uit dit artikel aangevinkt.' : nl(n) + ' objecten uit dit artikel aangevinkt.');
+    });
+  }
+
+  /** Terug naar wat er aanstond vóór de knop. */
+  function herstelObjecten() {
+    paneel.alleenArtikel = false;
+    if (paneel.voorArtikel) {
+      paneel.aan = paneel.voorArtikel.aan;
+      paneel.dicht = Object.assign(paneel.dicht, paneel.voorArtikel.dicht);
+      paneel.voorArtikel = null;
+      tekenPaneel();
+    }
+    toonAlleenStand('');
+  }
+
+  function toonAlleenStand(tekst) {
+    Array.prototype.forEach.call(document.querySelectorAll('.kp-alleen'), function (l) {
+      l.querySelector('input').checked = paneel.alleenArtikel;
+      l.querySelector('.kp-alleen-stand').textContent = paneel.alleenArtikel ? tekst : '';
+    });
+  }
+
+  function alleenArtikelKnop(art) {
+    var vink = el('input', { type: 'checkbox' });
+    vink.checked = paneel.alleenArtikel;
+    vink.addEventListener('change', function () {
+      if (vink.checked) {
+        paneel.alleenArtikel = true;
+        pasArtikelToeOpPaneel(art);
+      } else {
+        herstelObjecten();
+      }
+    });
+    return el('label', { class: 'kp-alleen' }, [
+      vink,
+      el('span', { text: 'Alleen relevante objecten vanuit dit artikel tonen' }),
+      el('span', { class: 'kp-alleen-stand muted' })
+    ]);
+  }
+
+  /** Wro in de stand objectenpaneel: het plan, en dezelfde knop. */
+  function wroKenmerkenBlok(art) {
+    var d = art.wroKenmerken || {}, plan = d.plan || {}, n = (d.objecten || []).length;
+    var blok = el('div', { class: 'kenmerken' });
+    var kop = el('button', { type: 'button', class: 'kenmerken-kop', 'aria-expanded': 'false' }, [
+      icoon(PAD_RECHTS), el('span', { class: 'label', text: 'Kenmerken' }),
+      el('span', { class: 'muted', text: n ? nl(n) + (n === 1 ? ' planobject' : ' planobjecten') : 'geldt in het hele plan' })
+    ]);
+    var body = el('div', { class: 'kenmerken-body', hidden: true });
+    kop.addEventListener('click', function () {
+      var open = kop.getAttribute('aria-expanded') !== 'true';
+      kop.setAttribute('aria-expanded', open ? 'true' : 'false');
+      blok.classList.toggle('open', open);
+      body.hidden = !open;
+    });
+    body.appendChild(alleenArtikelKnop(art));
+    var lijst = el('dl', { class: 'kenmerken-lijst' }, [
+      el('dt', { text: 'Plan' }), el('dd', { text: metPunt([plan.naam, plan.planstatus, plan.datum]) })
+    ]);
+    (d.objecten || []).forEach(function (o) {
+      lijst.appendChild(el('dt', { text: o.object_type }));
+      lijst.appendChild(el('dd', { text: o.naam + (o.op_punt ? ' (op uw locatie)' : '') }));
+    });
+    body.appendChild(lijst);
+    blok.appendChild(kop);
+    blok.appendChild(body);
+    return blok;
   }
 
   /** Het kenmerkenpaneel, bij de tekst. Het werkingsgebied staat altijd in het paneel en aan
@@ -2864,6 +3043,16 @@
   }
 
   function owSecties(art, body) {
+    var k = art.kenmerken || { regels: [] };
+    if (art.categorie) body.appendChild(el('p', { class: 'kp-onder', text: 'Onderwerp: ' + art.categorie + (art.sub ? ' › ' + art.sub : '') }));
+    if (regelTekst(k)) body.appendChild(el('p', { class: 'kp-onder', text: 'Juridische regel: ' + regelTekst(k) }));
+    if (themaTekst(k)) body.appendChild(el('p', { class: 'kp-onder', text: 'Thema: ' + themaTekst(k) }));
+    if (!(k.regels || []).length) body.appendChild(el('p', { class: 'kp-onder', text: 'Bij dit artikel is geen juridische regel gepubliceerd. Dat is hoe het in het DSO staat.' }));
+    return { secties: owKenmerkSecties(art), plangrens: null };
+  }
+
+  /** De annotaties van een artikel als paneelsecties. */
+  function owKenmerkSecties(art) {
     var k = art.kenmerken || { activiteiten: [], gebiedsaanwijzingen: [], normwaarden: [], regels: [], werkingsgebieden: [] };
     var locs = art.locaties || [];
     function idsVan(soort, naam, eigen) {
@@ -2875,11 +3064,7 @@
     var gebieden = k.werkingsgebieden && k.werkingsgebieden.length ? k.werkingsgebieden
       : (art.regelingsgebied ? [{ locatie_id: art.regelingsgebied.locatie_id, naam: 'Hele regelingsgebied' +
           (art.regelingsgebied.naam ? ': ' + art.regelingsgebied.naam : ''), type: art.regelingsgebied.type }] : []);
-    if (art.categorie) body.appendChild(el('p', { class: 'kp-onder', text: 'Onderwerp: ' + art.categorie + (art.sub ? ' › ' + art.sub : '') }));
-    if (regelTekst(k)) body.appendChild(el('p', { class: 'kp-onder', text: 'Juridische regel: ' + regelTekst(k) }));
-    if (themaTekst(k)) body.appendChild(el('p', { class: 'kp-onder', text: 'Thema: ' + themaTekst(k) }));
-    if (!(k.regels || []).length) body.appendChild(el('p', { class: 'kp-onder', text: 'Bij dit artikel is geen juridische regel gepubliceerd. Dat is hoe het in het DSO staat.' }));
-    var secties = [
+    return [
       paneelSectie('k-wg', 'Werkingsgebied', true, gebieden, function (x) {
         return { naam: x.naam || x.type || 'Werkingsgebied', onder: x.naam ? x.type : null, ids: [x.locatie_id] };
       }),
@@ -2891,11 +3076,9 @@
         return { naam: naam, onder: metPunt([x.type, x.groep]), ids: idsVan('gebiedsaanwijzing', naam, x.locatie_id) };
       }),
       paneelSectie('k-norm', 'Omgevingsnormen', false, k.normwaarden, function (w) {
-        var waarde = w.waarde != null ? ' ' + String(w.waarde).replace('.', ',') + (w.eenheid ? ' ' + w.eenheid : '') : '';
-        return { naam: (w.naam || w.type_norm || '') + waarde, onder: w.type_norm, ids: w.locatie_id ? [w.locatie_id] : [] };
+        return { naam: normNaam(w), onder: w.type_norm, ids: w.locatie_id ? [w.locatie_id] : [] };
       })
     ].filter(function (s) { return s.rijen.length; });
-    return { secties: secties, plangrens: null };
   }
 
   var WRO_SOORT = { Maatvoering: 'k-maat', Figuur: 'k-fig' };
@@ -3091,6 +3274,7 @@
     });
     pan.addEventListener('change', function () {
       staat.paneel = PANEEL_VORMEN[pan.value] ? pan.value : 'objecten';
+      if (paneel.alleenArtikel) herstelObjecten();
       zetPaneelKlasse();
       bewaar();
       RomKaart.toonObjecten({});

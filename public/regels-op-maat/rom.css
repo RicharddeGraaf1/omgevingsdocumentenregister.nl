@@ -442,6 +442,13 @@ body.boom-weergave.lees-open .werkvlak { grid-template-columns: minmax(0, 380px)
 .kenmerkenpaneel .kp-body { border-top: 1px solid var(--lijn-2); max-height: none; }
 .kenmerkenpaneel .kp-sectie { background: none; }
 
+/* De knop in het inklapblok Kenmerken: alleen de objecten van dit artikel */
+.kp-alleen { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 3px 7px; margin: 2px 0 8px; font-size: 13px; cursor: pointer; }
+.kp-alleen input { flex: none; margin: 2px 0 0; }
+.kp-alleen > span:first-of-type { flex: 1; min-width: 0; }
+.kp-alleen-stand { flex-basis: 100%; padding-left: 20px; font-size: 12px; }
+.kp-alleen-stand:empty { display: none; }
+
 /* Verwijzingen: terug naar waar de bezoeker vandaan kwam */
 .lees-terug { display: inline-flex; align-items: center; gap: 6px; margin-bottom: 10px; padding: 4px 8px 4px 2px; border: 0; background: none; font: inherit; font-size: 13.5px; color: var(--acc); text-align: left; cursor: pointer; }
 .lees-terug:hover { text-decoration: underline; }
