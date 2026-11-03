@@ -180,7 +180,7 @@
   function locatiesUitBoom(boom) {
     var per = {};
     function vak(art) {
-      return per[art] || (per[art] = { locaties: [], activiteiten: [], gebiedsaanwijzingen: [], normwaarden: [] });
+      return per[art] || (per[art] = { locaties: [], activiteiten: [], gebiedsaanwijzingen: [], normwaarden: [], regels: [], werkingsgebieden: [] });
     }
     function voegLocatie(art, item, soort) {
       if (!item || !item.locatie_id) return;
@@ -210,10 +210,23 @@
           voegLocatie(a, x, 'norm');
           uniek(vak(a).normwaarden, x, function (y) { return (y.naam || '') + '|' + y.waarde + '|' + (y.locatie_id || ''); });
         });
+        (ann.regels || []).forEach(function (x) {
+          uniek(vak(a).regels, x, function (y) { return y.type + '|' + y.idealisatie + '|' + (y.themas || []).join(); });
+        });
+        (ann.werkingsgebieden || []).forEach(function (x) {
+          uniek(vak(a).werkingsgebieden, x, function (y) { return y.locatie_id; });
+        });
       }
       (knoop.kinderen || []).forEach(function (k) { loop(k, a); });
     }
     (boom || []).forEach(function (k) { loop(k, null); });
+    // Elke juridische regel heeft een werkingsgebied, ook zonder activiteit. Achteraan, zodat een
+    // gebied dat ook bij een activiteit of gebiedsaanwijzing hoort die naam en kleur houdt.
+    Object.keys(per).forEach(function (a) {
+      per[a].werkingsgebieden.forEach(function (w) {
+        voegLocatie(a, { locatie_id: w.locatie_id, naam: w.naam, type: w.type }, 'werkingsgebied');
+      });
+    });
     return per;
   }
 
@@ -1261,6 +1274,7 @@
         var vak = (artWid && locatiesPerArtikel[artWid]) || null;
         a.locaties = vak ? vak.locaties : [];
         a.kenmerken = vak;
+        a.kenmerkenBron = (doc.bron_type === 'ow' && !boom && artWid) ? doc.bron_id : null;
         a.kopje = (artWid && kopjes.kop[artWid]) || null;
         a.kopjePad = (artWid && kopjes.pad[artWid]) || [];
         artikelen.push(a);
@@ -1975,6 +1989,9 @@
    *  bezoeker zet de annotaties zelf aan, dus de kaart begint leeg (als de DSO-viewer). */
   function zetArtikelOpKaart(art) {
     staat.artikel = art;
+    if (art.kenmerkenBron) {
+      haalKenmerken(art).then(function () { if (staat.artikel === art) zetArtikelOpKaart(art); });
+    }
     var legenda = $('werking-legenda');
     if (staat.paneel === 'kenmerken') {
       RomKaart.toonWerkingsgebieden([]);
@@ -2012,11 +2029,53 @@
     }
   }
 
+  /** De grote landelijke regelingen laden geen boom (megabytes): daar halen we de kenmerken
+   *  pas op als een artikel opengaat. Een lid-wId is altijd echt; de artikel-wId is daar
+   *  afgeleid uit de tekst van de wId. */
+  function haalKenmerken(art) {
+    if (!art.kenmerkenBron) return Promise.resolve();
+    if (!art.kenmerkenLaden) {
+      var wid = (!art.eigenTekst && art.leden.length) ? art.leden[0].wid : art.wid;
+      art.kenmerkenLaden = api('/v1/viewer/regeling/' + encodeURIComponent(art.kenmerkenBron) +
+        '/artikel-annotaties?wid=' + encodeURIComponent(wid)).then(function (d) {
+          var vak = locatiesUitBoom([{ type: 'Artikel', wid: art.wid, annotaties: d.annotaties }])[art.wid] || null;
+          art.kenmerken = vak;
+          art.locaties = vak ? vak.locaties : [];
+          art.kenmerkenBron = null;
+        }).catch(function () {
+          art.kenmerkenBron = null;
+          art.kenmerkenFout = true;
+        });
+    }
+    return art.kenmerkenLaden;
+  }
+
+  var REGEL_LABEL = { RegelVoorIedereen: 'Regel voor iedereen', Instructieregel: 'Instructieregel',
+    Omgevingswaardegel: 'Omgevingswaarderegel', Omgevingswaarderegel: 'Omgevingswaarderegel' };
+
+  /** "Regel voor iedereen (exact)", elk type één keer. */
+  function regelTekst(k) {
+    var gezien = [];
+    (k.regels || []).forEach(function (r) {
+      var t = (REGEL_LABEL[r.type] || r.type || '') + (r.idealisatie ? ' (' + r.idealisatie + ')' : '');
+      if (t && gezien.indexOf(t) < 0) gezien.push(t);
+    });
+    return gezien.join(' · ');
+  }
+
+  function themaTekst(k) {
+    var gezien = [];
+    (k.regels || []).forEach(function (r) {
+      (r.themas || []).forEach(function (t) { if (gezien.indexOf(t) < 0) gezien.push(t); });
+    });
+    return gezien.join(' · ');
+  }
+
   /** Kenmerken van een artikel: wat het DSO erbij annoteert. Uit de
    *  documentboom (activiteiten, gebiedsaanwijzingen, normwaarden). "Type regel"
    *  zit daar niet in en staat er daarom ook niet — liever niets dan een gok. */
   function kenmerkenBlok(art) {
-    var k = art.kenmerken || { activiteiten: [], gebiedsaanwijzingen: [], normwaarden: [] };
+    var k = art.kenmerken || { activiteiten: [], gebiedsaanwijzingen: [], normwaarden: [], regels: [], werkingsgebieden: [] };
     var blok = el('div', { class: 'kenmerken' });
     var kop = el('button', { type: 'button', class: 'kenmerken-kop', 'aria-expanded': 'false' }, [
       icoon(PAD_RECHTS), el('span', { class: 'label', text: 'Kenmerken' }),
@@ -2039,7 +2098,8 @@
       if (k.activiteiten.length) d.push(k.activiteiten.length + (k.activiteiten.length === 1 ? ' activiteit' : ' activiteiten'));
       if (k.gebiedsaanwijzingen.length) d.push(k.gebiedsaanwijzingen.length + ' gebiedsaanwijzing' + (k.gebiedsaanwijzingen.length === 1 ? '' : 'en'));
       if (k.normwaarden.length) d.push(k.normwaarden.length + (k.normwaarden.length === 1 ? ' norm' : ' normen'));
-      if (!d.length) d.push('niet geannoteerd in dit plan');
+      if (!d.length && art.kenmerkenFout) d.push('niet opgehaald');
+      else if (!d.length) d.push(k.werkingsgebieden.length ? 'werkingsgebied' : 'geen juridische regel');
       return d.join(' · ');
     }
 
@@ -2063,6 +2123,9 @@
         rij('Onderwerp', 'niet ingedeeld', [el('span', { class: 'muted', text: ' — ' + nietIngedeeldTekst() })])
           .forEach(function (n) { lijst.appendChild(n); });
       }
+
+      if (regelTekst(k)) rij('Juridische regel', regelTekst(k)).forEach(function (n) { lijst.appendChild(n); });
+      if (themaTekst(k)) rij('Thema', themaTekst(k)).forEach(function (n) { lijst.appendChild(n); });
 
       // Werkingsgebied (fase 8): waar geldt dit artikel?
       if (art.locaties.length) {
@@ -2123,9 +2186,10 @@
         });
       }
 
-      if (!k.activiteiten.length && !k.gebiedsaanwijzingen.length && !k.normwaarden.length) {
-        body.appendChild(el('p', { class: 'leeg-melding', text:
-          'Dit artikel is in dit plan niet geannoteerd met een activiteit, gebiedsaanwijzing of norm. Dat is hoe het gepubliceerd is, niet iets dat hier ontbreekt.' }));
+      if (art.kenmerkenFout) {
+        body.appendChild(el('p', { class: 'leeg-melding', text: 'De kenmerken van dit artikel konden niet worden opgehaald.' }));
+      } else if (!k.regels.length) {
+        body.appendChild(el('p', { class: 'leeg-melding', text: 'Bij dit artikel is geen juridische regel gepubliceerd. Dat is hoe het in het DSO staat, niet iets dat hier ontbreekt.' }));
       }
     }
   }
@@ -2138,7 +2202,11 @@
       doel.appendChild(el('div', { class: 'lid' }, [el('span', { class: 'lid-nr' }), blok]));
       return;
     }
-    if (art.wid) doel.appendChild(kenmerkenBlok(art));
+    if (art.wid) {
+      var plek = el('div');
+      doel.appendChild(plek);
+      haalKenmerken(art).then(function () { plek.appendChild(kenmerkenBlok(art)); });
+    }
 
     var delen = art.leden.length ? art.leden.slice() : [];
     if (art.eigenTekst || !delen.length) delen.unshift({ nummer: '', wid: art.wid });
@@ -2581,7 +2649,7 @@
       body.appendChild(el('p', { class: 'kp-leeg', text: 'Open een artikel om te zien wat erbij geannoteerd is. U zet de annotaties zelf aan op de kaart.' }));
       return;
     }
-    var k = art.kenmerken || { activiteiten: [], gebiedsaanwijzingen: [], normwaarden: [] };
+    var k = art.kenmerken || { activiteiten: [], gebiedsaanwijzingen: [], normwaarden: [], regels: [], werkingsgebieden: [] };
     var locs = art.locaties || [];
     function idsVan(soort, naam, eigen) {
       var ids = eigen ? [eigen] : [];
@@ -2589,6 +2657,9 @@
       return ids;
     }
     var secties = [
+      paneelSectie('k-wg', 'Werkingsgebied', false, k.werkingsgebieden, function (x) {
+        return { naam: x.naam || x.type || 'Werkingsgebied', onder: x.naam ? x.type : null, ids: [x.locatie_id] };
+      }),
       paneelSectie('k-act', 'Activiteiten', false, k.activiteiten, function (x) {
         return { naam: x.naam, onder: metPunt([x.kwalificatie, x.groep && x.groep !== 'overig' ? x.groep : null]), ids: idsVan('activiteit', x.naam, x.locatie_id) };
       }),
@@ -2615,7 +2686,12 @@
     }
     body.appendChild(el('p', { class: 'kp-artikel', text: artikelNaam(art) }));
     if (art.categorie) body.appendChild(el('p', { class: 'kp-onder', text: 'Onderwerp: ' + art.categorie + (art.sub ? ' › ' + art.sub : '') }));
-    if (!alle.length) body.appendChild(el('p', { class: 'kp-leeg', text: 'Dit artikel is in dit plan niet geannoteerd met een activiteit, gebiedsaanwijzing of norm.' }));
+    if (regelTekst(k)) body.appendChild(el('p', { class: 'kp-onder', text: 'Juridische regel: ' + regelTekst(k) }));
+    if (themaTekst(k)) body.appendChild(el('p', { class: 'kp-onder', text: 'Thema: ' + themaTekst(k) }));
+    if (art.kenmerkenBron) body.appendChild(el('p', { class: 'laden', text: 'Kenmerken ophalen…' }));
+    else if (art.kenmerkenFout) body.appendChild(el('p', { class: 'kp-leeg', text: 'De kenmerken van dit artikel konden niet worden opgehaald.' }));
+    else if (!art.wid) body.appendChild(el('p', { class: 'kp-leeg', text: 'Een bestemmingsplan heeft geen juridische regels met annotaties zoals een omgevingsdocument.' }));
+    else if (!alle.length) body.appendChild(el('p', { class: 'kp-leeg', text: 'Bij dit artikel is geen juridische regel gepubliceerd. Dat is hoe het in het DSO staat.' }));
     var lijst = el('div', { class: 'kp-lijst' });
     body.appendChild(lijst);
     secties.forEach(function (s) {
