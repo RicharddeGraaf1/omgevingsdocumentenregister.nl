@@ -658,7 +658,7 @@ def toegang(raak, alle, tegel, sub, modus, sub_fijn=None, termen=None, fijn=Fals
 MODI_D = {"stelsel": False, "stelsel_act": True}   # modus -> activiteitengroep op niveau 1
 MODI_E = ("meervoudig",)
 MODI = ("pad", "imow", "hybride") + tuple(MODI_D) + MODI_E
-TOEGANG_EXTRA = ["hybride_verfijnd", "direct", "hybride_samen", "meervoudig_samen"]
+TOEGANG_EXTRA = ["hybride_verfijnd", "direct", "direct_document", "hybride_samen", "meervoudig_samen"]
 
 # ── Variant E: D + meer tegels per artikel (2026-10-24) ──
 # Zelfde tegels en chips als D, maar een artikel staat onder ELKE tegel waarover het iets regelt:
@@ -746,7 +746,7 @@ def toegang_d(raak, alle, tegel, termen, met_actgroep, fn=None):
     return {"gevonden": False, "score": 0.0, "uitleg": "artikel valt onder %s" % ("+".join(waar) or "?")}
 
 
-# ── Variant H: tegels van E, geen documentkeuze (2026-11-04, G-178) ──
+# ── Variant H: tegels van E, alleen subonderwerpen, activiteit een niveau lager (2026-11-04, G-178) ──
 # Spiegel van toonOnderwerpDirect() in app.js. Niveau 2 is alleen het subonderwerp van de tegel zelf; de rest
 # staat bij elkaar onder één chip. Daarna Verfijn (zoals G) en het zoekveld, dat op woorden uit de vraag test.
 # De termen zijn de woorden die de testvraag meegeeft: de score is dus optimistisch over de zoekopdracht.
@@ -766,7 +766,8 @@ def zoektekst_h(a):
 
 def toegang_h(raak, alle, tegel, sub, sub_fijn, termen, documentkeuze=False):
     """Hoeveel artikelen ziet de bezoeker na tegel, chip, Verfijn en zoekveld, en hoeveel keuzes kostte dat?
-    documentkeuze: het artikel staat niet achter de tegels (landelijk), dus eerst via alle documenten."""
+    documentkeuze: de bezoeker kiest eerst een document: de keuze staat aan, of het artikel staat niet
+    achter de tegels (landelijk) en is alleen via alle documenten te bereiken."""
     in_tegel = [x for x in alle if tegel in tegels_e(x)[0]]
     termen_n = [norm(t) for t in termen or []]
     beste = None
@@ -916,12 +917,14 @@ def draai_case(api, c, met_vraag=True):
                 du["toegang"].update({m: toegang_d(raak, alle, c["onderwerp_d"], c.get("termen_d"), act)
                                       for m, act in MODI_D.items()})
                 du["toegang"]["meervoudig"] = toegang_d(raak, alle, c["onderwerp_d"], c.get("termen_d"), True, tegels_e)
-                # Zonder documentkeuze: alles achter de tegels. Een landelijk artikel staat daar niet achter;
+                # Documentkeuze uit: alles achter de tegels. Een landelijk artikel staat daar niet achter;
                 # dat blijft het eigen document, en dat kost dan wél een keuze.
                 lokaal = is_lokaal(doc)
                 achter = artikelen_achter_tegels(api, loc, docs) if lokaal else alle
                 du["toegang"]["direct"] = toegang_h(raak, achter, c["onderwerp_d"], c.get("sub"), c.get("sub_fijn"),
                                                     c.get("termen_d"), documentkeuze=not lokaal)
+                du["toegang"]["direct_document"] = toegang_h(raak, alle, c["onderwerp_d"], c.get("sub"), c.get("sub_fijn"),
+                                                             c.get("termen_d"), documentkeuze=True)
                 du["toegang"]["meervoudig_samen"] = toegang_d(raak, achter, c["onderwerp_d"], c.get("termen_d"), True, tegels_e)
                 du["toegang"]["hybride_samen"] = toegang(raak, achter, c["onderwerp"], c.get("sub"), "hybride", c.get("sub_fijn"), c.get("termen_d"))
         du["indeling"] = {}
@@ -1038,9 +1041,10 @@ VARIANTEN = [("pad", "A · kopjes (opschriftpad)"), ("imow", "B · label van de 
              ("stelsel", "D · negen tegels"), ("meervoudig", "E · negen tegels, onder elke passende tegel"),
              ("stelsel_act", "F · negen tegels + soort activiteit"),
              ("hybride_verfijnd", "G · C met derde niveau (kopje, anders activiteit)"),
-             ("direct", "H · tegels van E, subonderwerp + verfijn + zoeken, geen documentkeuze"),
-             ("hybride_samen", "C over documenten heen (ter vergelijking)"),
-             ("meervoudig_samen", "E over documenten heen (ter vergelijking)")]
+             ("direct_document", "H · tegels van E, alleen subonderwerpen, activiteit een niveau lager"),
+             ("hybride_samen", "C, documentkeuze uit"),
+             ("meervoudig_samen", "E, documentkeuze uit"),
+             ("direct", "H, documentkeuze uit (standaard bij H)")]
 
 
 def toegang_cel(t):
@@ -1079,7 +1083,7 @@ def toegang_sectie(resultaten, g):
                 sc += 1.0 if t.get("terecht_leeg") else (t.get("score") or 0)
             r.append("| %s | %.1f / %d (%d%%) |" % (naam, sc, len(tel), round(100 * sc / max(len(tel), 1))))
     r += ["", "**Keuzes tot het artikel** (gemiddeld over de gevonden vragen; tegel, document, chip, verfijn of zoeken). "
-          "A t/m G rekenen de documentkeuze als één keuze, en gaan ervan uit dat de bezoeker meteen het juiste document pakt.", "",
+          "Met documentkeuze aan telt die als één keuze, en gaat de test ervan uit dat de bezoeker meteen het juiste document pakt.", "",
           "| Variant | Gemiddeld aantal keuzes |", "|---|---|"]
     for m, naam in VARIANTEN:
         k = [keuzes_van(t, documentkeuze=not m.endswith("_samen"))

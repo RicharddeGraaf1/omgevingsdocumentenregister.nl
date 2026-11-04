@@ -77,7 +77,7 @@ Wat de bezoeker merkt; de techniek staat in de secties hieronder.
 | E | negen tegels, onder elke passende tegel | Als F, en daarnaast onder elke tegel die de naam van de activiteit, het gebied of de bestemming noemt. Een regel over bodemenergie in een boringsvrije zone staat dan onder *Bodem en water* én *Energie en klimaat*. | indeling *E · Stelsel, meervoudig (proef)* |
 | F | negen tegels + soort activiteit | Als D, en ook de soort activiteit telt. Een regel bij een monumentenactiviteit komt dan ook onder *Erfgoed*. Heette tot 24-10 D′. | indeling *F · Stelsel: + activiteitengroep (proef)* |
 | G | kopjes, anders label, met een derde niveau | Als C, en binnen een subonderwerp met meer dan 10 regels kiest de bezoeker verder op kopje of activiteit. | indeling *G · Hybride met derde niveau* |
-| H | tegels van E, geen documentkeuze | Als E, maar op niveau 2 alleen de subonderwerpen van de tegel. Activiteiten zitten in *Verfijn* en achter het zoekveld, en de regels staan per document onder elkaar. | indeling *H · Tegels van E, subonderwerp kiezen, geen documentkeuze* |
+| H | tegels van E, alleen subonderwerpen | Als E, maar op niveau 2 alleen de subonderwerpen van de tegel. Activiteiten zitten in *Verfijn* en achter het zoekveld. | indeling *H · Tegels van E, alleen subonderwerpen, activiteit een niveau lager*, met *Documentkeuze* op Uit (de standaard bij H) |
 
 "Stelsel" is de werktitel in de code voor de negen tegels van D, E en F (modi `stelsel`,
 `stelsel_act` en `meervoudig`).
@@ -130,14 +130,26 @@ de activiteiten en de gebiedsaanwijzingen. Bij meer dan 17 chips zijn dat de eer
 zoekveld en "+N meer". De benchmark telt de best passende chip die de bezoeker herkent aan een
 woord uit zijn vraag (`D_TERMEN`); op de site doet het zoekveld dat.
 
-### Variant H: tegels van E, geen documentkeuze (2026-11-04, G-178)
+### Variant H: tegels van E, alleen subonderwerpen (2026-11-04, G-178)
 
-Indeling *H* (`?indeling=direct`), `toegang_h()` hier en `toonOnderwerpDirect()` in `app.js`. De tegel telt over alle
-lokale documenten heen; een landelijk artikel staat niet achter de tegels en kost dus wel een documentkeuze. Wat in de
-kopjes onder een ander onderwerp staat, komt onder de chip *uit andere onderwerpen*. Het rapport toont daarnaast C en E
-over documenten heen en het gemiddeld aantal keuzes tot het artikel. Run `2026-11-04_132438`: H 20,6 / 30, E over
-documenten heen 20,0, C over documenten heen 12,4. De zoekwoorden komen uit de testvraag, dus de score is optimistisch
-over wat een bezoeker intikt.
+Indeling *H* (`?indeling=direct`), `toegang_h()` hier. Wat in de kopjes onder een ander onderwerp staat, komt
+onder de chip *uit andere onderwerpen*.
+
+### Schermkeuze Documentkeuze (2026-11-04)
+
+Los van de indeling (`?documentkeuze=aan|uit`, `toonOnderwerpDirect()` in `app.js`). Standaard aan, behalve bij H.
+Bij uit tellen de tegels over alle lokale documenten heen; een landelijk artikel staat niet achter de tegels en kost
+dus wel een documentkeuze. Het rapport toont H, C en E met de keuze uit. Run `2026-11-04_155541`, van 30:
+
+| | Documentkeuze aan | Documentkeuze uit |
+|---|---|---|
+| C | 14,2 | 12,4 |
+| E | 22,3 | 20,0 |
+| H | 22,4 | 20,6 |
+
+Bij aan gaat de test ervan uit dat de bezoeker meteen het juiste document pakt, en voor H rekent hij met de chip
+*uit andere onderwerpen*; op de site staan binnen een document de subonderwerpen van alle categorieën los. De zoekwoorden
+komen uit de testvraag, dus beide scores zijn optimistisch over wat een bezoeker intikt.
 
 ### Variant G: C met een derde niveau (2026-10-30, eigen indeling sinds 2026-11-03)
 

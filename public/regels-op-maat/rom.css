@@ -469,10 +469,20 @@ body.boom-weergave.lees-open .werkvlak { grid-template-columns: minmax(0, 380px)
   border-radius: 3px; background: var(--blad); color: var(--inkt); }
 .direct-doc { margin-bottom: 12px; }
 .direct-doc[hidden] { display: none; }
-.direct-doc-kop { display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: baseline; padding: 10px 12px; background: var(--grond); border-radius: 3px; }
+/* Blijft bovenaan staan tijdens het scrollen: zo klapt u een lang document in zonder terug te scrollen. */
+.direct-doc-kop { display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: baseline; width: 100%; padding: 10px 12px; border: 0; text-align: left;
+  color: inherit; cursor: pointer; background: var(--grond); border-radius: 3px; position: sticky; top: -18px; z-index: 2; }
+.direct-doc-kop:hover .direct-doc-titel { color: var(--acc); }
+.direct-doc .doc-chevron { align-self: center; margin-top: 0; transform: rotate(180deg); }
+.direct-doc.dicht .doc-chevron { transform: none; }
+.direct-doc .artikelen[hidden] { display: none; }
+.direct-alle { font: inherit; font-size: 13px; padding: 5px 10px; border: 1px solid var(--lijn); border-radius: 3px; background: var(--blad); color: var(--inkt); cursor: pointer; }
+.direct-alle:hover { color: var(--acc); }
 .direct-doc-titel { font-family: var(--serif); font-size: 15.5px; font-weight: 600; color: var(--inkt); }
 .direct-doc-meta { font-size: 12.5px; color: var(--inkt-3); }
 .boom-bron { font-size: 12px; }
+/* Hier scrolt de pagina zelf, niet .lijst. */
+@media (max-width: 900px) { .direct-doc-kop { top: 0; } }
 /* Op telefoonbreedte: het label onder de titel in plaats van ernaast, anders rekt het de kolom op. */
 @media (max-width: 640px) {
   .lijst { min-width: 0; }
