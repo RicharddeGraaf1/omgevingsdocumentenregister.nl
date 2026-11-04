@@ -459,3 +459,24 @@ body.boom-weergave.lees-open .werkvlak { grid-template-columns: minmax(0, 380px)
   .leesvenster { position: fixed; inset: 0; z-index: 20; border-left: 0; }
   .kaart-paneel { width: 280px; max-height: calc(100% - 50px); }
 }
+
+/* Indeling H: regels per document onder elkaar, zonder documentkeuze */
+.direct-filter { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+.direct-zoekrij { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.direct-zoekrij .sub-zoek { flex: 1 1 14em; min-width: 0; font-size: 14px; padding: 6px 12px; }
+/* width: lange documentnamen mogen de kolom niet oprekken */
+.direct-doc-keuze { flex: 1 1 14em; width: 100%; min-width: 0; font: inherit; font-size: 13px; padding: 5px 8px; border: 1px solid var(--lijn);
+  border-radius: 3px; background: var(--blad); color: var(--inkt); }
+.direct-doc { margin-bottom: 12px; }
+.direct-doc[hidden] { display: none; }
+.direct-doc-kop { display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: baseline; padding: 10px 12px; background: var(--grond); border-radius: 3px; }
+.direct-doc-titel { font-family: var(--serif); font-size: 15.5px; font-weight: 600; color: var(--inkt); }
+.direct-doc-meta { font-size: 12.5px; color: var(--inkt-3); }
+.boom-bron { font-size: 12px; }
+/* Op telefoonbreedte: het label onder de titel in plaats van ernaast, anders rekt het de kolom op. */
+@media (max-width: 640px) {
+  .lijst { min-width: 0; }
+  .direct-doc .art-kop { flex-wrap: wrap; }
+  .direct-doc .art-titel { flex: 1 1 60%; min-width: 0; overflow-wrap: anywhere; }
+  .direct-doc .art-onderwerp { flex-basis: 100%; white-space: normal; overflow-wrap: anywhere; margin-top: 0; padding-left: 44px; }
+}

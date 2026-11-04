@@ -186,7 +186,8 @@
   /** Stelseltegels voor één artikel: {ids, herkomst: 'pad'|'annotatie'|null}.
    *  variant: 'stelsel' (D: kopjes, anders thema, + type gebiedsaanwijzing),
    *           'stelsel_act' (F: D + activiteitengroep),
-   *           'meervoudig' (E, standaard: F + alle thema's + Wro-functies + trefwoorden in namen).
+   *           'meervoudig' (E, standaard: F + alle thema's + Wro-functies + trefwoorden in namen),
+   *           'direct' (H: dezelfde tegels als E, zie toonOnderwerpDirect in app.js).
    *  Gelijk aan tegels_d / tegels_e in tests/rom-benchmark/run_benchmark.py.
    *  art: {pad: {categorie, sub}|null, imow: [thema's]|null,
    *        kenmerken: {activiteiten, gebiedsaanwijzingen}|null, opschrift, inhoud}. */
@@ -265,7 +266,7 @@
   function isKlein(id) { return !!(PER_ID[id] && PER_ID[id].klein); }
 
   global.RomThema = {
-    ONDERWERPEN: ONDERWERPEN, STELSEL: STELSEL, onderwerpVan: onderwerpVan, stelselVan: stelselVan,
+    ONDERWERPEN: ONDERWERPEN, STELSEL: STELSEL, onderwerpVan: onderwerpVan, stelselVan: stelselVan, tegelVanPad: tegelD,
     icoon: icoon, naam: naam, isKlein: isKlein,
     bestaat: function (id) { return !!PER_ID[id]; },
     /** Hoort deze tegel bij de tegelset ('site' of 'stelsel')? */

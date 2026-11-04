@@ -35,7 +35,9 @@
   //            op niveau 2 zijn subonderwerp, activiteit en gebiedsaanwijzing
   //   stelsel     variant D (proef): stelseltegels uit kopjes/thema + type gebiedsaanwijzing
   //   stelsel_act variant F (proef): D + activiteitengroep
-  var INDELINGEN = { hybride: 1, pad: 1, imow: 1, stelsel: 1, stelsel_act: 1, meervoudig: 1, hybride_verfijnd: 1 };
+  //   direct   variant H (proef, 2026-11-04, G-178): de tegels van E, op niveau 2 alleen
+  //            subonderwerpen, activiteiten een niveau lager, en geen documentkeuze
+  var INDELINGEN = { hybride: 1, pad: 1, imow: 1, stelsel: 1, stelsel_act: 1, meervoudig: 1, hybride_verfijnd: 1, direct: 1 };
   // Twee keuzes over het scherm, los van de indeling (gebruiker 2026-11-03): hoe zoekt u
   // (onderwerp-tegels of onderwerpenboom) en wat staat er op de kaart (objecten op deze
   // locatie, of de kenmerken van het geopende artikel).
@@ -43,7 +45,7 @@
   var PANEEL_VORMEN = { objecten: 1, kenmerken: 1 };
   /** G is C met een derde niveau: dezelfde tegels, dezelfde subonderwerpen, dezelfde teksten. */
   function basisIndeling() { return staat.indeling === 'hybride_verfijnd' ? 'hybride' : staat.indeling; }
-  var STELSEL_MODI = { stelsel: 1, stelsel_act: 1, meervoudig: 1 };   // de negen stelseltegels
+  var STELSEL_MODI = { stelsel: 1, stelsel_act: 1, meervoudig: 1, direct: 1 };   // de negen stelseltegels
   function isStelsel() { return !!STELSEL_MODI[staat.indeling]; }
   function tegelset() { return isStelsel() ? 'stelsel' : 'site'; }
   // Koepelthema's tellen alleen mee als een artikel geen specifieker thema heeft:
@@ -594,6 +596,24 @@
     })).then(function (r) { return r.filter(Boolean); });
   }
 
+  /** Alle artikelen achter de tegels. doc: de bron van het artikel (ook aanvullende regels);
+   *  hoofd: het document waar die bij hoort. Een document dat niet laadt valt eruit en telt
+   *  mee in .mislukt. */
+  function lokaleArtikelen() {
+    var mislukt = 0;
+    return Promise.all(lokaleDocs().map(function (d) {
+      return Promise.all(delenVan(d).map(analyseer)).then(function (lijst) {
+        var xs = [];
+        lijst.forEach(function (an) { an.artikelen.forEach(function (art) { xs.push({ art: art, doc: an.doc, hoofd: d }); }); });
+        return xs;
+      }).catch(function () { mislukt++; return []; });
+    })).then(function (res) {
+      var alle = [].concat.apply([], res);
+      alle.mislukt = mislukt;
+      return alle;
+    });
+  }
+
   function terugLink() {
     return el('a', { class: 'terug', href: '#', onclick: function (e) { e.preventDefault(); navigeer({}); } }, [
       icoon('M12 5l-5 5 5 5'), 'Onderwerpen op deze locatie'
@@ -671,6 +691,7 @@
           imow: 'Gemeente, provincie en waterschap hebben op dit punt geen IMOW-thema aan hun regels gegeven. ' +
                 'Gemeenten doen dat zelden. Kies bij Indeling het opschriftpad of hybride, of bekijk de regels via alle documenten.',
           meervoudig: 'De regels op dit punt zijn (nog) niet op onderwerp ingedeeld. Bekijk ze via alle documenten.',
+          direct: 'De regels op dit punt zijn (nog) niet op onderwerp ingedeeld. Bekijk ze via alle documenten.',
           stelsel: 'De regels op dit punt zijn (nog) niet op onderwerp ingedeeld. Bekijk ze via alle documenten.',
           stelsel_act: 'De regels op dit punt zijn (nog) niet op onderwerp ingedeeld. Bekijk ze via alle documenten.'
         }[basisIndeling()] }));
@@ -707,6 +728,8 @@
           meervoudig: 'Proef (variant E): de negen tegels uit het voorstel voor een thema- en activiteitindeling. Een regel staat onder ' +
             'elke tegel waarover hij iets regelt — uit de kopjes, de IMOW-thema’s, de gebiedsaanwijzingen, de activiteitengroep en ' +
             'de naam van de activiteit. Binnen een tegel kiest u een subonderwerp, activiteit of gebiedsaanwijzing.',
+          direct: 'Proef (variant H): de negen tegels en de indeling van variant E. Binnen een tegel kiest u een subonderwerp en daarna eventueel ' +
+            'een kopje of activiteit, of u zoekt op een woord. U kiest geen document: de regels staan per document onder elkaar.',
           stelsel: 'Proef (variant D): de negen tegels uit het voorstel voor een thema- en activiteitindeling. Een regel staat onder ' +
             'de tegel van zijn kopjes (anders van het thema van de overheid), en daarnaast onder de tegel van het type van elke ' +
             'gebiedsaanwijzing. Binnen een tegel kiest u een subonderwerp, activiteit of gebiedsaanwijzing.',
@@ -722,6 +745,7 @@
 
   /** Eén onderwerp, over de lokale documenten heen. */
   function toonOnderwerp(id, nr) {
+    if (staat.indeling === 'direct') return toonOnderwerpDirect(id, nr);
     var doel = $('resultaat');
     doel.appendChild(terugLink());
     doel.appendChild(el('div', { class: 'res-kop ow-res-kop' }, [
@@ -735,8 +759,7 @@
       doel.removeChild(laden);
       var met = res.filter(function (r) { return r.a.tegels[id] > 0; });
       if (!met.length) {
-        doel.appendChild(el('p', { class: 'leeg-melding', text: 'Op deze locatie staan geen regels van gemeente, provincie, waterschap of bestemmingsplan over dit onderwerp' +
-          (basisIndeling() === 'hybride' ? '.' : ' — volgens ' + ROUTE[basisIndeling()] + '. Een andere indeling kan er wel regels onder vinden.') }));
+        doel.appendChild(geenRegelsMelding());
         return;
       }
       var totaal = met.reduce(function (t, r) { return t + r.a.tegels[id]; }, 0);
@@ -746,6 +769,203 @@
       var sectie = el('section', { class: 'groep' });
       met.forEach(function (r) { sectie.appendChild(documentKaart(r.doc, groepVan(r.doc), nr, id)); });
       doel.appendChild(sectie);
+    });
+  }
+
+  function geenRegelsMelding() {
+    return el('p', { class: 'leeg-melding', text: 'Op deze locatie staan geen regels van gemeente, provincie, waterschap of bestemmingsplan over dit onderwerp' +
+      (basisIndeling() === 'hybride' ? '.' : ' — volgens ' + ROUTE[basisIndeling()] + '. Een andere indeling kan er wel regels onder vinden.') });
+  }
+
+  // ── Indeling H: van tegel naar artikel, zonder documentkeuze (2026-11-04, G-178) ──
+  // Spiegel van toegang_h() in tests/rom-benchmark/run_benchmark.py: wijzig ze samen.
+  var ANDER_ONDERWERP = 'uit andere onderwerpen';
+
+  /** De chip op niveau 2 van tegel id. Alleen subonderwerpen van de tegel zelf: wat via een
+   *  activiteit, thema of gebiedsaanwijzing ook hierover gaat, komt onder één chip. */
+  function directChip(art, id) {
+    var p = art.pad;
+    if (p && RomThema.tegelVanPad(p.categorie, p.sub) !== id) {
+      return { sleutel: ANDER_ONDERWERP, label: ANDER_ONDERWERP,
+        soort: 'Staat in de kopjes onder een ander onderwerp, maar gaat via een activiteit, thema of gebiedsaanwijzing ook hierover' };
+    }
+    if (p && p.sub) return { sleutel: p.sub, label: p.sub, soort: 'categorie: ' + p.categorie };
+    return { sleutel: ' > ', label: 'zonder subonderwerp', soort: null };
+  }
+
+  /** Waarop het zoekveld zoekt: opschrift, kopje, subonderwerp, activiteit en gebiedsaanwijzing. */
+  function directZoektekst(art) {
+    var k = art.kenmerken || {};
+    return [art.opschrift, art.kopje, art.pad && art.pad.sub].concat(
+      (k.activiteiten || []).map(function (x) { return x.naam; }),
+      (k.gebiedsaanwijzingen || []).map(function (x) { return x.naam; })
+    ).filter(Boolean).join(' | ').toLowerCase();
+  }
+
+  function directKiezen(actief, sleutel) {
+    if (actief[sleutel]) delete actief[sleutel]; else actief[sleutel] = true;
+  }
+
+  /** Eén chiprij. tel: {sleutel: aantal}; boven MAX_SUBS + 2 chips staat de rest achter een knop. */
+  function directChipRij(rij, titel, tel, namen, soorten, actief, alles, opKlik, opMeer) {
+    leeg(rij);
+    var sleutels = Object.keys(tel).sort(function (x, y) {
+      function achteraan(s) { return s === ' > ' || s === 'overig' ? 2 : s === ANDER_ONDERWERP ? 1 : 0; }
+      return achteraan(x) - achteraan(y) || tel[y] - tel[x];
+    });
+    rij.hidden = sleutels.length < 2;
+    if (rij.hidden) return;
+    rij.appendChild(el('span', { class: 'sub-label', text: titel }));
+    var veel = sleutels.length > MAX_SUBS + 2, verborgen = 0;
+    sleutels.forEach(function (s, i) {
+      var k = el('button', { type: 'button', class: 'chip chip-sub' + (s === ' > ' || s === 'overig' || s === ANDER_ONDERWERP ? ' chip-leeg' : ''),
+        'aria-pressed': actief[s] ? 'true' : 'false', title: soorten[s] || null },
+        [namen[s] + ' ', el('b', { text: nl(tel[s]) })]);
+      k.hidden = veel && !alles && i >= MAX_SUBS && !actief[s];
+      if (k.hidden) verborgen++;
+      k.addEventListener('click', function () { opKlik(s); });
+      k.dataset.sleutel = s;
+      rij.appendChild(k);
+    });
+    if (verborgen) rij.appendChild(el('button', { type: 'button', class: 'chip chip-leeg', text: '+' + nl(verborgen) + ' meer', onclick: opMeer }));
+  }
+
+  /** Het scherm na een tegel in indeling H. */
+  function toonOnderwerpDirect(id, nr) {
+    var doel = $('resultaat');
+    doel.appendChild(terugLink());
+    doel.appendChild(el('div', { class: 'res-kop ow-res-kop' }, [
+      el('span', { class: 'ow-tegel-icoon' }, [RomThema.icoon(id, 26)]),
+      el('h1', { text: RomThema.naam(id) })
+    ]));
+    var laden = el('p', { class: 'laden', text: 'Regels over dit onderwerp zoeken…' });
+    doel.appendChild(laden);
+    lokaleArtikelen().then(function (alle) {
+      if (nr !== staat.volgnr || staat.view.onderwerp !== id) return;
+      doel.removeChild(laden);
+      // Zonder documentkeuze ziet niemand dat er een document ontbreekt: dus zeggen.
+      if (alle.mislukt) doel.appendChild(el('p', { class: 'leeg-melding', role: 'alert', text:
+        (alle.mislukt === 1 ? '1 document kon' : nl(alle.mislukt) + ' documenten konden') + ' niet worden geladen. Deze lijst is dus niet compleet; probeer het later opnieuw.' }));
+      var xs = alle.filter(function (x) { return x.art.onderwerpen.indexOf(id) >= 0; });
+      if (!xs.length) { doel.appendChild(geenRegelsMelding()); return; }
+
+      // Per bron één blok, aanvullende regels eerst (zoals delenVan): die gelden naast de hoofdregeling.
+      var blokken = [], perBron = {}, rijen = [];
+      xs.forEach(function (x) {
+        var sl = x.doc.bron_id, b = perBron[sl];
+        if (!b) {
+          var aanvullend = x.doc !== x.hoofd, teller = el('span', { class: 'mono direct-doc-meta' }), lijst = el('div', { class: 'artikelen' });
+          b = perBron[sl] = { teller: teller, lijst: lijst, el: el('section', { class: 'direct-doc blad' }, [
+            el('div', { class: 'direct-doc-kop' }, [
+              regimeTag(x.doc.bron_type === 'wro'),
+              el('span', { class: 'direct-doc-titel', text: x.doc.regeling || '(zonder titel)' }),
+              el('span', { class: 'direct-doc-meta', text: hoofdletter(x.doc.documenttype || '') + ' · ' + hoofdletter(x.doc.bestuurslaag || '') }),
+              aanvullend ? el('span', { class: 'tag tag-aanvullend', text: 'Aanvullende regels bij ' + (x.hoofd.regeling || 'de hoofdregeling') }) : null,
+              teller
+            ]),
+            lijst
+          ]) };
+          blokken.push(b);
+        }
+        var e = artikelElement(x.art, x.doc);
+        b.lijst.appendChild(e);
+        rijen.push({ x: x, el: e, blok: b, chip: directChip(x.art, id), tekst: directZoektekst(x.art) });
+      });
+
+      var uitleg = el('p', { class: 'groep-uitleg' });
+      var subRij = el('div', { class: 'chips sub-chips', role: 'group', 'aria-label': 'Filter op subonderwerp', hidden: true });
+      var fijnRij = el('div', { class: 'chips sub-chips fijn-chips', role: 'group', 'aria-label': 'Verfijn binnen het subonderwerp', hidden: true });
+      var zoek = el('input', { type: 'search', class: 'sub-zoek', placeholder: 'zoek in deze regels, bv. warmtepomp of dakkapel',
+        'aria-label': 'Zoek op opschrift, kopje, activiteit of gebiedsaanwijzing' });
+      var hoofden = [], aantalHoofd = {};
+      xs.forEach(function (x) {
+        var sl = x.hoofd.bron_id;
+        if (!aantalHoofd[sl]) { aantalHoofd[sl] = 0; hoofden.push(x.hoofd); }
+        aantalHoofd[sl]++;
+      });
+      var docKeuze = hoofden.length < 2 ? null : el('select', { class: 'direct-doc-keuze', 'aria-label': 'Filter op document' },
+        [el('option', { value: '', text: 'Alle ' + hoofden.length + ' documenten' })].concat(hoofden.map(function (d) {
+          return el('option', { value: d.bron_id, text: (d.regeling || '(zonder titel)') + ' (' + nl(aantalHoofd[d.bron_id]) + ')' });
+        })));
+      var geen = el('p', { class: 'leeg-melding', text: 'Geen regels met deze keuze.', hidden: true });
+      var actiefSub = {}, actiefFijn = {}, alleSubs = false, alleFijn = false;
+
+      function teken() {
+        var opDoc = docKeuze ? docKeuze.value : '';
+        var basis = rijen.filter(function (r) { return !opDoc || r.x.hoofd.bron_id === opDoc; });
+        var tel = {}, namen = {}, soorten = {};
+        basis.forEach(function (r) {
+          tel[r.chip.sleutel] = (tel[r.chip.sleutel] || 0) + 1;
+          namen[r.chip.sleutel] = r.chip.label; soorten[r.chip.sleutel] = r.chip.soort;
+        });
+        Object.keys(actiefSub).forEach(function (s) { if (!tel[s]) delete actiefSub[s]; });
+        directChipRij(subRij, 'Subonderwerp', tel, namen, soorten, actiefSub, alleSubs, function (s) {
+          directKiezen(actiefSub, s); actiefFijn = {}; teken(); herstelFocus(subRij, s);
+        }, function () { alleSubs = true; teken(); });
+        var opSub = Object.keys(actiefSub).length > 0;
+        var selectie = basis.filter(function (r) { return !opSub || actiefSub[r.chip.sleutel]; });
+
+        // Niveau 3: pas na een subonderwerp (of als er maar één is), net als bij G.
+        var fijnVan = new Map(), telF = {};
+        if ((opSub || subRij.hidden) && selectie.length > VERFIJN_GRENS) {
+          var sl = verfijnSleutels(selectie.map(function (r) { return r.x.art; }));
+          selectie.forEach(function (r, i) {
+            var ks = r.chip.sleutel === ANDER_ONDERWERP ? [r.x.art.pad.categorie] : sl[i];
+            fijnVan.set(r, ks);
+            ks.forEach(function (k) { telF[k] = (telF[k] || 0) + 1; });
+          });
+        }
+        var fijnLabels = Object.keys(telF);
+        // Net als G: minstens twee chips, en gemiddeld minstens twee artikelen per chip.
+        if (fijnLabels.length < 2 || fijnLabels.length * 2 > selectie.length) { telF = {}; fijnVan = new Map(); }
+        Object.keys(actiefFijn).forEach(function (k) { if (!telF[k]) delete actiefFijn[k]; });
+        var namenF = {}, titelF = {};
+        Object.keys(telF).forEach(function (k) { namenF[k] = k; titelF[k] = k === 'overig' ? 'Artikelen zonder eigen kopje of activiteit' : null; });
+        directChipRij(fijnRij, 'Verfijn', telF, namenF, titelF, actiefFijn, alleFijn, function (k) {
+          directKiezen(actiefFijn, k); teken(); herstelFocus(fijnRij, k);
+        }, function () { alleFijn = true; teken(); });
+
+        var opFijn = Object.keys(actiefFijn).length > 0;
+        var q = zoek.value.trim().toLowerCase();
+        var zichtbaar = new Set(selectie.filter(function (r) {
+          if (opFijn && !(fijnVan.get(r) || []).some(function (k) { return actiefFijn[k]; })) return false;
+          return !q || r.tekst.indexOf(q) >= 0;
+        }));
+        var perBlok = new Map();
+        rijen.forEach(function (r) {
+          var aan = zichtbaar.has(r);
+          r.el.hidden = !aan;
+          if (aan) perBlok.set(r.blok, (perBlok.get(r.blok) || 0) + 1);
+        });
+        blokken.forEach(function (b) {
+          var n = perBlok.get(b) || 0;
+          b.el.hidden = !n;
+          b.teller.textContent = nl(n) + (n === 1 ? ' regel' : ' regels');
+        });
+        geen.hidden = zichtbaar.size > 0;
+        uitleg.textContent = nl(zichtbaar.size) + (zichtbaar.size === 1 ? ' regel' : ' regels') + ' in ' +
+          (perBlok.size === 1 ? '1 document' : nl(perBlok.size) + ' documenten') + '.' +
+          (zichtbaar.size > VERFIJN_GRENS ? ' Kies een subonderwerp of zoek op een woord om de lijst korter te maken.' : '');
+      }
+
+      /** De rij wordt opnieuw getekend: zet de focus terug op dezelfde chip. */
+      function herstelFocus(rij, sleutel) {
+        Array.prototype.some.call(rij.querySelectorAll('button'), function (b) {
+          if (b.dataset.sleutel === sleutel) { b.focus(); return true; }
+          return false;
+        });
+      }
+
+      zoek.addEventListener('input', teken);
+      if (docKeuze) docKeuze.addEventListener('change', function () { actiefSub = {}; actiefFijn = {}; teken(); });
+      doel.appendChild(el('div', { class: 'filter direct-filter' }, [
+        el('div', { class: 'direct-zoekrij' }, [zoek, docKeuze]), subRij, fijnRij, uitleg
+      ]));
+      var sectie = el('section', { class: 'groep' });
+      blokken.forEach(function (b) { sectie.appendChild(b.el); });
+      sectie.appendChild(geen);
+      doel.appendChild(sectie);
+      teken();
     });
   }
 
@@ -1327,7 +1547,8 @@
         a.categorie = a.pad ? a.pad.categorie : (e.herkomst ? RomThema.naam(e.ids[0]).toLowerCase() : null);
         a.sub = a.pad ? a.pad.sub : null;
         // Niveau 2: subonderwerp uit het pad, plus elke activiteit en gebiedsaanwijzing.
-        var k = a.kenmerken || {};
+        // H niet: daar staan activiteiten een niveau lager (Verfijn) en achter het zoekveld.
+        var k = modus === 'direct' ? {} : (a.kenmerken || {});
         a.subs = (a.sub ? [{ sleutel: (a.categorie || '') + ' > ' + a.sub, label: a.sub, soort: 'categorie: ' + a.categorie }] : [])
           .concat((k.activiteiten || []).map(function (x) { return { sleutel: 'act > ' + x.naam, label: x.naam, soort: 'activiteit' }; }))
           .concat((k.gebiedsaanwijzingen || []).map(function (x) { return { sleutel: 'ga > ' + x.naam, label: x.naam, soort: 'gebiedsaanwijzing' }; }))
@@ -1387,6 +1608,7 @@
   // hooguit 10, meestal met 7 chips. Spiegel van verfijn_sleutels() in
   // tests/rom-benchmark/run_benchmark.py: wijzig ze samen.
   var VERFIJN_GRENS = 10;
+  var MAX_SUBS = 15;     // variant E: tientallen activiteiten per tegel (G-169); de rest achter een knop
   var KOPJE_VAAG = /^(algeme(en|ne)( bepalingen| regels)?|inleidende (regels|bepalingen)|aanvraagvereisten|toepassingsbereik|begripsbepalingen|begrippen|overige( bepalingen| regels)?|slotbepalingen|overgangsrecht|overgangs- en slotbepalingen)$/i;
   function kopjeVaag(k) { return !k || KOPJE_VAAG.test(String(k).trim()); }
   // Activiteiten die de structuur van het plan benoemen, niet wat je gaat doen (bruidsschat,
@@ -1489,6 +1711,7 @@
   // ── Teksten die van de gekozen indeling afhangen ──
   var ROUTE = { pad: 'het opschriftpad', imow: 'de IMOW-annotatie',
     meervoudig: 'het opschriftpad, de annotaties en de namen van activiteiten en gebiedsaanwijzingen',
+    direct: 'het opschriftpad, de annotaties en de namen van activiteiten en gebiedsaanwijzingen',
     stelsel: 'het opschriftpad, het thema en het type gebiedsaanwijzing',
     stelsel_act: 'het opschriftpad, het thema, het type gebiedsaanwijzing en de activiteitengroep' };
 
@@ -1513,7 +1736,7 @@
   function nietIngedeeldTekst() {
     if (basisIndeling() === 'pad') return 'geen onderwerp in de kopjes boven dit artikel';
     if (basisIndeling() === 'imow') return 'geen IMOW-thema in de annotatie van de regels';
-    if (basisIndeling() === 'meervoudig') return 'geen onderwerp in de kopjes, de annotaties of de namen van activiteiten';
+    if (basisIndeling() === 'meervoudig' || basisIndeling() === 'direct') return 'geen onderwerp in de kopjes, de annotaties of de namen van activiteiten';
     if (isStelsel()) return 'geen onderwerp in de kopjes, het thema of de annotaties';
     return 'geen onderwerp in de kopjes en geen thema in de annotatie';
   }
@@ -1549,6 +1772,7 @@
         pad: 'Geen onderwerp uit de kopjes',
         imow: 'Geen IMOW-thema geannoteerd',
         meervoudig: 'Nog niet op onderwerp ingedeeld',
+        direct: 'Nog niet op onderwerp ingedeeld',
         stelsel: 'Nog niet op onderwerp ingedeeld',
         stelsel_act: 'Nog niet op onderwerp ingedeeld'
       }[basisIndeling()] })];
@@ -1612,7 +1836,6 @@
     // subnaam kan onder twee categorieën hangen.
     var subRij = el('div', { class: 'chips sub-chips', role: 'group', 'aria-label': 'Filter op subonderwerp', hidden: true });
 
-    var MAX_SUBS = 15;     // variant E: tientallen activiteiten per tegel (G-169); de rest achter een knop
     var alleSubs = false, subZoek = '';
 
     // Niveau 3: verfijnen. Verschijnt zodra er een subonderwerp gekozen is (of er maar één
@@ -1712,7 +1935,7 @@
       var opOnderwerp = Object.keys(actief).length > 0;
       var opSub = Object.keys(actiefSub).length > 0;
       var basis = artEls.map(function (x) { return x.art; }).filter(inSelectie);
-      if (staat.indeling !== 'hybride_verfijnd' || !opOnderwerp || !(opSub || subRij.hidden) || basis.length <= VERFIJN_GRENS) {
+      if ((staat.indeling !== 'hybride_verfijnd' && staat.indeling !== 'direct') || !opOnderwerp || !(opSub || subRij.hidden) || basis.length <= VERFIJN_GRENS) {
         fijnRij.hidden = true; actiefFijn = {}; return;
       }
       var sl = verfijnSleutels(basis), tel = {};
@@ -2323,20 +2546,9 @@
     doel.appendChild(blok);
     doel.appendChild(alleDocumentenKnop());
 
-    Promise.all(lokaleDocs().map(function (d) {
-      return Promise.all(delenVan(d).map(analyseer))
-        .then(function (lijst) {
-          // doc: de bron van het artikel (ook aanvullende regels); hoofd: de rij in de boom.
-          var xs = [];
-          lijst.forEach(function (an) { an.artikelen.forEach(function (art) { xs.push({ art: art, doc: an.doc, hoofd: d }); }); });
-          return { doc: d, xs: xs };
-        })
-        .catch(function () { return null; });
-    })).then(function (res) {
+    lokaleArtikelen().then(function (alle) {
       if (nr !== staat.volgnr) return;
       blok.removeChild(blok.querySelector('.laden'));
-      var alle = [];
-      res.filter(Boolean).forEach(function (r) { alle = alle.concat(r.xs); });
       var tel = {};
       alle.forEach(function (x) { x.art.onderwerpen.forEach(function (id) { tel[id] = (tel[id] || 0) + 1; }); });
       var ids = Object.keys(tel).filter(function (k) { return !RomThema.isKlein(k); })
@@ -2352,7 +2564,7 @@
           kop: [el('span', { class: 'boom-icoon' }, [RomThema.icoon(id, 18)]), el('b', { class: 'boom-naam', text: RomThema.naam(id) })],
           aantal: tel[id],
           kinderen: function () {
-            return boomSubs(alle.filter(function (x) { return x.art.onderwerpen.indexOf(id) >= 0; }));
+            return boomSubs(alle.filter(function (x) { return x.art.onderwerpen.indexOf(id) >= 0; }), id);
           },
           // Het open onderwerp staat in de link, en blijft staan bij een wissel naar de tegels.
           opWissel: function (open) {
@@ -2406,10 +2618,10 @@
 
   /** Subonderwerpen, samengevoegd op naam: over de documenten heen is "lozen" één rij.
    *  Bij maar één subonderwerp is die laag overbodig. */
-  function boomSubs(xs) {
+  function boomSubs(xs, id) {
     var groepen = {}, volgorde = [];
     xs.forEach(function (x) {
-      subsVan(x.art).forEach(function (s) {
+      (staat.indeling === 'direct' ? [directChip(x.art, id)] : subsVan(x.art)).forEach(function (s) {
         var naam = String(s.label || '').toLowerCase();
         if (!groepen[naam]) { groepen[naam] = { s: s, xs: [] }; volgorde.push(naam); }
         if (groepen[naam].xs.indexOf(x) < 0) groepen[naam].xs.push(x);
@@ -2417,7 +2629,8 @@
     });
     if (volgorde.length < 2) return boomDocumenten(xs);
     return volgorde.sort(function (p, q) {
-      return (p === 'zonder subonderwerp') - (q === 'zonder subonderwerp') || groepen[q].xs.length - groepen[p].xs.length;
+      return (p === 'zonder subonderwerp') - (q === 'zonder subonderwerp') || (p === ANDER_ONDERWERP) - (q === ANDER_ONDERWERP) ||
+        groepen[q].xs.length - groepen[p].xs.length;
     }).map(function (naam) {
       var g = groepen[naam];
       return boomKnoop({
@@ -2430,6 +2643,8 @@
 
   /** Per document, in de volgorde van de documentenlijst; aanvullende regels vallen onder hun hoofdregeling. */
   function boomDocumenten(xs) {
+    // H: een korte lijst meteen tonen, met het document erbij in plaats van als extra stap.
+    if (staat.indeling === 'direct' && xs.length <= VERFIJN_GRENS) return xs.map(boomArtikel);
     var per = {}, volgorde = [];
     xs.forEach(function (x) {
       var id = x.hoofd.bron_id;
@@ -2483,6 +2698,7 @@
     var titel = el('span', { class: 'boom-naam' });
     if (x.art.nummer && x.doc.bron_type === 'ow') titel.appendChild(el('span', { class: 'art-nr', text: 'Artikel ' + x.art.nummer + ' ' }));
     titel.appendChild(document.createTextNode(x.art.opschrift || (x.art.nummer ? '' : 'Tekstdeel')));
+    if (staat.indeling === 'direct') titel.appendChild(el('span', { class: 'muted boom-bron', text: ' · ' + (x.hoofd.regeling || '(zonder titel)') }));
     var rij = el('button', { type: 'button', class: 'boom-art' }, [titel]);
     rij.addEventListener('click', function () {
       lees.stapel = [];
@@ -3197,6 +3413,21 @@
         'het kopje direct boven het artikel;',
         'de activiteit van het artikel, als dat kopje nietszeggend is of er zelf meer dan tien regels onder staan.']],
       ['Bestemmingsplannen', BESTEMMINGSPLANNEN]
+    ] },
+    direct: { titel: 'H · Tegels van E, subonderwerp kiezen, geen documentkeuze', delen: [
+      ['Tegels', NEGEN],
+      ['Onderwerp', 'Zoals bij E: een artikel staat onder élke tegel waarover het iets regelt.'],
+      ['Subonderwerp', 'Alleen de subonderwerpen van deze tegel. Regels die in de kopjes onder een ander onderwerp staan, maar via een ' +
+        'activiteit, thema of gebiedsaanwijzing ook hierover gaan, staan samen onder ‘uit andere onderwerpen’.'],
+      ['Verfijn', ['Staan er na het kiezen van een subonderwerp nog meer dan tien regels, dan kiest u verder op:',
+        'het kopje direct boven het artikel;',
+        'de activiteit van het artikel, als dat kopje nietszeggend is of er zelf meer dan tien regels onder staan;',
+        'bij ‘uit andere onderwerpen’: het onderwerp waar de regel in de kopjes onder staat.']],
+      ['Zoeken', 'Het zoekveld zoekt in het opschrift, het kopje, het subonderwerp en de namen van activiteiten en gebiedsaanwijzingen.'],
+      ['Document', 'U kiest geen document. De regels staan per document onder elkaar, met het document erboven; filteren op één document kan wel.'],
+      ['Bestemmingsplannen', BESTEMMINGSPLANNEN],
+      ['Let op', 'Omdat een artikel onder meer tegels staat, tellen de tegels niet op. De trefwoorden vanuit de namen van ' +
+        'activiteiten en gebiedsaanwijzingen heeft geleid tot een lijst die niet bestaat in de standaarden.']
     ] },
     stelsel_act: { titel: 'F · gebiedsaanwijzing + activiteitengroep + opschriftpad-met-IMOW-thema-fallback', delen: [
       ['Tegels', NEGEN],

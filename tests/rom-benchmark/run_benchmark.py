@@ -224,7 +224,7 @@ class Api:
         data = json.dumps(body).encode() if body is not None else None
         hdr = dict(UA, **({"Content-Type": "application/json"} if body is not None else {}))
         fout = None
-        for poging in range(3):
+        for poging in range(8):
             try:
                 self.aanroepen += 1
                 with urllib.request.urlopen(urllib.request.Request(url, data=data, headers=hdr), timeout=self.timeout) as r:
@@ -233,6 +233,9 @@ class Api:
                 return uit
             except urllib.error.HTTPError as e:
                 fout = e
+                if e.code == 429:   # de API begrenst per minuut: wachten en opnieuw
+                    time.sleep(30)
+                    continue
                 if e.code < 500:   # 4xx: opnieuw proberen helpt niet
                     break
             except (urllib.error.URLError, TimeoutError) as e:
@@ -655,6 +658,7 @@ def toegang(raak, alle, tegel, sub, modus, sub_fijn=None, termen=None, fijn=Fals
 MODI_D = {"stelsel": False, "stelsel_act": True}   # modus -> activiteitengroep op niveau 1
 MODI_E = ("meervoudig",)
 MODI = ("pad", "imow", "hybride") + tuple(MODI_D) + MODI_E
+TOEGANG_EXTRA = ["hybride_verfijnd", "direct", "hybride_samen", "meervoudig_samen"]
 
 # ── Variant E: D + meer tegels per artikel (2026-10-24) ──
 # Zelfde tegels en chips als D, maar een artikel staat onder ELKE tegel waarover het iets regelt:
@@ -742,6 +746,92 @@ def toegang_d(raak, alle, tegel, termen, met_actgroep, fn=None):
     return {"gevonden": False, "score": 0.0, "uitleg": "artikel valt onder %s" % ("+".join(waar) or "?")}
 
 
+# ── Variant H: tegels van E, geen documentkeuze (2026-11-04, G-178) ──
+# Spiegel van toonOnderwerpDirect() in app.js. Niveau 2 is alleen het subonderwerp van de tegel zelf; de rest
+# staat bij elkaar onder één chip. Daarna Verfijn (zoals G) en het zoekveld, dat op woorden uit de vraag test.
+# De termen zijn de woorden die de testvraag meegeeft: de score is dus optimistisch over de zoekopdracht.
+def chip_h(a, tegel):
+    p = a.get("pad")
+    if p and tegel_d(p["categorie"], p["sub"]) != tegel:
+        return "ander", p["categorie"]
+    if p and p.get("sub"):
+        return "sub", p["sub"]
+    return "zonder", None
+
+
+def zoektekst_h(a):
+    return " | ".join(norm(x) for x in [a.get("opschrift"), a.get("kopje"), (a.get("pad") or {}).get("sub")] +
+                      [y["naam"] for y in a["ann"]["act"]] + [y["naam"] for y in a["ann"]["ga"]] if x)
+
+
+def toegang_h(raak, alle, tegel, sub, sub_fijn, termen, documentkeuze=False):
+    """Hoeveel artikelen ziet de bezoeker na tegel, chip, Verfijn en zoekveld, en hoeveel keuzes kostte dat?
+    documentkeuze: het artikel staat niet achter de tegels (landelijk), dus eerst via alle documenten."""
+    in_tegel = [x for x in alle if tegel in tegels_e(x)[0]]
+    termen_n = [norm(t) for t in termen or []]
+    beste = None
+    for a in raak:
+        if tegel not in tegels_e(a)[0]:
+            continue
+        soort, label = chip_h(a, tegel)
+        sel, n, via, keuzes = in_tegel, len(in_tegel), "onderwerp", 1
+        verwacht = normsub(label) == normsub(sub_fijn) if sub_fijn else past_sub(label, sub)
+        if soort == "sub" and (verwacht or any(t in norm(label) for t in termen_n)):
+            sel = [x for x in in_tegel if chip_h(x, tegel) == (soort, label)]
+            n, via, keuzes = len(sel), "chip '%s'" % label, 2
+        if via != "onderwerp" or len({chip_h(x, tegel) for x in in_tegel}) < 2:
+            m, v = verfijn(sel, a, termen, n, via)
+            if m < n:
+                n, via, keuzes = m, v, keuzes + 1
+        tekst = zoektekst_h(a)
+        for term in termen_n:
+            m = len([x for x in sel if term in zoektekst_h(x)]) if term in tekst else 0
+            if 0 < m < n:
+                n, via, keuzes = m, via + " › zoek '%s'" % term, keuzes + 1
+        kand = {"gevonden": True, "artikel": a["nummer"] or a["opschrift"], "n": n, "via": via, "score": gewicht(n),
+                "keuzes": keuzes + (1 if documentkeuze else 0)}
+        if not beste or (kand["score"], -n) > (beste["score"], -beste["n"]):
+            beste = kand
+    if beste:
+        return beste
+    waar = sorted({t for a in raak for t in tegels_e(a)[0]})
+    return {"gevonden": False, "score": 0.0, "uitleg": "artikel valt onder %s" % ("+".join(waar) or "?")}
+
+
+def is_lokaal(d):
+    """Zoals lokaleDocs() in app.js: de documenten achter de tegels."""
+    if d.get("bron_type") == "wro":
+        return "structuurvisie" not in (d.get("documenttype") or "").lower()
+    return d.get("via") != "gebied" and d.get("bestuurslaag") != "rijk"
+
+
+_PUNTEN = {}
+
+
+def artikelen_achter_tegels(api, loc, docs):
+    """Alle artikelen over de lokale documenten heen, met hun aanvullende regels; één keer per punt."""
+    sleutel = (loc["x"], loc["y"])
+    if sleutel not in _PUNTEN:
+        gezien, uit = set(), []
+        for d in docs:
+            if not is_lokaal(d):
+                continue
+            for w in [d] + aanvullend_bij(docs, d):
+                if w["bron_id"] not in gezien:
+                    gezien.add(w["bron_id"])
+                    uit += analyseer_document(api, loc, w)["artikelen"]
+        _PUNTEN[sleutel] = uit
+    return _PUNTEN[sleutel]
+
+
+def keuzes_van(t, documentkeuze=True):
+    """Keuzes tot het artikel: tegel, eventueel document, chip, verfijn. H telt ze zelf."""
+    if "keuzes" in t:
+        return t["keuzes"]
+    via = t.get("via") or ""
+    return 1 + (1 if documentkeuze else 0) + (0 if via.startswith("onderwerp") else 1) + (1 if "verfijn" in via else 0)
+
+
 # ── één case ──
 def draai_case(api, c, met_vraag=True):
     uit = {"id": c["id"], "vraag": c["vraag"], "routes": {}, "documenten": []}
@@ -826,6 +916,14 @@ def draai_case(api, c, met_vraag=True):
                 du["toegang"].update({m: toegang_d(raak, alle, c["onderwerp_d"], c.get("termen_d"), act)
                                       for m, act in MODI_D.items()})
                 du["toegang"]["meervoudig"] = toegang_d(raak, alle, c["onderwerp_d"], c.get("termen_d"), True, tegels_e)
+                # Zonder documentkeuze: alles achter de tegels. Een landelijk artikel staat daar niet achter;
+                # dat blijft het eigen document, en dat kost dan wél een keuze.
+                lokaal = is_lokaal(doc)
+                achter = artikelen_achter_tegels(api, loc, docs) if lokaal else alle
+                du["toegang"]["direct"] = toegang_h(raak, achter, c["onderwerp_d"], c.get("sub"), c.get("sub_fijn"),
+                                                    c.get("termen_d"), documentkeuze=not lokaal)
+                du["toegang"]["meervoudig_samen"] = toegang_d(raak, achter, c["onderwerp_d"], c.get("termen_d"), True, tegels_e)
+                du["toegang"]["hybride_samen"] = toegang(raak, achter, c["onderwerp"], c.get("sub"), "hybride", c.get("sub_fijn"), c.get("termen_d"))
         du["indeling"] = {}
         for modus in MODI:
             per = []
@@ -876,7 +974,7 @@ def toegang_case(c, documenten, kenmerk=None):
     Negatieve vraag: niet te vinden langs een tegel, maar "terecht leeg" als het kenmerk terecht
     ontbreekt (telt in het totaal 'haalbaar'). Buiten bereik (37, 40): telt in 'haalbaar' niet mee."""
     def geen(reden, **extra):
-        return {m: dict({"gevonden": False, "score": 0.0, "uitleg": reden}, **extra) for m in list(MODI) + ["hybride_verfijnd"]}
+        return {m: dict({"gevonden": False, "score": 0.0, "uitleg": reden}, **extra) for m in list(MODI) + TOEGANG_EXTRA}
     if c.get("buiten_scope"):
         return geen("buiten bereik: " + c["buiten_scope"], buiten_scope=True)
     if c.get("negatief"):
@@ -888,7 +986,7 @@ def toegang_case(c, documenten, kenmerk=None):
     if not any(s.get("match") for s in c["documenten"]):
         return geen("geen verwacht artikel om naar te zoeken")
     uit = {}
-    for m in list(MODI) + ["hybride_verfijnd"]:   # G is geen eigen tegelindeling, wel een eigen toegang
+    for m in list(MODI) + TOEGANG_EXTRA:   # G en H zijn geen eigen tegelindeling, wel een eigen toegang
         kand = [d["toegang"][m] for d in documenten if d.get("toegang") and m in d["toegang"]]
         if kand:
             uit[m] = max(kand, key=lambda t: (t["score"], -t.get("n", 0)))
@@ -939,7 +1037,10 @@ VARIANTEN = [("pad", "A · kopjes (opschriftpad)"), ("imow", "B · label van de 
              ("hybride", "C · kopjes, anders label (hybride, site-standaard)"),
              ("stelsel", "D · negen tegels"), ("meervoudig", "E · negen tegels, onder elke passende tegel"),
              ("stelsel_act", "F · negen tegels + soort activiteit"),
-             ("hybride_verfijnd", "G · C met derde niveau (kopje, anders activiteit)")]
+             ("hybride_verfijnd", "G · C met derde niveau (kopje, anders activiteit)"),
+             ("direct", "H · tegels van E, subonderwerp + verfijn + zoeken, geen documentkeuze"),
+             ("hybride_samen", "C over documenten heen (ter vergelijking)"),
+             ("meervoudig_samen", "E over documenten heen (ter vergelijking)")]
 
 
 def toegang_cel(t):
@@ -977,6 +1078,13 @@ def toegang_sectie(resultaten, g):
                 t = (x.get("toegang") or {}).get(m) or {}
                 sc += 1.0 if t.get("terecht_leeg") else (t.get("score") or 0)
             r.append("| %s | %.1f / %d (%d%%) |" % (naam, sc, len(tel), round(100 * sc / max(len(tel), 1))))
+    r += ["", "**Keuzes tot het artikel** (gemiddeld over de gevonden vragen; tegel, document, chip, verfijn of zoeken). "
+          "A t/m G rekenen de documentkeuze als één keuze, en gaan ervan uit dat de bezoeker meteen het juiste document pakt.", "",
+          "| Variant | Gemiddeld aantal keuzes |", "|---|---|"]
+    for m, naam in VARIANTEN:
+        k = [keuzes_van(t, documentkeuze=not m.endswith("_samen"))
+             for t in ((x.get("toegang") or {}).get(m) for x in rij) if t and t.get("gevonden")]
+        r.append("| %s | %s |" % (naam, ("%.1f" % (sum(k) / len(k))).replace(".", ",") if k else "–"))
     r += ["", "| # | Toeleiding (M) | Excel N | A · opschriftpad | Excel O | B · annotatie | C · hybride |",
           "|---|---|---|---|---|---|---|"]
     for x in rij:
