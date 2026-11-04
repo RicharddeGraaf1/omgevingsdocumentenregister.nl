@@ -3580,6 +3580,118 @@
     });
   }
 
+  // ── Vensterbreedtes (gebruiker 2026-11-04) ─────────────
+  // Navigatie- en leesvenster zijn versleepbaar. Per schermvorm (tegels of boom, met of zonder
+  // leesvenster) een eigen breedte, want de standaard verschilt ook; de kaart houdt altijd KAART_MIN.
+  // Dubbelklik zet terug. Onthouden in de browser: een voorkeur van deze bezoeker, geen gegeven.
+  var VENSTER_OPSLAG = 'rom-vensters', VENSTER_NAMEN = { '--b-lijst': 1, '--b-lijst-boom': 1, '--b-lijst-lees': 1, '--b-lijst-boom-lees': 1, '--b-lees': 1 };
+  var LIJST_MIN = 280, LEES_MIN = 320, KAART_MIN = 240, VENSTER_STAP = 20;
+
+  function initVensters() {
+    var vlak = document.querySelector('.werkvlak'), lijst = $('lijst'), lees = $('leesvenster');
+    var breedtes = {};
+    try { breedtes = JSON.parse(localStorage.getItem(VENSTER_OPSLAG)) || {}; } catch (e) { breedtes = {}; }
+    Object.keys(breedtes).forEach(function (n) {
+      if (VENSTER_NAMEN[n] && breedtes[n] > 0) vlak.style.setProperty(n, breedtes[n] + 'px');
+      else delete breedtes[n];
+    });
+    function bewaar() {
+      try { localStorage.setItem(VENSTER_OPSLAG, JSON.stringify(breedtes)); } catch (e) { /* private mode */ }
+    }
+    function leesBreedte() { return lees.hidden ? 0 : lees.getBoundingClientRect().width; }
+
+    var grepen = [
+      { venster: lijst, min: LIJST_MIN, label: 'Breedte van het navigatievenster',
+        naam: function () {
+          return '--b-lijst' + (document.body.classList.contains('boom-weergave') ? '-boom' : '') +
+            (document.body.classList.contains('lees-open') ? '-lees' : '');
+        },
+        max: function () { return vlak.clientWidth - KAART_MIN - leesBreedte(); } },
+      { venster: lees, min: LEES_MIN, label: 'Breedte van het leesvenster',
+        naam: function () { return '--b-lees'; },
+        max: function () { return vlak.clientWidth - KAART_MIN - lijst.getBoundingClientRect().width; } }
+    ];
+
+    function plaats() {
+      var links = vlak.getBoundingClientRect().left;
+      grepen.forEach(function (g) {
+        var r = g.venster.getBoundingClientRect();
+        g.el.hidden = g.venster.hidden || !r.width;
+        if (g.el.hidden) return;
+        g.el.style.left = (r.right - links) + 'px';
+        g.el.setAttribute('aria-valuenow', Math.round(r.width));
+        g.el.setAttribute('aria-valuemin', g.min);
+        g.el.setAttribute('aria-valuemax', Math.round(Math.max(g.min, g.max())));
+      });
+    }
+
+    function zet(g, px) {
+      var breedte = Math.round(Math.max(g.min, Math.min(px, g.max())));
+      vlak.style.setProperty(g.naam(), breedte + 'px');
+      breedtes[g.naam()] = breedte;
+    }
+
+    grepen.forEach(function (g) {
+      g.el = el('div', { class: 'venster-greep', role: 'separator', 'aria-orientation': 'vertical', tabindex: '0',
+        'aria-label': g.label, title: 'Sleep om de breedte te wijzigen; dubbelklik zet terug', hidden: true });
+      vlak.appendChild(g.el);
+      var start = null;
+      g.el.addEventListener('pointerdown', function (e) {
+        if (e.button) return;
+        e.preventDefault();
+        g.el.focus();
+        g.el.setPointerCapture(e.pointerId);
+        start = { x: e.clientX, breedte: g.venster.getBoundingClientRect().width };
+        g.el.classList.add('bezig');
+        document.body.classList.add('venster-slepen');
+      });
+      g.el.addEventListener('pointermove', function (e) {
+        if (start) zet(g, start.breedte + e.clientX - start.x);
+      });
+      function klaar() {
+        if (!start) return;
+        start = null;
+        g.el.classList.remove('bezig');
+        document.body.classList.remove('venster-slepen');
+        bewaar();
+      }
+      g.el.addEventListener('pointerup', klaar);
+      g.el.addEventListener('pointercancel', klaar);
+      g.el.addEventListener('dblclick', function () {
+        vlak.style.removeProperty(g.naam());
+        delete breedtes[g.naam()];
+        bewaar();
+      });
+      g.el.addEventListener('keydown', function (e) {
+        var nu = g.venster.getBoundingClientRect().width, doel = null;
+        if (e.key === 'ArrowLeft') doel = nu - VENSTER_STAP;
+        else if (e.key === 'ArrowRight') doel = nu + VENSTER_STAP;
+        else if (e.key === 'Home') doel = g.min;
+        else if (e.key === 'End') doel = g.max();
+        if (doel === null) return;
+        e.preventDefault();
+        zet(g, doel);
+        bewaar();
+      });
+    });
+
+    // Volgt elke wijziging van de kolommen: slepen, leesvenster open of dicht, andere navigatie, venstergrootte.
+    var wacht = false;
+    new ResizeObserver(function () {
+      if (wacht) return;
+      wacht = true;
+      requestAnimationFrame(function () {
+        wacht = false;
+        plaats();
+        RomKaart.herschaal();
+      });
+    }).observe(vlak);
+    var kijker = new ResizeObserver(function () { plaats(); RomKaart.herschaal(); });
+    kijker.observe(lijst);
+    kijker.observe(lees);
+    plaats();
+  }
+
   // ── Thema (gedeeld met de rest van het register: zelfde sleutel) ──
   function initThema() {
     var knop = $('themaKnop');
@@ -3608,6 +3720,7 @@
     initIndeling();
     initSchermKeuzes();
     initVerwijzingen();
+    initVensters();
 
     var uitUrl = leesUrl();
     if (uitUrl) kiesLocatie(uitUrl, { uitUrl: true, view: viewUitUrl() });

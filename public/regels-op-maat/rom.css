@@ -64,8 +64,9 @@ body { display: flex; flex-direction: column; min-height: 100vh; }
 .weergave-knop[aria-pressed="true"] { color: var(--inkt); font-weight: 700; border-bottom-color: var(--inkt); }
 
 /* ── Werkvlak: lijst links, kaart rechts ──────────────── */
-.werkvlak { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 640px) minmax(0, 1fr); }
-.lijst { overflow-y: auto; padding-block: 18px 0; padding-inline: 20px; display: flex; flex-direction: column; gap: 14px; outline: none; }
+/* De breedtes zijn versleepbaar: de --b-variabelen zet initVensters() in app.js, per schermvorm een eigen. */
+.werkvlak { flex: 1; min-height: 0; position: relative; display: grid; grid-template-columns: minmax(0, var(--b-lijst, 640px)) minmax(240px, 1fr); }
+.lijst { overflow-y: auto; padding-block: 18px 0; padding-inline: 20px; display: flex; flex-direction: column; gap: 14px; outline: none; container: lijst / inline-size; }
 .kaartvlak { position: relative; border-left: 1px solid var(--lijn); min-height: 0; }
 .kaart { position: absolute; inset: 0; background: oklch(97% 0.006 90); }
 
@@ -259,7 +260,7 @@ button.chip[aria-pressed="true"] .ow-icoon { color: var(--blad); }
 :root[data-theme="dark"] .vraagdeel { --acc: oklch(78% 0.13 300); --acc-zacht: oklch(31% 0.06 300); --focus: oklch(78% 0.13 300); }
 
 .vraagvak { display: flex; gap: 8px; align-items: stretch; }
-.vraagvak .vraagveld { flex: 1; display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 3px; color: var(--inkt-3); }
+.vraagvak .vraagveld { flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 3px; color: var(--inkt-3); }
 .vraagvak .vraagveld:focus-within { box-shadow: 0 0 0 2px var(--focus); }
 .vraagvak input { flex: 1; min-width: 0; border: 0; outline: 0; background: none; font-size: 15.5px; color: var(--inkt); padding: 10px 0; }
 .vraagvak input::placeholder { color: var(--inkt-3); }
@@ -371,9 +372,9 @@ button.chip-sub[aria-pressed="true"] { background: var(--acc); color: var(--blad
 button.chip-sub[aria-pressed="true"] b { color: var(--blad); }
 
 /* ── Onderwerpenboom en leesvenster (?nav=boom) ───────── */
-body.boom-weergave .werkvlak { grid-template-columns: minmax(0, 460px) minmax(0, 1fr); }
-body.lees-open .werkvlak { grid-template-columns: minmax(0, 480px) minmax(0, 520px) minmax(240px, 1fr); }
-body.boom-weergave.lees-open .werkvlak { grid-template-columns: minmax(0, 380px) minmax(0, 520px) minmax(240px, 1fr); }
+body.boom-weergave .werkvlak { grid-template-columns: minmax(0, var(--b-lijst-boom, 460px)) minmax(240px, 1fr); }
+body.lees-open .werkvlak { grid-template-columns: minmax(0, var(--b-lijst-lees, 480px)) minmax(0, var(--b-lees, 520px)) minmax(240px, 1fr); }
+body.boom-weergave.lees-open .werkvlak { grid-template-columns: minmax(0, var(--b-lijst-boom-lees, 380px)) minmax(0, var(--b-lees, 520px)) minmax(240px, 1fr); }
 .boom { padding: 4px; }
 .boom-rij {
   display: flex; align-items: flex-start; gap: 8px; width: 100%; padding: 7px 8px; border: 0; background: none;
@@ -489,4 +490,23 @@ body.boom-weergave.lees-open .werkvlak { grid-template-columns: minmax(0, 380px)
   .direct-doc .art-kop { flex-wrap: wrap; }
   .direct-doc .art-titel { flex: 1 1 60%; min-width: 0; overflow-wrap: anywhere; }
   .direct-doc .art-onderwerp { flex-basis: 100%; white-space: normal; overflow-wrap: anywhere; margin-top: 0; padding-left: 44px; }
+}
+
+/* Versleepbare vensters */
+.venster-greep { position: absolute; top: 0; bottom: 0; width: 11px; margin-left: -5px; z-index: 6; cursor: col-resize; touch-action: none; outline: none; }
+.venster-greep[hidden] { display: none; }
+.venster-greep::after { content: ""; position: absolute; top: 50%; left: 4px; width: 3px; height: 34px; margin-top: -17px; border-radius: 2px; background: var(--inkt-3); opacity: .55; }
+.venster-greep:hover::before, .venster-greep:focus-visible::before, .venster-greep.bezig::before { content: ""; position: absolute; inset: 0 4px; background: var(--acc); }
+.venster-greep:hover::after, .venster-greep:focus-visible::after, .venster-greep.bezig::after { background: var(--acc); opacity: 1; }
+body.venster-slepen { cursor: col-resize; user-select: none; }
+@media (max-width: 900px) { .venster-greep { display: none; } }
+/* Een smal navigatievenster: het label onder de titel, anders ontstaat een zijwaartse schuifbalk. */
+@container lijst (max-width: 460px) {
+  .art-kop { flex-wrap: wrap; }
+  .art-titel { flex: 1 1 60%; min-width: 0; overflow-wrap: anywhere; }
+  .art-onderwerp { flex-basis: 100%; white-space: normal; overflow-wrap: anywhere; margin-top: 0; padding-left: 44px; }
+  .vraagvak { flex-wrap: wrap; }
+  .vraagvak .vraagveld { flex-basis: 100%; }
+  .ow-raster { grid-template-columns: minmax(0, 1fr); }
+  .direct-doc-kop .tag { white-space: normal; }
 }
