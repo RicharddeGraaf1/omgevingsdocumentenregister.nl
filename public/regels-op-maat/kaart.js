@@ -161,8 +161,24 @@
      een artikel staat — dus de kleur komt van hier en niet uit de tegel. Zo is
      er geen aparte geometrie-aanroep nodig: een tegel is ~4 kB en wordt een uur
      gecachet, tegenover megabytes aan GeoJSON per gebied. */
-  function werkingLaag() {
-    werkBron = new ol.source.VectorTile({
+  /* ── Tegels met alleen de selectie ─────────────────────────────────
+     Elke tegel-aanvraag noemt de id's die de laag tekent (`?ids=`), zodat de
+     API alleen die objecten in de tegel stopt. Tot 2026-11-13 haalde de kaart
+     de volle tegel op en verborg de rest in de stijl; dat kon pas vanaf z9,
+     want een volle tegel op z4 is een zware query (op 2026-09-18 trok dat de
+     hele API in time-outs). Met de selectie is een tegel klein op elke zoom:
+     gemeten op ocd-viewer.nl met dezelfde API 88–308 kB per schermbeeld op
+     z3–z7, 1,0–1,5 s. Daarom geen minZoom meer: uitgezoomd blijft zichtbaar
+     wat aan staat.
+
+     `rand=1` voegt een tweede laag toe (`locaties_rand`, `planobjecten_rand`)
+     met de echte omtrek. Een lijn om de vlakken zelf kan niet: die zijn in de
+     database opgeknipt en in de tegel nog eens op de tegelgrens afgesneden,
+     dus dan teken je het knipraster mee in plaats van het gebied. */
+  var MAX_IDS = 250;   // MAX_IDS in ocd-api/tiles.py
+
+  function tegelBron(laag, selectie) {
+    return new ol.source.VectorTile({
       format: new ol.format.MVT(),
       projection: RD,
       tileGrid: new ol.tilegrid.TileGrid({
@@ -171,16 +187,61 @@
         extent: RD.getExtent(),
         tileSize: 256
       }),
-      url: '/api/v1/tiles/locaties/{z}/{x}/{y}.mvt'
+      tileUrlFunction: function (c) {
+        var basis = '/api/v1/tiles/' + laag + '/' + c[0] + '/' + c[1] + '/' + c[2] + '.mvt';
+        var ids = selectie();
+        // Niets geselecteerd: geen aanvraag (undefined = lege tegel, geen fout).
+        if (!ids.length) return undefined;
+        // Meer dan de API accepteert: terug naar de oude weg, de volle tegel
+        // vanaf z9 zonder rand. Een halve selectie tekenen zou zeggen dat de
+        // rest er niet is.
+        if (ids.length > MAX_IDS) return c[0] >= 9 ? basis : undefined;
+        return basis + '?ids=' + ids.map(encodeURIComponent).join(',') + '&rand=1';
+      }
     });
-    // Alleen laden als het nodig is. Een onzichtbare laag haalt geen tegels op,
-    // en onder z9 (≈ 7 m/px) ook niet: een tegel op z4 bestrijkt een groot deel
-    // van het land en is een zware query. Zonder deze twee grenzen liet elke
-    // bezoeker de OCD-database die tegels uitrekenen, ook zonder open artikel —
-    // dat trok op 2026-09-18 de hele API in time-outs (landelijk beeld gaf 500).
+  }
+
+  /** Korte sleutel voor een selectie. Verandert hij, dan haalt OpenLayers de
+   *  tegels opnieuw op; de id-lijst zelf als sleutel zou in elke cachesleutel
+   *  van elke tegel belanden. */
+  function selectieSleutel(ids) {
+    var h = 5381, s = ids.join(',');
+    for (var i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) | 0;
+    return ids.length + '-' + (h >>> 0).toString(36);
+  }
+
+  function zetSelectie(laag, ids) {
+    var b = laag && laag.getSource();
+    if (!b) return;
+    var s = selectieSleutel(ids);
+    if (b.getKey() !== s) b.setTileUrlFunction(b.getTileUrlFunction(), s);
+  }
+
+  /** Komt deze feature uit de randlaag? De MVT-lezer zet de laagnaam onder `layer`. */
+  function isRand(feature) {
+    var l = feature.get('layer');
+    return typeof l === 'string' && /_rand$/.test(l);
+  }
+
+  /** Donkere, dekkende variant van een vulkleur, zodat de rand bij zijn vlak hoort
+   *  en ook op de achtergrondkaart zichtbaar is. Zelfde verhouding als `rand` in
+   *  kleurVoorNaam: oklch(65% 0.15 h / a) → oklch(50% 0.18 h). */
+  function randKleur(vul) {
+    var m = /^oklch\(\s*([\d.]+)%\s+([\d.]+)\s+([\d.]+)/.exec(vul);
+    if (!m) return vul.replace(/\s*\/\s*[\d.]+\)$/, ')');
+    return 'oklch(' + Math.max(0, +m[1] - 15) + '% ' + Math.min(0.37, +m[2] + 0.03) + ' ' + m[3] + ')';
+  }
+
+  function randStijl(kleur, breedte) {
+    return new ol.style.Style({ stroke: new ol.style.Stroke({ color: kleur, width: breedte || 1.5 }), zIndex: 1 });
+  }
+
+  function werkingLaag() {
+    werkBron = tegelBron('locaties', function () { return Object.keys(werking).sort(); });
+    // Een onzichtbare laag haalt geen tegels op: zonder open artikel geen aanvragen.
     werkLaag = new ol.layer.VectorTile({
       className: 'werking', source: werkBron, renderMode: 'vector', style: werkStijl,
-      visible: false, minZoom: 9
+      visible: false
     });
     return werkLaag;
   }
@@ -188,36 +249,24 @@
   function werkStijl(feature) {
     var a = werking[feature.get('id')];
     if (!a) return null;   // alles wat niet bij dit artikel hoort blijft onzichtbaar
-    // Geen contour. De tegels zijn op de tegelrand geknipt, dus een lijn tekent
-    // die rand mee: je ziet dan het tegelraster in plaats van het gebied. Om
-    // dezelfde reden staat de buffer in het tile-endpoint op 0. Een ambtsgebied
-    // of provinciebrede zone krijgt een lichtere vulling, anders ligt er een
-    // waas over de hele kaart die niets zegt.
+    // Een ambtsgebied of provinciebrede zone krijgt een lichtere vulling en een
+    // halfdoorzichtige rand, anders ligt er een waas over de hele kaart die niets zegt.
+    if (isRand(feature)) return randStijl(a.dekkend ? a.randWaas : a.kleur);
     return new ol.style.Style({ fill: new ol.style.Fill({ color: a.dekkend ? a.waas : a.vulling }) });
   }
 
-  /* Het kaartpaneel: dezelfde tegels (Ow-locaties en Wro-planobjecten), andere keuze.
-     Ook hier geen contour en minZoom 9, om dezelfde redenen als hierboven. */
+  /* Het kaartpaneel: dezelfde tegels (Ow-locaties en Wro-planobjecten), andere keuze. */
   function objectLaag(laag) {
     var l = new ol.layer.VectorTile({
-      className: 'object-' + laag, renderMode: 'vector', visible: false, minZoom: 9,
+      className: 'object-' + laag, renderMode: 'vector', visible: false,
       // Vaste tekenvolgorde. Doorzichtige vlakken mengen afhankelijk van de volgorde, en die
       // verschilt per tegel: zonder deze regel verspringt de kleur op elke tegelrand.
       renderOrder: function (a, b) { return String(a.get('id')) < String(b.get('id')) ? -1 : 1; },
-      source: new ol.source.VectorTile({
-        format: new ol.format.MVT(),
-        projection: RD,
-        tileGrid: new ol.tilegrid.TileGrid({
-          origin: [-285401.92, 903401.92],
-          resolutions: RESOLUTIES,
-          extent: RD.getExtent(),
-          tileSize: 256
-        }),
-        url: '/api/v1/tiles/' + laag + '/{z}/{x}/{y}.mvt'
-      }),
+      source: tegelBron(laag, function () { return objectIds(laag === 'planobjecten'); }),
       style: function (feature) {
         var kleur = objecten[feature.get('id')];
         if (!kleur) return null;
+        if (isRand(feature)) return randStijl(randKleur(kleur));
         // Wro-figuren (gevellijnen, bouwvlakgrenzen) zijn lijnen; die hebben niets aan een vulling.
         return /LineString$/.test(feature.getType()) && feature.getGeometry
           ? new ol.style.Style({ stroke: new ol.style.Stroke({ color: kleur.replace(/\/ [\d.]+\)$/, ')'), width: 2 }) })
@@ -228,13 +277,17 @@
     return l;
   }
 
-  /** kaart: {id -> vulkleur}. Id's van Wro-planobjecten beginnen met NL.IMRO. */
+  /** Id's van Wro-planobjecten beginnen met NL.IMRO; de rest zijn Ow-locaties. */
+  function objectIds(wro) {
+    return Object.keys(objecten).filter(function (i) { return (i.indexOf('NL.IMRO') === 0) === wro; }).sort();
+  }
+
+  /** kaart: {id -> vulkleur}. */
   function toonObjecten(kaart) {
     objecten = kaart || {};
-    var ids = Object.keys(objecten);
-    var wro = ids.filter(function (i) { return i.indexOf('NL.IMRO') === 0; }).length;
-    if (objLaag) { objLaag.setVisible(ids.length > wro); objLaag.changed(); }
-    if (wroLaag) { wroLaag.setVisible(wro > 0); wroLaag.changed(); }
+    var ow = objectIds(false), wro = objectIds(true);
+    if (objLaag) { zetSelectie(objLaag, ow); objLaag.setVisible(ow.length > 0); objLaag.changed(); }
+    if (wroLaag) { zetSelectie(wroLaag, wro); wroLaag.setVisible(wro.length > 0); wroLaag.changed(); }
   }
 
   /** Na een wijziging in de kolommen (leesvenster open of dicht). */
@@ -255,9 +308,11 @@
         // laatste lichter, anders kleurt het hele scherm.
         vulling: cssKleur(ga ? '--at' : '--acc', ga ? 0.20 : 0.10),
         waas: cssKleur(ga ? '--at' : '--acc', 0.06),
+        randWaas: cssKleur(ga ? '--at' : '--acc', 0.45),
         dekkend: String(l.id).indexOf('.ambtsgebied.') >= 0
       };
     });
+    zetSelectie(werkLaag, Object.keys(werking).sort());
     if (werkLaag) {
       werkLaag.setVisible(Object.keys(werking).length > 0);
       werkLaag.changed();
