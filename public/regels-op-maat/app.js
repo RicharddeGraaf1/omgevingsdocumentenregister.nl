@@ -25,7 +25,7 @@
   var MAX_ART_OPEN_RENDER = 400;   // boven dit aantal artikelen starten hoofdstukken dichtgeklapt
 
   // view: {} = tussenscherm met onderwerpen · {onderwerp: id} · {alles: true}
-  var staat = { loc: null, weergave: 'juridisch', indeling: 'hybride', nav: 'tegels', paneel: 'objecten', documentkeuze: null, artikel: null, volgnr: 0, docs: null, view: {} };
+  var staat = { loc: null, weergave: 'juridisch', indeling: 'hybride', nav: 'tegels', paneel: 'objecten', documentkeuze: null, documenten: 'lokaal', artikel: null, volgnr: 0, docs: null, view: {} };
 
   //   pad      alleen de kopjes boven het artikel — onderwerp én subcategorie
   //   imow     alleen het IMOW-thema van de juridische regels — geen subcategorie
@@ -48,6 +48,17 @@
   var DOCUMENTKEUZES = { aan: 1, uit: 1 };
   function metDocumentkeuze() {
     return staat.documentkeuze ? staat.documentkeuze === 'aan' : staat.indeling !== 'direct';
+  }
+  // Vierde schermkeuze (gebruiker 2026-11-13), samen met de documentkeuze in één menu:
+  // lokaal = gemeente, provincie, waterschap en bestemmingsplannen achter de tegels;
+  // totaal = daarbij ook de landelijke regels. Beleid (visies, programma's) blijft in beide buiten.
+  var REIKWIJDTES = { lokaal: 1, totaal: 1 };
+  function metRijk() { return staat.documenten === 'totaal'; }
+  /** De waarde van het menu Documenten: reikwijdte en documentkeuze samen. */
+  function documentenMenuWaarde() { return staat.documenten + '-' + (metDocumentkeuze() ? 'aan' : 'uit'); }
+  /** Wie er achter de tegels staat, voor de kopregel boven de tegels. */
+  function bronnenTekst() {
+    return 'gemeente · provincie · waterschap · bestemmingsplannen' + (metRijk() ? ' · Rijk' : '');
   }
   /** G is C met een derde niveau: dezelfde tegels, dezelfde subonderwerpen, dezelfde teksten. */
   function basisIndeling() { return staat.indeling === 'hybride_verfijnd' ? 'hybride' : staat.indeling; }
@@ -281,6 +292,7 @@
       if (staat.indeling !== 'hybride') q.set('indeling', staat.indeling);
       if (staat.nav !== 'tegels') q.set('nav', staat.nav);
       if (staat.documentkeuze) q.set('documentkeuze', staat.documentkeuze);
+      if (staat.documenten !== 'lokaal') q.set('documenten', staat.documenten);
       if (staat.paneel !== 'objecten') q.set('paneel', staat.paneel);
     }
     var url = location.pathname + (loc ? '?' + q.toString() : '');
@@ -319,6 +331,11 @@
   function documentkeuzeUitUrl() {
     var v = new URLSearchParams(location.search).get('documentkeuze');
     return DOCUMENTKEUZES[v] ? v : null;
+  }
+
+  function documentenUitUrl() {
+    var v = new URLSearchParams(location.search).get('documenten');
+    return REIKWIJDTES[v] ? v : 'lokaal';
   }
 
   function indelingUitUrl() {
@@ -590,11 +607,14 @@
    *  onder het overgangsrecht nog gelden (sinds 2026-10-24). Een bezoeker die bij Bouwen
    *  zoekt, weet niet of zijn perceel al onder het omgevingsplan valt of nog onder een
    *  bestemmingsplan. Een Wro-plan zonder indeling (oudere API) telt vanzelf niet mee.
-   *  Wro-structuurvisies niet: dat is beleid, net als de Ow-visies die hier ook buiten blijven. */
+   *  Wro-structuurvisies niet: dat is beleid, net als de Ow-visies die hier ook buiten blijven.
+   *  Bij Documenten = totaal ook de landelijke regels (gebruiker 2026-11-13). Hun indeling komt
+   *  uit hetzelfde /onderwerpen-antwoord; alleen de boom (kopjes, locaties) halen we niet op. */
   function lokaleDocs() {
     return staat.docs.filter(function (d) {
       if (d.bron_type === 'wro') return !/structuurvisie/i.test(d.documenttype || '');
-      return d.bron_type === 'ow' && groepVan(d) === 'lokaal';
+      var g = groepVan(d);
+      return d.bron_type === 'ow' && (g === 'lokaal' || (g === 'rijk' && metRijk()));
     });
   }
 
@@ -657,7 +677,7 @@
       el('span', { class: 'ow-alles-icoon' }, [icoon('M5 2.5h7l3.5 3.5v11.5H5z'), icoon('M12 2.5V6h3.5')]),
       el('span', { class: 'ow-tegel-tekst' }, [
         el('b', { text: 'Alle ' + nl(staat.docs.length) + ' documenten op deze locatie' }),
-        el('span', { class: 'muted', text: 'Ook bestemmingsplannen, beleid en landelijke regels' })
+        el('span', { class: 'muted', text: metRijk() ? 'Per document, ook beleid' : 'Ook bestemmingsplannen, beleid en landelijke regels' })
       ]),
       icoon(PAD_RECHTS)
     ]);
@@ -670,7 +690,7 @@
     var blok = el('section', { class: 'onderwerpen', 'aria-labelledby': 'ow-kop' }, [
       el('div', { class: 'ow-kopregel' }, [
         el('h2', { class: 'label', id: 'ow-kop', text: 'Onderwerpen op deze locatie' }),
-        el('span', { class: 'muted', text: 'gemeente · provincie · waterschap · bestemmingsplannen' })
+        el('span', { class: 'muted', text: bronnenTekst() })
       ]),
       el('p', { class: 'laden', text: 'Onderwerpen tellen…' })
     ]);
@@ -750,8 +770,8 @@
         }[basisIndeling()]) + meervoudigTekst(meervoudig) })
       ]));
       blok.appendChild(el('p', { class: 'ow-noot', text:
-        'Onderwerpindeling van het register, per artikel. Bestemmingsplannen die hier onder het overgangsrecht nog gelden tellen mee; ' +
-        'landelijke regels en beleid niet.' }));
+        'Onderwerpindeling van het register, per artikel. Bestemmingsplannen die hier onder het overgangsrecht nog gelden tellen mee' +
+        (metRijk() ? ', en de landelijke regels; beleid niet.' : '; landelijke regels en beleid niet.') }));
     });
   }
 
@@ -785,7 +805,7 @@
   }
 
   function geenRegelsMelding() {
-    return el('p', { class: 'leeg-melding', text: 'Op deze locatie staan geen regels van gemeente, provincie, waterschap of bestemmingsplan over dit onderwerp' +
+    return el('p', { class: 'leeg-melding', text: 'Op deze locatie staan geen regels van gemeente, provincie, waterschap' + (metRijk() ? ', bestemmingsplan of Rijk' : ' of bestemmingsplan') + ' over dit onderwerp' +
       (basisIndeling() === 'hybride' ? '.' : ' — volgens ' + ROUTE[basisIndeling()] + '. Een andere indeling kan er wel regels onder vinden.') });
   }
 
@@ -2584,7 +2604,7 @@
     var blok = el('section', { class: 'onderwerpen', 'aria-labelledby': 'ow-kop' }, [
       el('div', { class: 'ow-kopregel' }, [
         el('h2', { class: 'label', id: 'ow-kop', text: 'Onderwerpen op deze locatie' }),
-        el('span', { class: 'muted', text: 'gemeente · provincie · waterschap · bestemmingsplannen' })
+        el('span', { class: 'muted', text: bronnenTekst() })
       ]),
       el('p', { class: 'laden', text: 'Onderwerpen tellen…' })
     ]);
@@ -3533,7 +3553,7 @@
     });
     keuze.addEventListener('change', function () {
       staat.indeling = INDELINGEN[keuze.value] ? keuze.value : 'hybride';
-      $('documentkeuze').value = metDocumentkeuze() ? 'aan' : 'uit';
+      $('documentkeuze').value = documentenMenuWaarde();
       if (!$('indeling-uitleg').hidden) tekenUitleg();
       // Andere tegelset: een gekozen tegel bestaat daar niet, dus terug naar het overzicht.
       if (staat.view.onderwerp && !RomThema.inSet(staat.view.onderwerp, tegelset())) staat.view = {};
@@ -3551,9 +3571,12 @@
     nav.value = staat.nav; pan.value = staat.paneel;
     var doc = $('documentkeuze');
     staat.documentkeuze = documentkeuzeUitUrl();
-    doc.value = metDocumentkeuze() ? 'aan' : 'uit';
+    staat.documenten = documentenUitUrl();
+    doc.value = documentenMenuWaarde();
     doc.addEventListener('change', function () {
-      staat.documentkeuze = DOCUMENTKEUZES[doc.value] ? doc.value : null;
+      var w = doc.value.split('-');
+      staat.documenten = REIKWIJDTES[w[0]] ? w[0] : 'lokaal';
+      staat.documentkeuze = DOCUMENTKEUZES[w[1]] ? w[1] : null;
       bewaar();
       if (staat.docs) toon(staat.volgnr);
     });
@@ -3733,7 +3756,8 @@
       staat.nav = navUitUrl(); staat.paneel = paneelUitUrl();
       $('nav').value = staat.nav; $('paneel').value = staat.paneel;
       staat.documentkeuze = documentkeuzeUitUrl();
-      $('documentkeuze').value = metDocumentkeuze() ? 'aan' : 'uit';
+      staat.documenten = documentenUitUrl();
+      $('documentkeuze').value = documentenMenuWaarde();
       zetPaneelKlasse();
       if (staat.loc && staat.docs && loc.x === staat.loc.x && loc.y === staat.loc.y) {
         staat.view = viewUitUrl();
