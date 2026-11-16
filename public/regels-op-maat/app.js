@@ -517,6 +517,35 @@
     return 'lokaal';
   }
 
+  // Korte namen voor de landelijke regelingen (gebruiker 2026-11-16). Hun citeertitel in het
+  // register is het volledige opschrift ("Besluit van 3 juli 2018, houdende procedurele
+  // regels …"), dus te lang voor een kop. Op werk-id, want dat blijft gelijk bij een nieuwe
+  // versie. Nagelopen op 2026-11-16: dit zijn de enige Rijksregelingen met zo'n lange titel.
+  var KORTE_TITELS = {
+    '/akn/nl/act/mnre1034/2018/BWBR0041278': 'Omgevingsbesluit',
+    '/akn/nl/act/mnre1034/2018/BWBR0041330': 'Besluit activiteiten leefomgeving',
+    '/akn/nl/act/mnre1034/2018/BWBR0041297': 'Besluit bouwwerken leefomgeving',
+    '/akn/nl/act/mnre1034/2018/BWBR0041313': 'Besluit kwaliteit leefomgeving',
+    '/akn/nl/act/mnre1034/2019/reg0001': 'Omgevingsregeling'
+  };
+  /** De korte naam van een document; het volledige opschrift blijft in regelingVolledig. */
+  function korteTitel(d) {
+    var werk = String(d.bron_id || '').split('/').slice(0, 7).join('/');
+    var kort = KORTE_TITELS[werk];
+    // Een andere Rijksregeling met een lang opschrift en de citeertitel tussen haakjes aan het eind.
+    if (!kort && d.bestuurslaag === 'rijk' && /^(Besluit|Regeling) van /.test(d.regeling || '')) {
+      var m = /\(([^()]{4,80})\)\s*$/.exec(d.regeling);
+      if (m) kort = m[1];
+    }
+    if (kort && kort !== d.regeling) { d.regelingVolledig = d.regeling; d.regeling = kort; }
+    return d;
+  }
+
+  /** Korte naam bij een treffer uit het vraagveld (die draagt alleen naam en expressie). */
+  function naamVanHit(hit) {
+    return korteTitel({ regeling: hit.regeling || '', bron_id: hit.regeling_expression }).regeling;
+  }
+
   function laadDocumenten(nr) {
     var doel = $('resultaat');
     leeg(doel);
@@ -524,7 +553,7 @@
     var loc = staat.loc;
     api('/v1/viewer/regelmix?x=' + loc.x + '&y=' + loc.y).then(function (d) {
       if (nr !== staat.volgnr) return;
-      staat.docs = koppelAanvullend(d.documenten || []);
+      staat.docs = koppelAanvullend((d.documenten || []).map(korteTitel));
       $('context-telling').textContent = staat.docs.length === 1 ? '1 document' : nl(staat.docs.length) + ' documenten';
       toon(nr);
     }).catch(function (e) {
@@ -1285,7 +1314,7 @@
             var vak = el('div', { class: 'regel-groep' }, [
               el('div', { class: 'regel-groep-kop' }, [
                 regimeTag(false),
-                el('span', { class: 'regel-groep-titel', text: g.hit.regeling || '(zonder titel)' }),
+                el('span', { class: 'regel-groep-titel', text: naamVanHit(g.hit) || '(zonder titel)' }),
                 el('span', { class: 'muted', text: g.rijen.length + (g.rijen.length === 1 ? ' regel' : ' regels') })
               ])
             ]);
@@ -1320,7 +1349,7 @@
           el('span', { class: 'regel-midden' }, [
             el('span', { class: 'regel-titel', text: titel }),
             el('span', { class: 'regel-meta' }, [
-              metRegeling ? el('span', { text: r.hit.regeling || '' }) : null,
+              metRegeling ? el('span', { text: naamVanHit(r.hit) }) : null,
               el('span', { class: 'regel-route', text: ROUTE[r.hit.join_pad] || r.hit.join_pad || '' }),
               geraakt.length ? el('span', { class: 'muted', text: 'op: ' + geraakt.map(function (t) { return t.term; }).join(', ') }) : null
             ])
@@ -1377,7 +1406,7 @@
       if (t.begrijpelijk) rt.begrijpelijk = t.begrijpelijk;
       if (hit && hit.regeling_expression) {
         rt._artikel = { wid: hit.wid, nummer: hit.artikel_nummer || '', opschrift: hit.artikel_opschrift || hit.artikel || '',
-          document: { regeling: hit.regeling, bron_id: hit.regeling_expression, bron_type: 'ow' } };
+          document: korteTitel({ regeling: hit.regeling, bron_id: hit.regeling_expression, bron_type: 'ow' }) };
       }
       return rt;
     }
