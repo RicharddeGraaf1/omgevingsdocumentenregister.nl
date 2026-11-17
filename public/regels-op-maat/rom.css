@@ -190,6 +190,7 @@ details.sectie > summary { cursor: pointer; list-style-position: outside; }
 }
 
 /* Aanvullende regels (voorbescherming) binnen het document waar ze bij horen */
+.tag-status { color: var(--inkt-3); text-transform: none; font-family: var(--sans); font-size: 11.5px; font-style: italic; }
 .tag-aanvullend { color: var(--at); border-color: color-mix(in oklch, var(--at) 40%, var(--lijn)); text-transform: none; font-family: var(--sans); font-size: 11.5px; }
 .deel { display: flex; flex-direction: column; }
 .deel + .deel { margin-top: 14px; }

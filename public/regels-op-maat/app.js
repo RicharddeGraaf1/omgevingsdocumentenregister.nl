@@ -104,6 +104,17 @@
       : 'Omgevingswet, de wetgeving die vanaf 2024 bepaalt wat er mag met de omgeving.' });
   }
 
+  /** Een vastgesteld Wro-plan dat volgens de landelijke voorziening nog niet onherroepelijk is
+   *  (OCD geeft `onherroepelijk: false`, G-186). Het plan geldt, maar kan na beroep nog veranderen.
+   *  Bij `null` (oude WRO-plannen zonder dossier) is het niet bekend; dan geen label. */
+  function statusTag(doc) {
+    if (doc.bron_type !== 'wro' || doc.onherroepelijk !== false) return null;
+    return el('span', { class: 'tag tag-status', text: 'nog niet onherroepelijk', title:
+      'Dit plan is vastgesteld en geldt, maar is volgens de landelijke voorziening nog niet onherroepelijk' +
+      (doc.dossierstatus ? ' (status: ' + doc.dossierstatus + ')' : '') +
+      '. Na een beroep kan het nog veranderen.' });
+  }
+
   var SVG_NS = 'http://www.w3.org/2000/svg';
   function icoon(d) {
     var s = document.createElementNS(SVG_NS, 'svg');
@@ -939,6 +950,7 @@
               chevron,
               regimeTag(x.doc.bron_type === 'wro'),
               el('span', { class: 'direct-doc-titel', text: x.doc.regeling || '(zonder titel)' }),
+              statusTag(x.doc),
               el('span', { class: 'direct-doc-meta', text: hoofdletter(x.doc.documenttype || '') + ' · ' + hoofdletter(x.doc.bestuurslaag || '') }),
               aanvullend ? el('span', { class: 'tag tag-aanvullend', text: 'Aanvullende regels bij ' + (x.hoofd.regeling || 'de hoofdregeling') }) : null,
               teller
@@ -1471,6 +1483,7 @@
       el('span', { class: 'doc-titelrij' }, [el('span', { class: 'doc-titel', text: doc.regeling || '(zonder titel)' }), chevron]),
       el('span', { class: 'doc-meta' }, [
         regimeTag(isWro),
+        statusTag(doc),
         el('span', { text: hoofdletter(doc.documenttype || '') + ' · ' + hoofdletter(doc.bestuurslaag || '') }),
         el('span', { class: 'mono', text: nl(doc.aantal) + ' ' + eenheid }),
         doc.aanvullend ? el('span', { class: 'tag tag-aanvullend', text:
@@ -2750,7 +2763,8 @@
       return boomKnoop({
         klasse: 'boom-document',
         kop: [regimeTag(isWro),
-          el('span', { class: 'boom-naam', text: r.doc.regeling || '(zonder titel)' })],
+          el('span', { class: 'boom-naam', text: r.doc.regeling || '(zonder titel)' }),
+          statusTag(r.doc)],
         aantal: r.xs.length,
         kinderen: function () { return boomKopjes(r.xs); }
       });
