@@ -2856,6 +2856,12 @@
     vak.appendChild(inhoud);
     if (art.container) vulOnderdeel(art, inhoud);
     else vulArtikel(art, inhoud);
+    // Naast inhoud, niet erin: vulArtikel zet de tekst er pas na het laden in.
+    if (!art.container && art.wid && doc.bron_type === 'ow' && doc.bron_id) {
+      var toel = el('section', { class: 'toelichting', hidden: true, 'aria-label': 'Toelichting' });
+      vak.appendChild(toel);
+      vulToelichting(art, doc.bron_id, toel);
+    }
     vak.hidden = false;
     vak.scrollTop = 0;
     document.body.classList.add('lees-open');
@@ -2899,6 +2905,123 @@
     document.body.classList.remove('lees-open');
     Array.prototype.forEach.call(document.querySelectorAll('.boom-art[aria-current]'), function (r) { r.removeAttribute('aria-current'); });
     RomKaart.herschaal();
+  }
+
+  // ── Artikelgewijze toelichting ────────────────────────
+  // Uit OCD p2p.toelichting_koppeling: welk blok in de toelichting bij welk artikel hoort,
+  // afgeleid uit de kop van dat blok. Onder de regel, met een streep ertussen en "geen regel"
+  // erboven: de toelichting legt uit, ze verplicht niets. Zonder toelichting: niets, ook
+  // geen melding — in plannen zonder artikelgewijze toelichting stond die er anders overal.
+  var toelichtingen = {};
+  var TOELICHTING_OPSLAG = 'rom-toelichting';
+
+  function toelichtingZichtbaar() {
+    try { return localStorage.getItem(TOELICHTING_OPSLAG) !== 'uit'; } catch (e) { return true; }
+  }
+
+  function haalToelichting(expr, wid) {
+    var sleutel = expr + '|' + wid;
+    if (!toelichtingen[sleutel]) {
+      toelichtingen[sleutel] = api('/v1/viewer/regeling/' + encodeURIComponent(expr) + '/toelichting?wid=' +
+        encodeURIComponent(wid)).then(function (d) {
+          return (d.toelichting || {})[wid] || { artikel: [], boven: [] };
+        }).catch(function (e) { delete toelichtingen[sleutel]; throw e; });
+    }
+    return toelichtingen[sleutel];
+  }
+
+  function vulToelichting(art, expr, doel) {
+    haalToelichting(expr, art.wid).then(function (t) {
+      if (!t.artikel.length && !t.boven.length) return;
+      var zichtbaar = toelichtingZichtbaar();
+      var lijf = el('div', { class: 'toel-lijf', id: 'toel-lijf' });
+      var knop = el('button', { type: 'button', class: 'toel-wissel', 'aria-expanded': String(zichtbaar),
+        'aria-controls': 'toel-lijf', text: zichtbaar ? 'verbergen' : 'tonen' });
+      knop.addEventListener('click', function () {
+        zichtbaar = !zichtbaar;
+        lijf.hidden = !zichtbaar;
+        knop.textContent = zichtbaar ? 'verbergen' : 'tonen';
+        knop.setAttribute('aria-expanded', String(zichtbaar));
+        try { localStorage.setItem(TOELICHTING_OPSLAG, zichtbaar ? 'aan' : 'uit'); } catch (e) { /* private mode */ }
+      });
+      doel.appendChild(el('div', { class: 'toel-kop' }, [
+        el('span', { class: 'label', text: (t.artikel.length ? 'Toelichting bij dit artikel' : 'Toelichting') + ' · geen regel' }),
+        knop
+      ]));
+      lijf.hidden = !zichtbaar;
+      doel.appendChild(lijf);
+      if (staat.weergave === 'begrijpelijk') {
+        lijf.appendChild(el('p', { class: 'toel-noot', text: 'Van de toelichting is geen begrijpelijke versie. U leest de tekst zoals de overheid hem schreef.' }));
+      }
+      t.artikel.forEach(function (blok) {
+        var zwak = toelichtingZwak(blok);
+        if (zwak) lijf.appendChild(el('div', { class: 'toel-melding', role: 'note' }, [icoon('M10 3a7 7 0 1 1 0 14 7 7 0 1 1 0-14zM10 9v5M10 6.5v.1'), el('span', { text: zwak })]));
+        toelichtingBlok(blok, lijf, art);
+      });
+      if (t.boven.length) {
+        var ook = el('div', { class: 'toel-ook' }, [el('span', { class: 'toel-ook-kop',
+          text: t.artikel.length ? 'Ook toegelicht, voor het geheel waar dit artikel in staat' : 'Toegelicht voor het geheel waar dit artikel in staat' })]);
+        t.boven.forEach(function (g) {
+          var inhoud = el('div', { class: 'toel-ook-inhoud', hidden: true });
+          var geladen = false;
+          var kop = el('button', { type: 'button', class: 'toel-ook-knop', 'aria-expanded': 'false' }, [
+            icoon(PAD_RECHTS),
+            el('span', {}, [el('b', { text: g.type + (g.nummer ? ' ' + g.nummer : '') }), g.opschrift ? ' ' + g.opschrift : ''])
+          ]);
+          kop.addEventListener('click', function () {
+            var open = kop.getAttribute('aria-expanded') !== 'true';
+            kop.setAttribute('aria-expanded', String(open));
+            inhoud.hidden = !open;
+            if (open && !geladen) {
+              geladen = true;
+              g.blokken.forEach(function (b) { toelichtingBlok(b, inhoud, art); });
+            }
+          });
+          ook.appendChild(kop);
+          ook.appendChild(inhoud);
+        });
+        lijf.appendChild(ook);
+      }
+      var bron = t.artikel.length ? toelichtingBron(t.artikel[0]) : '';
+      if (bron) lijf.appendChild(el('p', { class: 'toel-bron', text: bron }));
+      doel.hidden = false;
+    }).catch(function () { /* geen toelichting tonen is beter dan een foutmelding onder de regel */ });
+  }
+
+  /** De tekst van één blok: kop van de onderdelen ("Eerste lid") en hun tekst. */
+  function toelichtingBlok(blok, doel, art) {
+    var vak = el('div', { class: 'toel-blok' });
+    blok.delen.forEach(function (d) {
+      if (d.diepte > 0 && d.kop) vak.appendChild(el('span', { class: 'toel-sub', text: d.kop }));
+      if (!d.tekst) return;
+      var rt = document.createElement('ocd-regeltekst');
+      rt.setAttribute('weergave', 'juridisch');
+      rt.tekst = d.tekst;
+      rt._artikel = art;
+      vak.appendChild(rt);
+    });
+    doel.appendChild(vak);
+  }
+
+  /** Een koppeling die niet op de kop zelf berust, zegt dat hardop. */
+  function toelichtingZwak(blok) {
+    if (blok.zekerheid >= 0.9) return '';
+    if (blok.methode === 'kop_nummer') {
+      return 'Gekoppeld op nummer ' + (blok.nummer || '') + '. Het opschrift in de toelichting wijkt af' +
+        (blok.kop ? ': “' + blok.kop + '”.' : '.');
+    }
+    if (blok.methode === 'kop_tekst') return 'Deze toelichting hoort bij een reeks artikelen samen' + (blok.kop ? ': “' + blok.kop + '”.' : '.');
+    return '';
+  }
+
+  function toelichtingBron(blok) {
+    if (blok.zekerheid < 0.9) return '';
+    if (blok.methode === 'kop_intref' || blok.methode === 'kop_tekst') {
+      return 'Gekoppeld via de kop' + (blok.kop ? ' “' + blok.kop + '”' : '') + ' in de artikelgewijze toelichting.';
+    }
+    if (blok.methode === 'kop_nummer') return 'Gekoppeld via nummer en opschrift in de artikelgewijze toelichting.';
+    if (blok.methode === 'regeltekst_intref') return 'Het artikel verwijst zelf naar deze toelichting.';
+    return '';
   }
 
   /** Een hoofdstuk, afdeling of bijlage: de artikelen eronder, om verder te lezen. */

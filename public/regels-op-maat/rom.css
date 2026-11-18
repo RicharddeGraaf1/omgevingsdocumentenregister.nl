@@ -456,6 +456,28 @@ body.boom-weergave.lees-open .werkvlak { grid-template-columns: minmax(0, var(--
 .lees-terug:hover { text-decoration: underline; }
 .lid-doel { background: var(--acc-zacht); box-shadow: -8px 0 0 var(--acc-zacht), 8px 0 0 var(--acc-zacht); border-radius: 2px; }
 
+/* Artikelgewijze toelichting in het leesvenster: onder de regel, met een streep ertussen. */
+.toelichting { display: flex; flex-direction: column; gap: 10px; margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--lijn); }
+.toelichting[hidden], .toel-lijf[hidden], .toel-ook-inhoud[hidden] { display: none; }
+.toel-kop { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.toel-wissel { border: 0; background: none; padding: 0; font: inherit; font-size: 12.5px; color: var(--acc); cursor: pointer; }
+.toel-wissel:hover { text-decoration: underline; }
+.toel-lijf { display: flex; flex-direction: column; gap: 10px; }
+.toel-blok { display: flex; flex-direction: column; gap: 6px; }
+.toel-blok ocd-regeltekst { font-family: var(--serif); font-size: 15px; line-height: 1.6; color: var(--inkt-2); }
+.toel-sub { font-size: 13px; font-weight: 700; color: var(--inkt-2); margin-top: 4px; }
+.toel-melding { display: flex; gap: 10px; align-items: flex-start; background: var(--at-bg); color: var(--at); border-radius: 3px; padding: 8px 10px; font-size: 13px; line-height: 1.45; }
+.toel-melding .icoon { flex: none; width: 16px; height: 16px; margin-top: 1px; }
+.toel-noot { margin: 0; font-size: 13px; color: var(--inkt-3); }
+.toel-ook { display: flex; flex-direction: column; background: var(--grond); border-radius: 3px; padding: 6px 10px; }
+.toel-ook-kop { font-size: 12px; color: var(--inkt-3); padding: 4px 0 2px; }
+.toel-ook-knop { display: flex; align-items: baseline; gap: 8px; text-align: left; border: 0; background: none; padding: 6px 0; font: inherit; font-size: 13.5px; color: inherit; cursor: pointer; }
+.toel-ook-knop .icoon { flex: none; width: 11px; height: 11px; color: var(--inkt-3); transition: transform .12s; }
+.toel-ook-knop[aria-expanded="true"] .icoon { transform: rotate(90deg); }
+.toel-ook-inhoud { padding: 2px 0 8px 19px; }
+.toel-ook-inhoud .toel-blok ocd-regeltekst { font-size: 14.5px; }
+.toel-bron { margin: 0; font-size: 12px; color: var(--inkt-3); }
+
 @media (max-width: 900px) {
   body.boom-weergave .werkvlak, body.boom-weergave.lees-open .werkvlak, body.lees-open .werkvlak { grid-template-columns: 1fr; }
   .leesvenster { position: fixed; inset: 0; z-index: 20; border-left: 0; }
