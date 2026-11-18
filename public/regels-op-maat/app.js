@@ -3518,9 +3518,6 @@
       ]));
       lijf.hidden = !zichtbaar;
       doel.appendChild(lijf);
-      if (staat.weergave === 'begrijpelijk') {
-        lijf.appendChild(el('p', { class: 'toel-noot', text: 'Van de toelichting is geen begrijpelijke versie. U leest de tekst zoals de overheid hem schreef.' }));
-      }
       t.artikel.forEach(function (blok) {
         var zwak = toelichtingZwak(blok);
         if (zwak) lijf.appendChild(el('div', { class: 'toel-melding', role: 'note' }, [icoon('M10 3a7 7 0 1 1 0 14 7 7 0 1 1 0-14zM10 9v5M10 6.5v.1'), el('span', { text: zwak })]));
@@ -3556,14 +3553,17 @@
     }).catch(function () { /* geen toelichting tonen is beter dan een foutmelding onder de regel */ });
   }
 
-  /** De tekst van één blok: kop van de onderdelen ("Eerste lid") en hun tekst. */
+  /** De tekst van één blok: kop van de onderdelen ("Eerste lid") en hun tekst. De toelichting is
+   *  grotendeels hertaald (de hertaalronde nam Divisietekst mee), dus ze volgt Juridisch/Begrijpelijk
+   *  net als de regel; zonder hertaling meldt de component zelf dat de tekst van de overheid er staat. */
   function toelichtingBlok(blok, doel, art) {
     var vak = el('div', { class: 'toel-blok' });
     blok.delen.forEach(function (d) {
       if (d.diepte > 0 && d.kop) vak.appendChild(el('span', { class: 'toel-sub', text: d.kop }));
       if (!d.tekst) return;
       var rt = document.createElement('ocd-regeltekst');
-      rt.setAttribute('weergave', 'juridisch');
+      rt.setAttribute('weergave', staat.weergave);
+      if (d.begrijpelijk) rt.begrijpelijk = d.begrijpelijk;
       rt.tekst = d.tekst;
       rt._artikel = art;
       vak.appendChild(rt);
