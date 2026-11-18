@@ -27,6 +27,7 @@ Alleen standaardbibliotheek. De verwachtingen staan in golden.json, afgeleid uit
 import argparse
 import datetime
 import json
+import pickle
 import re
 import sys
 import time
@@ -37,6 +38,8 @@ import urllib.request
 from pathlib import Path
 
 HIER = Path(__file__).resolve().parent
+sys.path.insert(0, str(HIER))   # python -I zet de map van het script niet op het pad
+import indeling_i as ii   # noqa: E402  (indeling I, 2026-11-17)
 PDOK = "https://api.pdok.nl/bzk/locatieserver/search/v3_1"
 UA = {"User-Agent": "rom-benchmark/1.0 (+omgevingsdocumentenregister.nl tests)"}
 VRAAG_ZICHTBAAR = 10   # app.js: limiet = 10 — wat de bezoeker zonder doorklikken ziet
@@ -352,18 +355,23 @@ def waar_is_document(api, spec):
     return "'%s' staat in het register (%s artikelen), maar niet bij dit punt" % (r.get("titel"), r.get("totaal_artikelen"))
 
 
+KOPJEPAD = {}   # artikel-wid -> [opschriften van de kopjes erboven]; wids zijn uniek over documenten
+
+
 def boom_index(boom):
     """wid -> artikel-wid, wid -> [nummers van omhullende containers], artikelnummer -> opschrift,
     artikel-wid -> {act: [{naam, groep}], ga: [{naam, type}]} (annotaties van artikel en leden, voor variant D),
     artikel-wid -> opschrift van het diepste kopje erboven (niveau 3, 2026-10-30)."""
     ouder, secties, nummers, ann, kopje = {}, {}, {}, {}, {}
 
-    def loop(knoop, art, pad, kop=None):
+    def loop(knoop, art, pad, kop=None, koppen=()):
         t = knoop.get("type")
         if t in KOPJE_TYPES and knoop.get("opschrift"):
             kop = knoop["opschrift"]
+            koppen = koppen + (kop,)
         if t in ("Artikel", "Divisietekst") and knoop.get("wid"):
             kopje[knoop["wid"]] = kop
+            KOPJEPAD[knoop["wid"]] = list(koppen)   # indeling I leest alle kopjes, van buiten naar binnen
         a = knoop.get("wid") if t in ("Artikel", "Divisietekst") else art   # vrije tekst: tekstdeel-annotaties (2026-10-28)
         p = pad + ([str(knoop.get("nummer"))] if t != "Artikel" and knoop.get("nummer") else [])
         if t == "Artikel" and knoop.get("nummer"):
@@ -384,7 +392,7 @@ def boom_index(boom):
                 if e not in v["ga"]:
                     v["ga"].append(e)
         for k in knoop.get("kinderen") or []:
-            loop(k, a, p, kop)
+            loop(k, a, p, kop, koppen)
 
     for k in boom or []:
         loop(k, None, [])
@@ -518,12 +526,15 @@ def analyseer_document(api, loc, doc):
             a = artikelen[sleutel] = {
                 "wid": aw, "nummer": r.get("artikel_nummer") or "", "opschrift": r.get("artikel_opschrift") or r.get("artikel") or "",
                 "pad": p, "imow": imow.get(aw) if aw else None, "rij_wids": [], "inhoud": r.get("inhoud"),
-                "ann": ann.get(aw) or {"act": [], "ga": []}, "kopje": kopje.get(aw) if aw else None}
+                "ann": ann.get(aw) or {"act": [], "ga": []}, "kopje": kopje.get(aw) if aw else None,
+                "kopjepad": KOPJEPAD.get(aw) or [], "bron_type": doc["bron_type"], "bron_id": doc["bron_id"]}
         if r.get("wid"):
             a["rij_wids"].append(r["wid"])
         # zonder boom (grote rijksregelingen) kent alleen de regelmix-rij de activiteit, zonder groep
         if r.get("activiteit_naam") and not any(x["naam"] == r["activiteit_naam"] for x in a["ann"]["act"]):
             a["ann"] = {"act": a["ann"]["act"] + [{"naam": r["activiteit_naam"], "groep": ""}], "ga": a["ann"]["ga"]}
+    if doc["bron_type"] == "wro" and not is_beleid(doc):   # een structuurvisie heeft geen bestemmingen
+        ii.bereid_wro_voor(list(artikelen.values()))
     return {"rijen": len(rijen), "artikelen": list(artikelen.values()), "secties": secties, "nummers": nummers,
             "indeling_opgehaald": bool(ond and ond.get("categorieen")), "boom": boom is not None}
 
@@ -658,7 +669,8 @@ def toegang(raak, alle, tegel, sub, modus, sub_fijn=None, termen=None, fijn=Fals
 MODI_D = {"stelsel": False, "stelsel_act": True}   # modus -> activiteitengroep op niveau 1
 MODI_E = ("meervoudig",)
 MODI = ("pad", "imow", "hybride") + tuple(MODI_D) + MODI_E
-TOEGANG_EXTRA = ["hybride_verfijnd", "direct", "direct_document", "hybride_samen", "meervoudig_samen"]
+TOEGANG_EXTRA = ["hybride_verfijnd", "direct", "direct_document", "hybride_samen", "meervoudig_samen", "eigen",
+                 "direct_totaal", "eigen_totaal"]
 
 # ── Variant E: D + meer tegels per artikel (2026-10-24) ──
 # Zelfde tegels en chips als D, maar een artikel staat onder ELKE tegel waarover het iets regelt:
@@ -799,23 +811,148 @@ def toegang_h(raak, alle, tegel, sub, sub_fijn, termen, documentkeuze=False):
     return {"gevonden": False, "score": 0.0, "uitleg": "artikel valt onder %s" % ("+".join(waar) or "?")}
 
 
-def is_lokaal(d):
-    """Zoals lokaleDocs() in app.js: de documenten achter de tegels."""
+# ── Indeling I: eigen onderwerpen en subonderwerpen (2026-11-17) ──
+# De indeling staat in public/regels-op-maat/indeling-i.js en wordt toegepast door indeling_i.py.
+# Welke tegel en welk subonderwerp de bezoeker bij een vraag kiest: gelezen uit de vraag, niet uit
+# de plek van het artikel. Curatie van de agent (2026-11-17); bij 13 en 26 is een andere keuze verdedigbaar.
+I_KEUZE = {
+    5: ("i-bouwen", "maat"), 7: ("i-bouwen", "maat"),
+    8: ("i-ondernemen", "winkel"), 9: ("i-ondernemen", "winkel"), 10: ("i-ondernemen", "winkel"),
+    11: ("i-ondernemen", "bedrijf"), 12: ("i-ondernemen", "bedrijf"), 13: ("i-recreatie", "varen"),
+    14: ("i-verkeer", "parkeren"), 15: ("i-bouwen", "dak"), 16: ("i-bouwen", "dak"), 18: ("i-bouwen", "dak"),
+    19: ("i-bouwen", "dak"), 20: ("i-energie", "warmte"), 21: ("i-water", "onttrekken"), 22: ("i-water", "onttrekken"),
+    23: ("i-ondernemen", "datacenter"), 24: ("i-groen", "soorten"), 26: ("i-groen", "soorten"),
+    28: ("i-water", "overlast"), 29: ("i-water", "overlast"), 31: ("i-water", "overlast"), 32: ("i-water", "overlast"),
+    33: ("i-water", "overlast"), 34: ("i-water", "overlast"), 35: ("i-groen", "subsidie"), 36: ("i-groen", "subsidie"),
+    37: ("i-verkeer", "wegen"), 38: ("i-verkeer", "wegen"), 39: ("i-energie", "klimaat"), 40: ("i-energie", "wind"),
+}
+STRENG_MAX = 10   # strenge lezing (G-178): hooguit tien regels na een herkenbare keuze
+
+
+def keuze_i(c):
+    """Tegel en subonderwerp bij indeling I: uit de gouden set (scope 2), anders I_KEUZE (scope 1)."""
+    k = c["keuze_i"] if "keuze_i" in c else I_KEUZE.get(c["id"])
+    return tuple(k) if k else None
+
+
+def zoektekst_i(a):
+    w = a.get("wro") or {}
+    return " | ".join(norm(x) for x in [a.get("opschrift"), w.get("bestemming")] + list(a.get("kopjepad") or []) +
+                      [y["naam"] for y in a["ann"]["act"]] + [y["naam"] for y in a["ann"]["ga"]] if x)
+
+
+def toegang_i(raak, alle, keuze, termen, documentkeuze=False):
+    """Indeling I: tegel, subonderwerp, dan Verfijn (zoals G en H) en het zoekveld.
+    'streng': het artikel staat onder het gekozen subonderwerp en na de keuzes blijven er hooguit
+    STRENG_MAX regels over; 'n_sub' is het aantal regels direct na het subonderwerp."""
+    tegel, sub = keuze
+    plek = {id(x): ii.indeel(x) for x in alle + raak}
+    termen_n = [norm(t) for t in termen or []]
+    beste = None
+    for a in raak:
+        # Regels en beleid staan onder hetzelfde subonderwerp, maar in twee lijsten. Beleid staat per document,
+        # dichtgeklapt: dat kost twee keuzes meer (naar het beleid, en het document openen).
+        soort = [x for x in alle if bool(x.get("beleid")) == bool(a.get("beleid")) and (not a.get("beleid") or x["bron_id"] == a["bron_id"])]
+        in_tegel = [x for x in soort if any(p[0] == tegel for p in plek[id(x)])]
+        in_sub = [x for x in soort if ii.staat_onder(plek[id(x)], tegel, sub)]
+        extra = 2 if a.get("beleid") else 0
+        if ii.staat_onder(plek[id(a)], tegel, sub):
+            sel, n, via, keuzes, in_keuze = in_sub, len(in_sub), "sub '%s'%s" % (ii.sub_naam(tegel, sub), " › beleid" if extra else ""), 2 + extra, True
+        elif any(p[0] == tegel for p in plek[id(a)]):
+            eigen = next(p[1] for p in plek[id(a)] if p[0] == tegel)
+            sel, n, via, keuzes, in_keuze = in_tegel, len(in_tegel), "onderwerp — niet onder '%s' maar onder '%s'" % (
+                ii.sub_naam(tegel, sub), ii.sub_naam(tegel, eigen)), 1 + extra, False
+        else:
+            continue
+        n_sub = n
+        if in_keuze:
+            m, w = verfijn(sel, a, termen, n, via)
+            if m < n:
+                n, via, keuzes = m, w, keuzes + 1
+        tekst = zoektekst_i(a)
+        for term in termen_n:
+            m = len([x for x in sel if term in zoektekst_i(x)]) if term in tekst else 0
+            if 0 < m < n:
+                n, via, keuzes = m, via + " › zoek '%s'" % term, keuzes + 1
+        kand = {"gevonden": True, "artikel": a["nummer"] or a["opschrift"], "n": n, "via": via, "score": gewicht(n),
+                "keuzes": keuzes + (1 if documentkeuze else 0), "n_sub": n_sub,
+                "streng": bool(in_keuze and n <= STRENG_MAX), "streng_kaal": bool(in_keuze and n_sub <= STRENG_MAX)}
+        if not beste or (kand["score"], -n) > (beste["score"], -beste["n"]):
+            beste = kand
+    if beste:
+        return beste
+    waar = sorted({"%s/%s" % (p[0], p[1]) for a in raak for p in plek[id(a)]})
+    return {"gevonden": False, "score": 0.0, "uitleg": "artikel valt onder %s" % (" + ".join(waar) or "?")}
+
+
+def is_beleid(d):
+    """Zoals groepVan() in app.js, plus de Wro-structuurvisies: visies en programma's."""
+    if d.get("bron_type") == "wro":
+        return "structuurvisie" in (d.get("documenttype") or "").lower()
+    return d.get("via") == "gebied"
+
+
+def achter_tegels_i(d, met_rijk=False):
+    """Indeling I zet ook het beleid (visies, programma's) achter de tegels, in een eigen lijst; landelijke regels
+    alleen bij Documenten: totaal."""
+    return is_lokaal(d, met_rijk) or is_beleid(d)
+
+
+_PUNTEN_I = {}
+
+
+def artikelen_achter_tegels_i(api, loc, docs, met_rijk=False):
+    sleutel = (loc["x"], loc["y"], met_rijk)
+    if sleutel not in _PUNTEN_I:
+        gezien, uit = set(), []
+        for d in docs:
+            if not achter_tegels_i(d, met_rijk):
+                continue
+            for w in [d] + aanvullend_bij(docs, d):
+                if w["bron_id"] not in gezien:
+                    gezien.add(w["bron_id"])
+                    try:
+                        arts = analyseer_document(api, loc, w)["artikelen"]
+                    except RuntimeError:
+                        continue   # een document dat niet laadt valt eruit, zoals op de site
+                    for x in arts:
+                        x["beleid"] = is_beleid(w)
+                    uit += arts
+        _PUNTEN_I[sleutel] = uit
+    return _PUNTEN_I[sleutel]
+
+
+def is_lokaal(d, met_rijk=False):
+    """Zoals lokaleDocs() in app.js: de documenten achter de tegels. met_rijk: Documenten op totaal
+    (sinds 2026-11-13), dan staan ook de landelijke regels erachter; beleid blijft erbuiten."""
     if d.get("bron_type") == "wro":
         return "structuurvisie" not in (d.get("documenttype") or "").lower()
-    return d.get("via") != "gebied" and d.get("bestuurslaag") != "rijk"
+    return d.get("via") != "gebied" and (met_rijk or d.get("bestuurslaag") != "rijk")
+
+
+def hoofd_van(docs, v):
+    """Het document waar de site voorbeschermingsregels onder hangt (koppelAanvullend), of None."""
+    return next((d for d in docs if any(w is v for w in aanvullend_bij(docs, d))), None)
+
+
+def staat_achter(docs, doc, met_rijk=False, met_beleid=False):
+    """Staat dit document achter de tegels? Voorbeschermingsregels volgen het document waar ze onder hangen:
+    die van het luchthavenbesluit Eelde (Rijk) hangen onder het omgevingsplan en staan dus ook bij lokaal erachter."""
+    if is_voorbescherming(doc):
+        doc = hoofd_van(docs, doc) or doc
+    return (met_beleid and is_beleid(doc)) or is_lokaal(doc, met_rijk)
 
 
 _PUNTEN = {}
 
 
-def artikelen_achter_tegels(api, loc, docs):
+def artikelen_achter_tegels(api, loc, docs, met_rijk=False):
     """Alle artikelen over de lokale documenten heen, met hun aanvullende regels; één keer per punt."""
-    sleutel = (loc["x"], loc["y"])
+    sleutel = (loc["x"], loc["y"], met_rijk)
     if sleutel not in _PUNTEN:
         gezien, uit = set(), []
         for d in docs:
-            if not is_lokaal(d):
+            if not is_lokaal(d, met_rijk):
                 continue
             for w in [d] + aanvullend_bij(docs, d):
                 if w["bron_id"] not in gezien:
@@ -919,7 +1056,7 @@ def draai_case(api, c, met_vraag=True):
                 du["toegang"]["meervoudig"] = toegang_d(raak, alle, c["onderwerp_d"], c.get("termen_d"), True, tegels_e)
                 # Documentkeuze uit: alles achter de tegels. Een landelijk artikel staat daar niet achter;
                 # dat blijft het eigen document, en dat kost dan wél een keuze.
-                lokaal = is_lokaal(doc)
+                lokaal = staat_achter(docs, doc)
                 achter = artikelen_achter_tegels(api, loc, docs) if lokaal else alle
                 du["toegang"]["direct"] = toegang_h(raak, achter, c["onderwerp_d"], c.get("sub"), c.get("sub_fijn"),
                                                     c.get("termen_d"), documentkeuze=not lokaal)
@@ -927,6 +1064,19 @@ def draai_case(api, c, met_vraag=True):
                                                              c.get("termen_d"), documentkeuze=True)
                 du["toegang"]["meervoudig_samen"] = toegang_d(raak, achter, c["onderwerp_d"], c.get("termen_d"), True, tegels_e)
                 du["toegang"]["hybride_samen"] = toegang(raak, achter, c["onderwerp"], c.get("sub"), "hybride", c.get("sub_fijn"), c.get("termen_d"))
+                # Documenten op totaal (2026-11-13): ook de landelijke regels achter de tegels.
+                totaal = staat_achter(docs, doc, met_rijk=True)
+                achter_t = artikelen_achter_tegels(api, loc, docs, met_rijk=True) if totaal else alle
+                du["toegang"]["direct_totaal"] = toegang_h(raak, achter_t, c["onderwerp_d"], c.get("sub"), c.get("sub_fijn"),
+                                                          c.get("termen_d"), documentkeuze=not totaal)
+            ki = keuze_i(c)
+            if ki:
+                for x in raak:
+                    x["beleid"] = is_beleid(doc)
+                for m, met_rijk in (("eigen", False), ("eigen_totaal", True)):
+                    erachter = staat_achter(docs, doc, met_rijk=met_rijk, met_beleid=True)
+                    achter_i = artikelen_achter_tegels_i(api, loc, docs, met_rijk) if erachter else alle
+                    du["toegang"][m] = toegang_i(raak, achter_i, ki, c.get("termen_d"), documentkeuze=not erachter)
         du["indeling"] = {}
         for modus in MODI:
             per = []
@@ -1044,7 +1194,10 @@ VARIANTEN = [("pad", "A · kopjes (opschriftpad)"), ("imow", "B · label van de 
              ("direct_document", "H · tegels van E, alleen subonderwerpen, activiteit een niveau lager"),
              ("hybride_samen", "C, documentkeuze uit"),
              ("meervoudig_samen", "E, documentkeuze uit"),
-             ("direct", "H, documentkeuze uit (standaard bij H)")]
+             ("direct", "H, documentkeuze uit (standaard bij H)"),
+             ("direct_totaal", "H, documentkeuze uit, documenten totaal (ook Rijk)"),
+             ("eigen", "I · eigen onderwerpen en subonderwerpen, zonder documentkeuze"),
+             ("eigen_totaal", "I, documenten totaal (ook Rijk)")]
 
 
 def toegang_cel(t):
@@ -1064,7 +1217,8 @@ def toegang_sectie(resultaten, g):
          "artikelen staat het daar in het document? Met het verwachte subonderwerp telt de sub, anders de hele tegel. "
          "Weging: ≤10 artikelen 100%, ≤20 90%, ≤30 70%, meer 50%; niet gevonden 0%.", "",
          "| Variant | Gevonden | Gewogen score | Excel |", "|---|---|---|---|"]
-    excel = {"pad": sum(g[x["id"]]["excel_n"] for x in rij), "imow": sum(g[x["id"]]["excel_o"] for x in rij)}
+    excel = {} if any(g[x["id"]].get("excel_n") is None for x in rij) else \
+        {"pad": sum(g[x["id"]]["excel_n"] for x in rij), "imow": sum(g[x["id"]]["excel_o"] for x in rij)}
     for m, naam in VARIANTEN:
         t = [(x.get("toegang") or {}).get(m) or {"gevonden": False, "score": 0} for x in rij]
         r.append("| %s | %d / %d | %.1f / %d (%d%%) | %s |" % (
@@ -1072,7 +1226,7 @@ def toegang_sectie(resultaten, g):
             round(100 * sum(y["score"] for y in t) / len(rij)),
             ("%d / %d (kolom %s)" % (excel[m], len(rij), "N" if m == "pad" else "O")) if m in excel else "—"))
     # Haalbaar: zonder de vragen buiten bereik, en een negatieve vraag telt als goed als hij terecht leeg is.
-    for label, ids in (("vragen 11–40", [x for x in rij]), ("alle 40 vragen", resultaten)):
+    for label, ids in (("de benchmarkvragen", rij),) + ((("alle %d vragen" % len(resultaten), resultaten),) if len(resultaten) > len(rij) else ()):
         tel = [x for x in ids if not g[x["id"]].get("buiten_scope")]
         r += ["", "**Haalbaar, %s** (noemer %d: zonder buiten bereik; negatief = goed als terecht leeg):" % (label, len(tel)), "",
               "| Variant | Gewogen score |", "|---|---|"]
@@ -1091,11 +1245,14 @@ def toegang_sectie(resultaten, g):
         r.append("| %s | %s |" % (naam, ("%.1f" % (sum(k) / len(k))).replace(".", ",") if k else "–"))
     r += ["", "| # | Toeleiding (M) | Excel N | A · opschriftpad | Excel O | B · annotatie | C · hybride |",
           "|---|---|---|---|---|---|---|"]
+    janee = {True: "ja", False: "nee", None: "—"}
     for x in rij:
         c, t = g[x["id"]], x.get("toegang") or {}
+        tl = c["excel"].get("toeleiding") or ("%s%s (%s)" % (c["onderwerp"], "; " + c["sub"] if c.get("sub") else "", c.get("toeleiding_bron"))
+                                              if c.get("onderwerp") else "—")
         r.append("| %d | %s | %s | %s | %s | %s | %s |" % (
-            x["id"], c["excel"].get("toeleiding") or "—", "ja" if c["excel_n"] else "nee", toegang_cel(t.get("pad")),
-            "ja" if c["excel_o"] else "nee", toegang_cel(t.get("imow")), toegang_cel(t.get("hybride"))))
+            x["id"], tl, janee[c.get("excel_n")], toegang_cel(t.get("pad")),
+            janee[c.get("excel_o")], toegang_cel(t.get("imow")), toegang_cel(t.get("hybride"))))
     r += ["", "### Variant D — thema-en-activiteitindeling", "",
           "Tegel = Brigittes categorie (via kolom M, afwijkingen in `bouw_golden.py` `D_TEGEL`); chip = een label van "
           "het artikel (subonderwerp, activiteit, gebiedsaanwijzing) met een woord uit de vraag (`D_TERMEN`). "
@@ -1106,6 +1263,22 @@ def toegang_sectie(resultaten, g):
         r.append("| %d | %s | %s | %s | %s | %s |" % (
             x["id"], TEGELS_D.get(c.get("onderwerp_d"), "—"), ", ".join(c.get("termen_d") or []) or "—",
             toegang_cel(t.get("hybride")), toegang_cel(t.get("stelsel")), toegang_cel(t.get("stelsel_act"))))
+    r += ["", "### Indeling I — eigen onderwerpen en subonderwerpen", "",
+          "Tegel en subonderwerp per vraag staan in `I_KEUZE`. *Streng*: het artikel staat onder het gekozen subonderwerp en "
+          "er blijven hooguit %d regels over; *kaal* is dat zonder Verfijn en zonder zoekwoord." % STRENG_MAX, "",
+          "| # | Keuze | I | na sub | streng | kaal |", "|---|---|---|---|---|---|"]
+    streng = kaal = 0
+    for x in rij:
+        t = (x.get("toegang") or {}).get("eigen") or {}
+        k = keuze_i(g[x["id"]])
+        streng += bool(t.get("streng"))
+        kaal += bool(t.get("streng_kaal"))
+        r.append("| %d | %s | %s | %s | %s | %s |" % (
+            x["id"], "%s › %s" % (ii.tegel_naam(k[0]), ii.sub_naam(*k)) if k else "—", toegang_cel(t),
+            t.get("n_sub", "–"), "ja" if t.get("streng") else "nee", "ja" if t.get("streng_kaal") else "nee"))
+    st_t = sum(bool(((x.get("toegang") or {}).get("eigen_totaal") or {}).get("streng")) for x in rij)
+    r += ["", "Streng: **%d van %d**; kaal (alleen tegel en subonderwerp): **%d van %d**. Met documenten totaal (ook Rijk) "
+          "streng: **%d van %d**." % (streng, len(rij), kaal, len(rij), st_t, len(rij))]
     return r
 
 
@@ -1122,8 +1295,10 @@ def rapport(resultaten, golden, meta):
         overig = len([s for s in st if s not in ("PASS", "DEELS", "FAIL", "LAAT", "n.v.t.")])
         r.append("| %s | %d | %d | %d | %d | %d |" % (naam, p, d, f, overig, p + d + f))
     r += toegang_sectie(resultaten, g)
-    r += ["", "Ter vergelijking, handmatige score in het Excel (20-10-2026): filter op kenmerken 12/30, "
-          "(sub)categorie + opschriftpad 7/30, (sub)categorie + annotatie 5/30, vraag 9/30.", "",
+    if all(c.get("excel_n") is not None for c in golden):
+        r += ["", "Ter vergelijking, handmatige score in het Excel (20-10-2026): filter op kenmerken 12/30, "
+              "(sub)categorie + opschriftpad 7/30, (sub)categorie + annotatie 5/30, vraag 9/30."]
+    r += ["",
           "## Per case", "",
           "| # | Vraag | " + " | ".join(n for _, n in KOLOMMEN) + " | Excel K/P/A/V |",
           "|---|---|" + "---|" * len(KOLOMMEN) + "---|"]
@@ -1139,7 +1314,8 @@ def rapport(resultaten, golden, meta):
         r.append("### %d. %s" % (x["id"], x["vraag"]))
         r.append("- Locatie: %s (%s, %s)%s" % (x["locatie"].get("label"), x["locatie"].get("x"), x["locatie"].get("y"),
                                                 " ⚠️ " + x["locatie"]["melding"] if x["locatie"].get("melding") else ""))
-        r.append("- Verwacht: %s — *%s*" % (c["excel"]["verwacht_antwoord"], c["excel"]["bron"]))
+        r.append("- Verwacht: %s — *%s*%s" % (c["excel"]["verwacht_antwoord"], c["excel"]["bron"],
+                                              " (noot: %s)" % c["noot"] if c.get("noot") else ""))
         k = x.get("kenmerk") or {}
         if k.get("status") not in (None, "n.v.t."):
             extra = (" waarden %s (verwacht %s)" % (k.get("waarden"), k.get("verwacht"))) if "waarden" in k else ""
@@ -1180,6 +1356,8 @@ def main():
     ap.add_argument("--water-als-waterkering", action="store_true",
                     help="tegelindeling van vóór 2026-10-23 (water zonder sub → Waterkeringen), zoals het Excel van 20-10 zag")
     ap.add_argument("--uit", default=str(HIER / "runs"))
+    ap.add_argument("--cache", help="bestand met eerdere API-antwoorden (pickle): gelezen bij de start, bijgewerkt aan het eind. "
+                                    "Voor herhaald draaien op dezelfde dag; de antwoorden verouderen.")
     a = ap.parse_args()
     global WATER_OUD
     WATER_OUD = a.water_als_waterkering
@@ -1189,6 +1367,8 @@ def main():
         ids = {int(i) for i in a.case.split(",")}
         golden = [c for c in golden if c["id"] in ids]
     api = Api(a.api)
+    if a.cache and Path(a.cache).exists():
+        api.cache = pickle.load(open(a.cache, "rb"))
     start = datetime.datetime.now()
     resultaten = []
     for c in golden:
@@ -1201,6 +1381,8 @@ def main():
         print("%3d  %s  %s" % (c["id"], "  ".join("%s=%s" % (n, x["routes"].get(k, "-")) for k, n in KOLOMMEN),
                                ("FOUT " + x["fout"][:80]) if x.get("fout") else ""), flush=True)
 
+    if a.cache:
+        pickle.dump(api.cache, open(a.cache, "wb"))
     meta = {"start": start.strftime("%Y-%m-%d %H:%M"), "api": a.api, "water_als_waterkering": WATER_OUD, "aanroepen": api.aanroepen,
             "duur": (datetime.datetime.now() - start).total_seconds(), "golden": a.golden, "cases": len(golden)}
     doel = Path(a.uit) / start.strftime("%Y-%m-%d_%H%M%S")

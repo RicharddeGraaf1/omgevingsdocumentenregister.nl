@@ -533,3 +533,80 @@ body.venster-slepen { cursor: col-resize; user-select: none; }
   .ow-raster { grid-template-columns: minmax(0, 1fr); }
   .direct-doc-kop .tag { white-space: normal; }
 }
+
+/* ── Indeling I: eigen onderwerpen en subonderwerpen (2026-11-17) ── */
+/* De wegwijzer: één zoekveld boven de tegels. */
+.wijzer { position: relative; }
+.wijzer-veld { display: flex; align-items: center; gap: 10px; min-height: 48px; padding: 0 14px; border-radius: 3px; color: var(--inkt-3); }
+.wijzer-veld:focus-within { box-shadow: 0 0 0 2px var(--focus); }
+.wijzer-veld input { flex: 1; min-width: 0; border: 0; outline: 0; background: none; font: inherit; font-size: 16px; color: var(--inkt); padding: 12px 0; }
+.wijzer-veld input::placeholder { color: var(--inkt-3); }
+.wijzer-lijst { position: absolute; left: 0; right: 0; top: 100%; z-index: 20; margin: 4px 0 0; padding: 4px 0; list-style: none; max-height: min(60vh, 460px); overflow-y: auto; box-shadow: var(--paneel-schaduw); }
+.wijzer-lijst[hidden] { display: none; }
+.wijzer-lijst .wijzer-item { display: flex; align-items: center; gap: 10px; padding: 6px 12px; margin: 0; cursor: pointer; }
+.wijzer-item[aria-disabled="true"] { cursor: default; }
+.wijzer-item[aria-disabled="true"]:hover { background: none; }
+.wijzer-nieuw { border-top: 1px solid var(--lijn-2); margin-top: 4px; padding-top: 10px; }
+.wijzer-icoon { width: 28px; height: 28px; flex: none; display: grid; place-items: center; border-radius: 3px; color: var(--inkt-3); }
+.wijzer-onderwerp .wijzer-icoon { background: var(--acc-zacht); color: var(--acc); }
+.wijzer-vraag .wijzer-icoon { color: oklch(48% 0.17 300); }
+.wijzer-tekst { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.wijzer-tekst b { font-size: 14.5px; line-height: 1.3; overflow-wrap: anywhere; }
+.wijzer-regel .wijzer-tekst b { font-family: var(--serif); font-weight: 600; font-size: 14.5px; }
+.wijzer-tekst .muted { font-size: 12.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.wijzer-aantal { flex: none; font-size: 12px; color: var(--inkt-2); }
+.wijzer-leeg .wijzer-tekst b, .wijzer-leeg .wijzer-aantal { color: var(--inkt-3); font-weight: 400; }
+.wijzer-meer .wijzer-tekst b { font-weight: 400; color: var(--inkt-2); font-size: 13px; }
+
+/* Tegel met snelkoppelingen naar zijn subonderwerpen. */
+.ei-tegel { display: flex; flex-direction: column; border-radius: 3px; }
+.ei-tegel:hover { box-shadow: 0 0 0 1px var(--acc), 0 1px 3px oklch(20% 0.02 262 / .08); }
+.ei-tegel-kop { background: none; padding-bottom: 8px; }
+.ei-tegel-kop:hover { box-shadow: none; }
+.ei-subs { display: flex; flex-wrap: wrap; gap: 2px 4px; padding: 0 10px 10px 68px; margin-top: -4px; }
+.ei-sub { font: inherit; font-size: 12.5px; line-height: 1.35; text-align: left; padding: 2px 6px; border: 0; border-radius: 3px; background: none; color: var(--acc); cursor: pointer; }
+.ei-sub:hover { background: var(--acc-zacht); text-decoration: underline; }
+.ei-sub-meer { color: var(--inkt-3); }
+.ei-zonder b { font-weight: 700; color: var(--inkt-2); }
+.ei-klein-kop { margin: 10px 0 0; }
+.ei-kop h1 { margin: 0; font-size: 20px; }
+.ei-kop p { margin: 2px 0 0; font-size: 13.5px; }
+.ei-filter { margin-top: 6px; }
+.ei-filter .direct-zoekrij { margin-top: 4px; }
+
+/* De subonderwerpen van een tegel: een vaste lijst, wat hier niet speelt staat er grijs bij. */
+.ei-keuze { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+.ei-keuze[hidden] { display: none; }
+.ei-keuze-knop { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; text-align: left; font: inherit; font-size: 14px; line-height: 1.3;
+  padding: 8px 11px; border: 0; border-radius: 3px; background: var(--blad); box-shadow: var(--blad-schaduw); color: var(--inkt); cursor: pointer; }
+.ei-keuze-knop:hover { box-shadow: 0 0 0 1px var(--acc); color: var(--acc); }
+.ei-keuze-knop[aria-pressed="true"] { background: var(--acc); color: var(--blad); box-shadow: none; font-weight: 700; }
+.ei-keuze-knop[aria-pressed="true"] .ei-keuze-aantal { color: var(--blad); }
+.ei-keuze-aantal { flex: none; font-size: 12px; color: var(--inkt-3); }
+.ei-keuze-leeg { background: none; box-shadow: none; border: 1px dashed var(--lijn); color: var(--inkt-3); cursor: default; }
+.ei-keuze-leeg:hover { box-shadow: none; color: var(--inkt-3); }
+.ei-keuze-wissel { display: none; grid-column: 1 / -1; justify-self: start; font: inherit; font-size: 13px; padding: 4px 2px; border: 0; background: none; color: var(--acc); cursor: pointer; text-decoration: underline; }
+.ei-soort { display: inline-flex; flex: none; border: 1px solid var(--lijn); border-radius: 3px; overflow: hidden; }
+.ei-soort[hidden] { display: none; }
+.ei-soort-knop { font: inherit; font-size: 13px; padding: 5px 11px; border: 0; background: var(--blad); color: var(--inkt-2); cursor: pointer; }
+.ei-soort-knop + .ei-soort-knop { border-left: 1px solid var(--lijn); }
+.ei-soort-knop[aria-pressed="true"] { background: var(--inkt); color: var(--blad); font-weight: 700; }
+.tag-beleid { color: var(--at); border-color: color-mix(in oklch, var(--at) 40%, var(--lijn)); }
+.ei-vast { background: var(--acc-zacht); border-radius: 3px; border-top-color: transparent; }
+.ei-vast > .art-kop { padding-inline: 8px; }
+.ei-vast > .art-inhoud { padding-right: 8px; }
+.ei-vast-tag { margin-left: 8px; font-family: var(--sans); font-weight: 400; text-transform: none; color: var(--acc); border-color: color-mix(in oklch, var(--acc) 40%, var(--lijn)); white-space: nowrap; }
+@container lijst (max-width: 460px) {
+  .ei-keuze { grid-template-columns: 1fr; }
+  .ei-subs { padding-left: 10px; }
+  .ei-raster { grid-template-columns: 1fr; }
+  .ei-keuze-gekozen .ei-keuze-knop[aria-pressed="false"] { display: none; }
+  .ei-keuze-gekozen .ei-keuze-wissel { display: block; }
+}
+@media (max-width: 560px) {
+  .ei-keuze { grid-template-columns: 1fr; }
+  .ei-subs { padding-left: 10px; }
+  .ei-keuze-gekozen .ei-keuze-knop[aria-pressed="false"] { display: none; }
+  .ei-keuze-gekozen .ei-keuze-wissel { display: block; }
+}
+

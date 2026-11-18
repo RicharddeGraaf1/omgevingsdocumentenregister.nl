@@ -18,6 +18,7 @@ python -I run_benchmark.py --case 8,15,21    # een selectie
 python -I run_benchmark.py --zonder-vraag    # zonder de vraagroute (sneller)
 python -I run_benchmark.py --api http://localhost:8002
 python -I run_benchmark.py --water-als-waterkering   # tegelindeling van vóór 23-10, zoals het Excel zag
+python -I run_benchmark.py --zonder-vraag --cache cache.pkl   # herhaald draaien op één dag: antwoorden hergebruiken
 ```
 
 Alleen standaardbibliotheek. Productie gaat via de `/api`-proxy van het register, dus
@@ -78,6 +79,8 @@ Wat de bezoeker merkt; de techniek staat in de secties hieronder.
 | F | negen tegels + soort activiteit | Als D, en ook de soort activiteit telt. Een regel bij een monumentenactiviteit komt dan ook onder *Erfgoed*. Heette tot 24-10 D′. | indeling *F · Stelsel: + activiteitengroep (proef)* |
 | G | kopjes, anders label, met een derde niveau | Als C, en binnen een subonderwerp met meer dan 10 regels kiest de bezoeker verder op kopje of activiteit. | indeling *G · Hybride met derde niveau* |
 | H | tegels van E, alleen subonderwerpen | Als E, maar op niveau 2 alleen de subonderwerpen van de tegel. Activiteiten zitten in *Verfijn* en achter het zoekveld. | indeling *H · Tegels van E, alleen subonderwerpen, activiteit een niveau lager*, met *Documentkeuze* op Uit (de standaard bij H) |
+
+| I | eigen onderwerpen en subonderwerpen | Twaalf tegels in gewone taal met elk een vaste, korte lijst subonderwerpen (*Dakkapel, dakopbouw en dakterras*). Een zoekveld boven de tegels kent de woorden die mensen gebruiken. Geen documentkeuze; beleid staat onder hetzelfde subonderwerp in een eigen lijst. | indeling *I · Eigen onderwerpen en subonderwerpen, in gewone taal* |
 
 "Stelsel" is de werktitel in de code voor de negen tegels van D, E en F (modi `stelsel`,
 `stelsel_act` en `meervoudig`).
@@ -150,6 +153,94 @@ dus wel een documentkeuze. Het rapport toont H, C en E met de keuze uit. Run `20
 Bij aan gaat de test ervan uit dat de bezoeker meteen het juiste document pakt, en voor H rekent hij met de chip
 *uit andere onderwerpen*; op de site staan binnen een document de subonderwerpen van alle categorieën los. De zoekwoorden
 komen uit de testvraag, dus beide scores zijn optimistisch over wat een bezoeker intikt.
+
+### Indeling I: eigen onderwerpen en subonderwerpen (2026-11-17)
+
+Indeling *I* (`?indeling=eigen`). De gebruiker gaf de vrije hand: kies zelf hoe onderwerpen en subonderwerpen
+verdeeld zijn, zo gebruiksvriendelijk mogelijk.
+
+**Waar het staat.** De indeling zelf is één bestand, `public/regels-op-maat/indeling-i.js`: JSON in een script, met
+per subonderwerp de naam, de zoekwoorden en de regels. De site past haar toe met `indeelI()` in `thema.js`, de test
+met `indeel()` in `indeling_i.py`. Die twee zijn op 31.624 artikelen (alle documenten achter de tegels op de 35
+testpunten) met elkaar vergeleken: 0 verschillen. Wijzig ze samen.
+
+**Hoe een artikel zijn plek krijgt.**
+
+- Omgevingswet: het opschrift en de kopjes erboven, waarbij het meest specifieke kopje dat iets zegt wint; de
+  indeling van het register (opschriftpad); de naam en groep van de activiteiten en de naam en het type van de
+  gebiedsaanwijzingen, als het er samen hooguit zes zijn. Levert dat niets op, dan het IMOW-thema: zo'n artikel
+  staat onder *Andere regels over …*.
+- Bestemmingsplan: bouwregels onder *Bouwen en verbouwen*, de rest onder het onderwerp van de bestemming. De
+  bestemmingsomschrijving van de plek staat vast bovenaan elk subonderwerp van *Wonen*, *Bedrijf*, *Landbouw* en
+  *Recreatie*: daar staat wat hier mag. Begrippen, de wijze van meten en slotbepalingen gaan naar kleine tegels.
+- Beleid (visies, programma's, Wro-structuurvisies) staat achter dezelfde tegels, in een eigen lijst per document.
+
+**Wat de test speelt** (`toegang_i()`). De bezoeker kiest per vraag een tegel en een subonderwerp (`I_KEUZE`,
+gelezen uit de vraag, niet uit de plek van het artikel; curatie van de agent). Daarna Verfijn en het zoekveld, zoals
+bij H. Voor beleid telt de test twee keuzes extra (naar het beleid, en het document openen) en alleen de teksten van
+dat document. Het rapport geeft drie getallen:
+
+| | Wat telt |
+|---|---|
+| gewogen | zoals bij de andere varianten; staat het artikel niet onder het gekozen subonderwerp, dan telt de hele tegel |
+| streng | het artikel staat onder het gekozen subonderwerp en na Verfijn of een zoekwoord blijven hooguit 10 regels over |
+| kaal | hetzelfde, maar alleen tegel en subonderwerp: zonder Verfijn en zonder zoekwoord |
+
+**Wat de test niet meet.** De wegwijzer (het zoekveld boven de tegels) en de snelkoppelingen op de tegels. Die maken
+de weg korter, niet de lijst.
+
+**Eerlijkheid.** De indeling is ontworpen met de 40 testvragen in zicht. Twee dingen houden dat in toom: de
+zoekwoorden per vraag (`D_TERMEN`) dateren van vóór deze indeling, en de dekking is nagemeten op acht adressen buiten
+de testset (Valkenburg, Delft, Staphorst, Groningen, Hoogeveen, Zundert, Vlissingen, Swalmen; 7.262 regels): 69% van
+de regels in een subonderwerp, 4% nergens, een lijst na tegel en subonderwerp telt doorgaans 9 regels. Op de
+testpunten is dat 67%, 5% en 8.
+
+### Scope 2: de testvragen van 17-11-2026
+
+`Benchmark testvragen RoM - nieuwe scope - EL - 17-11-2026.xlsx` telt 30 vragen: 19 uit de oude set (kolom
+*Nr oud*) en 11 nieuwe, waarvan vijf over landelijke regels (Bal, Bbl, Bkl en de voorbeschermingsregels van het
+luchthavenbesluit Eelde). Alle 30 tellen mee; de noemer is 30.
+
+```bash
+python bouw_golden_scope2.py "C:/Testbestanden/Lokaal/Testsets-OZON/RoM-benchmark/Benchmark testvragen RoM - nieuwe scope - EL - 17-11-2026.xlsx"
+python -I run_benchmark.py --golden golden_scope2.json
+```
+
+- **Geen kolom Toeleiding meer.** De tegel per vraag is bij de oude vragen overgenomen uit `golden.json`
+  (`toeleiding_bron` `excel-oud` of `agent-oud`), bij de nieuwe vragen curatie van de agent (`agent`), gelezen uit de
+  vraag. Ook de keuze bij indeling I staat nu in de gouden set (`keuze_i`); `I_KEUZE` geldt alleen nog voor scope 1.
+- **Indeling I is voor de nieuwe vragen niet aangepast**: die elf zijn voor I de eerste toets buiten de set waarmee
+  hij ontworpen is.
+- **Documenten totaal.** Twee varianten erbij: H en I met ook de landelijke regels achter de tegels
+  (`direct_totaal`, `eigen_totaal`; de site: Documenten op totaal). Voorbeschermingsregels volgen het document waar de
+  site ze onder hangt (`staat_achter()`): die van Eelde (Rijk) hangen onder het omgevingsplan en staan dus ook bij
+  lokaal achter de tegels.
+- **Vraag 19.** Het Excel noemt het Bal voor beide reeksen; de artikelen 7.9–7.14 (asbestinventarisatie, sloopmelding)
+  staan in het Bbl. De gouden set zoekt 4.624–4.628a in het Bal en 7.9–7.14 in het Bbl.
+
+Run `2026-11-17_232027` (productie), haalbaar van 30 (de negatieve vraag 26 telt als goed):
+
+| | A | B | C | D | E | F | G | H | I |
+|---|---|---|---|---|---|---|---|---|---|
+| met documentkeuze | 13,7 | 4,2 | 13,5 | 16,9 | 22,1 | 16,9 | 13,5 | 22,9 | — |
+| zonder documentkeuze, lokaal | | | 12,2 | | 20,0 | | | 21,1 | 23,8 |
+| zonder documentkeuze, totaal (ook Rijk) | | | | | | | | 19,6 | 21,6 |
+
+Op de elf nieuwe vragen (van 11): C 2,7, E 5,5, H 5,7, I 6,4. I streng: 19 van 30. Geen enkele indeling vindt
+vraag 21 (asverstrooiing staat onder lozen), 24 (Wro-artikel 20.2.5 zonder indeling), 30 (onder luchtvaart) en 3
+(het bebouwingspercentage staat in geen tekst).
+
+**2026-11-18: twee algemene regels in I** (run `2026-11-18_104355`, zelfde API-antwoorden als de run van 17-11):
+
+- Bij een bestemmingsplan telt het kopje erboven als het eigen kopje niets zegt: *20.2.5 Dakbeëindiging* onder
+  *20.2 Bouwregels* is een bouwregel (`bereid_wro_voor()` / `bereidWroVoor()`).
+- Woordenlijsten: *dakbeëindiging*, *dakhelling*, *dakvorm*, *kapvorm* bij Dak; *hoogtebeperking* bij Maat (de
+  voorbeschermingsregels van Eelde: *Hoogtebeperkingen in verband met de vliegveiligheid*).
+
+I gaat van 23,8 naar **25,8** (totaal 21,6 → 23,5), streng van 19 naar 21 van 30; op de elf nieuwe vragen 8,4. A t/m H
+ongewijzigd. Vraag 24 vindt I nu onder Dakkapel, dakopbouw en dakterras; vraag 30 onder Hoogte, omvang en plaats.
+Wat I nog mist: 3 (staat op de kaart), 19 en 21 (I zet asbest onder Slopen en asverstrooien onder Water › Lozen; de
+gekozen tegel is curatie en verdedigbaar anders), en kleinere verliezen bij 2, 9, 20 en 29 door lange lijsten.
 
 ### Variant G: C met een derde niveau (2026-10-30, eigen indeling sinds 2026-11-03)
 

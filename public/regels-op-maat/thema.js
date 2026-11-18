@@ -85,7 +85,7 @@
     { id: 'd-energie', naam: 'Energie en klimaat', paden: ['M13 2.5L5.5 13.5H11l-1 8 7.5-11H12z'] },
     { id: 'd-verkeer', naam: 'Verkeer en infrastructuur', paden: paden('openbare-ruimte') }
   ];
-  var SET = { site: {}, stelsel: {} };
+  var SET = { site: {}, stelsel: {}, eigen: {} };
   ONDERWERPEN.forEach(function (o) { SET.site[o.id] = true; if (o.klein) SET.stelsel[o.id] = true; });
   STELSEL.forEach(function (o) { SET.stelsel[o.id] = true; });
 
@@ -262,6 +262,237 @@
     return s;
   }
 
+  // ── Indeling I: eigen onderwerpen en subonderwerpen (2026-11-17) ──
+  // De indeling staat in indeling-i.js (JSON); hier wordt ze toegepast. Spiegel van
+  // tests/rom-benchmark/indeling_i.py: wijzig ze samen.
+  var I = global.RomIndelingI || { tegels: [], klein: [], wro: {}, bestemming: { tegels: [] } };
+  var OVERIG = 'overig', VAST = '*', REST = 'i-overig';
+  var KOEPEL_I = { 'milieu': 1, 'procedures': 1, 'planologisch gebruik': 1 };
+  var ICONEN_I = {
+    'i-wonen': ['M8 11.5a3.5 3.5 0 1 1 0 7 3.5 3.5 0 0 1 0-7z', 'M10.6 12.4L19.5 3.5', 'M16.5 6.5l2.5 2.5', 'M14 9l2 2'],
+    'i-recreatie': ['M2.5 19.5h19', 'M12 4L3.5 19.5', 'M12 4l8.5 15.5', 'M12 12.5l-3 7', 'M12 12.5l3 7'],
+    'i-begrippen': ['M12 6.5c-2-1.3-4.5-1.8-8-1.5v13c3.5-.3 6 .2 8 1.5', 'M12 6.5c2-1.3 4.5-1.8 8-1.5v13c-3.5-.3-6 .2-8 1.5', 'M12 6.5v13']
+  };
+  function rx(p) { return p ? new RegExp(p) : null; }
+  function setVan(l) { var s = {}; (l || []).forEach(function (x) { s[x] = true; }); return s; }
+  function raakt(a, b) { return Object.keys(a).some(function (x) { return b[x]; }); }
+  var TEGEL_I = {};
+  I.tegels.forEach(function (t) {
+    t.subs.forEach(function (s) {
+      s._w = rx(s.w); s._wro = rx(s.wro); s._niet = rx(s.niet);
+      s._pad = setVan(s.pad); s._groep = setVan(s.groep); s._gatype = setVan(s.gatype); s._wrosoort = setVan(s.wrosoort);
+    });
+    t._cat = setVan(t.cat); t._imow = setVan(t.imow); t._groep = setVan(t.groep); t._gatype = setVan(t.gatype);
+    t._wro = rx(t.wro);
+  });
+  I.klein.forEach(function (k) { k._w = rx(k.w); k._pad = setVan(k.pad); k._wrosoort = setVan(k.wrosoort); k.klein = true; });
+  I.tegels.concat(I.klein).forEach(function (t) {
+    TEGEL_I[t.id] = t;
+    SET.eigen[t.id] = true;
+    PER_ID[t.id] = { id: t.id, naam: t.naam, klein: !!t.klein, paden: ICONEN_I[t.icoon] || (PER_ID[t.icoon] || PER_ID['niet-ingedeeld']).paden };
+  });
+  if (I.structuur_act) {
+    I._structuur = rx(I.structuur_act); I._vaag = rx(I.vaag);
+    I._wroRx = {};
+    Object.keys(I.wro).forEach(function (k) { I._wroRx[k] = rx(I.wro[k]); });
+  }
+
+  function subNaamI(tegel, sub) {
+    if (sub === OVERIG) return 'Andere regels over ' + naam(tegel).toLowerCase();
+    if (sub === VAST) return I.bestemming.naam;
+    var t = TEGEL_I[tegel], uit = sub;
+    ((t && t.subs) || []).forEach(function (s) { if (s.id === sub) uit = s.naam; });
+    return uit;
+  }
+
+  function wroTop(nummer) { return String(nummer || '').split('.')[0]; }
+  function zonderNummer(opschrift) { return klein(opschrift).replace(/^(artikel\s+)?[\d.]+\s*/, ''); }
+
+  /** Zet art.wro = {bestemming, soort, eigen} op elk artikel van één bestemmingsplan.
+   *  soort: begrip | meten | algemeen | bouw | gebruik. Gelijk aan bereid_wro_voor(). */
+  function bereidWroVoor(artikelen) {
+    var W = I._wroRx, groepen = {}, volgorde = [];
+    if (!W) return;
+    artikelen.forEach(function (a) {
+      var t = wroTop(a.nummer);
+      if (!groepen[t]) { groepen[t] = []; volgorde.push(t); }
+      groepen[t].push(a);
+    });
+    volgorde.forEach(function (t) {
+      var xs = groepen[t], kop = '', bestemming = '';
+      xs.some(function (a) {
+        if (String(a.nummer || '') !== t) return false;
+        kop = zonderNummer(a.opschrift);
+        return true;
+      });
+      xs.some(function (a) {
+        var m = W.bestemming.exec(klein(a.inhoud).slice(0, 400));
+        if (m) bestemming = m[1].slice(0, 80);
+        return !!m;
+      });
+      var aangewezen = !!bestemming, soortGroep = null;
+      bestemming = bestemming || kop;
+      // Sommige plannen leveren de begrippen zonder hun kop "Artikel 1 Begrippen".
+      if (t === '') soortGroep = null;
+      else if (W.begrip.test(kop) || (t === '1' && xs.length >= 5 && !aangewezen)) soortGroep = 'begrip';
+      else if (W.meten.test(kop)) soortGroep = 'meten';
+      else if (W.algemeen.test(kop)) soortGroep = 'algemeen';
+      var kopVan = {};
+      xs.forEach(function (a) { kopVan[String(a.nummer || '')] = zonderNummer(a.opschrift); });
+      xs.forEach(function (a) {
+        var eigen = zonderNummer(a.opschrift);
+        var soort = soortGroep || (W.algemeen.test(eigen) ? 'algemeen' : W.bouw.test(eigen) ? 'bouw' : 'gebruik');
+        if (soort === 'gebruik') {
+          // Zegt het eigen kopje niets, dan telt het kopje erboven (20.2.5 Dakbeëindiging onder 20.2 Bouwregels).
+          var delen = String(a.nummer || '').split('.');
+          for (var i = delen.length - 1; i > 1; i--) {
+            if (W.bouw.test(kopVan[delen.slice(0, i).join('.')] || '')) { soort = 'bouw'; break; }
+          }
+        }
+        a.wro = { bestemming: soortGroep ? '' : bestemming, eigen: eigen, soort: soort };
+      });
+    });
+  }
+
+  function subsOpTekst(tekst, veld) {
+    var uit = [];
+    I.tegels.forEach(function (t) {
+      t.subs.forEach(function (s) {
+        if (s[veld] && s[veld].test(tekst) && !(s._niet && s._niet.test(tekst))) uit.push([t.id, s.id]);
+      });
+    });
+    return uit;
+  }
+
+  function uniekOpNaam(xs) {
+    var gezien = {};
+    return xs.filter(function (x) {
+      var n = klein(x.naam);
+      if (gezien[n]) return false;
+      gezien[n] = true;
+      return true;
+    });
+  }
+
+  /** Waar staat dit artikel? -> [[tegel, sub]]; sub is null bij een kleine tegel, 'overig' als alleen
+   *  het onderwerp bekend is, '*' als het vast bovenaan elk subonderwerp staat. Nooit leeg.
+   *  Gelijk aan indeel() in tests/rom-benchmark/indeling_i.py.
+   *  art: {pad, imow, opschrift, inhoud, kopjePad: [{opschrift}], kenmerken: {activiteiten, gebiedsaanwijzingen}, wro}. */
+  function indeelI(a) {
+    var uit = [];
+    function voeg(paren) {
+      paren.forEach(function (p) {
+        if (!uit.some(function (q) { return q[0] === p[0] && q[1] === p[1]; })) uit.push(p);
+      });
+    }
+    var wro = a.wro || null, pad = a.pad || null;
+    var padS = pad && pad.sub ? pad.categorie + ' > ' + pad.sub : null;
+    var koppen = (a.kopjePad || []).map(function (k) { return klein(k.opschrift); });
+    var lagen = (wro ? [wro.eigen] : [klein(a.opschrift)].concat(koppen.slice().reverse()))
+      .filter(function (l) { return l && !I._vaag.test(l); });
+    var alles = [klein(a.opschrift)].concat(koppen).join(' > ');
+
+    // Kleine tegels: begrippen en slotbepalingen zeggen niets over een onderwerp.
+    var kleinHits = [];
+    I.klein.forEach(function (k) {
+      if ((padS && !wro && k._pad[padS]) || (wro && k._wrosoort[wro.soort]) || (k._w && k._w.test(wro ? wro.eigen : alles))) kleinHits.push([k.id, null]);
+    });
+    if (wro && (wro.soort === 'begrip' || wro.soort === 'meten' || wro.soort === 'algemeen')) return kleinHits.length ? kleinHits : [[REST, null]];
+    if (kleinHits.some(function (k) { return k[0] === 'i-begrippen'; })) return [['i-begrippen', null]];
+
+    if (wro) {
+      var best = wro.bestemming;
+      var dubbel = /^(waarde|leiding|waterstaat)\b/.test(best);
+      var opNaam = best ? subsOpTekst(best, '_wro').concat(subsOpTekst(best, '_w')) : [];
+      var eigen = subsOpTekst(wro.eigen, '_w').concat(subsOpTekst(wro.eigen, '_wro'));
+      if (wro.soort === 'bouw' && !dubbel) {
+        var bouw = eigen.filter(function (p) { return p[0] === 'i-bouwen'; });
+        voeg(bouw.length ? bouw : [['i-bouwen', 'maat']]);
+        voeg(eigen.filter(function (p) { return p[0] !== 'i-bouwen'; }));
+      } else {
+        voeg(opNaam);
+        voeg(eigen);
+        if (wro.eigen.indexOf('bestemmingsomschrijving') >= 0 && !dubbel) {
+          voeg(subsOpTekst(klein(a.inhoud).split('ondergeschikt')[0], '_wro'));
+          voeg(I.bestemming.tegels.map(function (t) { return [t, VAST]; }));
+        }
+        var metSubWro = {};
+        uit.forEach(function (p) { if (p[1] !== VAST) metSubWro[p[0]] = true; });
+        I.tegels.forEach(function (t) {
+          if (best && t._wro && t._wro.test(best) && !metSubWro[t.id]) voeg([[t.id, OVERIG]]);
+        });
+      }
+      if (!uit.length && padS) {
+        I.tegels.forEach(function (t) { t.subs.forEach(function (s) { if (s._pad[padS]) voeg([[t.id, s.id]]); }); });
+      }
+      if (!uit.length && pad) {
+        I.tegels.forEach(function (t) { if (t._cat[pad.categorie]) voeg([[t.id, OVERIG]]); });
+      }
+      uit = uit.concat(kleinHits);
+      return uit.length ? uit : [[REST, null]];
+    }
+
+    // Omgevingswet: het meest specifieke kopje dat iets zegt, wint.
+    for (var i = 0; i < lagen.length; i++) {
+      var h = subsOpTekst(lagen[i], '_w');
+      if (h.length) { voeg(h); break; }
+    }
+    var k = a.kenmerken || {};
+    var acts = uniekOpNaam((k.activiteiten || []).filter(function (x) { return x.naam && !I._structuur.test(klein(x.naam)); }));
+    var gas = uniekOpNaam((k.gebiedsaanwijzingen || []).filter(function (x) { return x.naam; }));
+    var weinig = acts.length + gas.length <= I.max_annotaties;
+    var groepen = {}, gatypes = {};
+    if (weinig) {
+      acts.forEach(function (x) { groepen[klein(x.groep)] = true; });
+      gas.forEach(function (x) { gatypes[klein(x.type)] = true; });
+      acts.concat(gas).forEach(function (x) { voeg(subsOpTekst(klein(x.naam), '_w')); });
+    }
+    I.tegels.forEach(function (t) {
+      t.subs.forEach(function (s) {
+        if ((padS && s._pad[padS]) || raakt(groepen, s._groep) || raakt(gatypes, s._gatype)) voeg([[t.id, s.id]]);
+      });
+    });
+
+    // Alleen het onderwerp bekend: "Andere regels over ...". Het kopje uit het register telt altijd;
+    // thema, activiteitengroep en type gebied alleen als het artikel nog nergens een subonderwerp heeft,
+    // en een artikel met meer dan max_themas thema's zegt over geen enkel onderwerp iets bijzonders.
+    var themas = a.imow || [];
+    var specifiek = themas.filter(function (x) { return !KOEPEL_I[x]; });
+    var themaSet = setVan(specifiek.length ? specifiek : themas);
+    if (Object.keys(themaSet).length > I.max_themas) themaSet = {};
+    var metSub = {}, kaal = !uit.length;
+    uit.forEach(function (p) { metSub[p[0]] = true; });
+    I.tegels.forEach(function (t) {
+      if (metSub[t.id]) return;
+      if ((pad && t._cat[pad.categorie]) || (kaal && (raakt(themaSet, t._imow) || raakt(groepen, t._groep) || raakt(gatypes, t._gatype)))) voeg([[t.id, OVERIG]]);
+    });
+    uit = uit.concat(kleinHits);
+    return uit.length ? uit : [[REST, null]];
+  }
+
+  /** Wegwijzer: de subonderwerpen (en tegels) bij een woord dat de bezoeker intikt.
+   *  -> [{tegel, sub|null, naam, tegelNaam, rang}], beste eerst. */
+  function wegwijzerI(woord) {
+    var w = klein(woord), uit = [];
+    if (w.length < 2) return uit;
+    I.tegels.forEach(function (t) {
+      if (klein(t.naam).indexOf(w) >= 0) uit.push({ tegel: t.id, sub: null, naam: t.naam, tegelNaam: t.uitleg, rang: 2 });
+      t.subs.forEach(function (s) {
+        var rang = null;
+        (s.zoek || []).forEach(function (z) {
+          z = klein(z);
+          if (z === w) rang = 0;
+          else if (z.indexOf(w) === 0 || (w.length >= 4 && w.indexOf(z) >= 0)) rang = Math.min(rang === null ? 9 : rang, 1);
+          else if (w.length >= 3 && z.indexOf(w) >= 0) rang = Math.min(rang === null ? 9 : rang, 3);
+        });
+        if (rang === null && klein(s.naam).indexOf(w) >= 0) rang = 2;
+        if (rang === null && w.length >= 4 && s._w && s._w.test(w)) rang = 4;
+        if (rang !== null) uit.push({ tegel: t.id, sub: s.id, naam: s.naam, tegelNaam: t.naam, rang: rang });
+      });
+    });
+    return uit.sort(function (a, b) { return a.rang - b.rang; });
+  }
+
   function naam(id) { return (PER_ID[id] || PER_ID['niet-ingedeeld']).naam; }
   function isKlein(id) { return !!(PER_ID[id] && PER_ID[id].klein); }
 
@@ -270,6 +501,9 @@
     icoon: icoon, naam: naam, isKlein: isKlein,
     bestaat: function (id) { return !!PER_ID[id]; },
     /** Hoort deze tegel bij de tegelset ('site' of 'stelsel')? */
-    inSet: function (id, set) { return !!(SET[set] && SET[set][id]); }
+    inSet: function (id, set) { return !!(SET[set] && SET[set][id]); },
+    // Indeling I
+    I: I, tegelI: function (id) { return TEGEL_I[id] || null; }, indeelI: indeelI, bereidWroVoor: bereidWroVoor,
+    subNaamI: subNaamI, wegwijzerI: wegwijzerI, kleinTekst: klein, OVERIG: OVERIG, VAST: VAST, REST: REST
   };
 })(window);
