@@ -25,11 +25,13 @@
   var MAX_ART_OPEN_RENDER = 400;   // boven dit aantal artikelen starten hoofdstukken dichtgeklapt
 
   // view: {} = tussenscherm met onderwerpen · {onderwerp: id} · {alles: true}
-  var staat = { loc: null, weergave: 'juridisch', indeling: 'hybride', nav: 'tegels', paneel: 'objecten', documentkeuze: null, documenten: 'lokaal', artikel: null, volgnr: 0, docs: null, view: {} };
+  // Standaardindeling: I sinds 2026-11-18 (gebruiker), daarvoor C. Een link zonder ?indeling= toont I.
+  var STANDAARD_INDELING = 'eigen';
+  var staat = { loc: null, weergave: 'juridisch', indeling: STANDAARD_INDELING, nav: 'tegels', paneel: 'objecten', documentkeuze: null, documenten: 'lokaal', artikel: null, volgnr: 0, docs: null, view: {} };
 
   //   pad      alleen de kopjes boven het artikel — onderwerp én subcategorie
   //   imow     alleen het IMOW-thema van de juridische regels — geen subcategorie
-  //   hybride  het pad, en waar dat zwijgt het IMOW-thema (de standaard)
+  //   hybride  het pad, en waar dat zwijgt het IMOW-thema (tot 2026-11-18 de standaard)
   //   meervoudig  variant E (proef, 2026-10-24): de stelseltegels, en een artikel staat
   //            onder elke tegel waarover het iets regelt (RomThema.stelselVan); chips
   //            op niveau 2 zijn subonderwerp, activiteit en gebiedsaanwijzing
@@ -310,7 +312,7 @@
       if (staat.view.vraag) q.set('vraag', staat.view.vraag);
       else if (staat.view.onderwerp) { q.set('onderwerp', staat.view.onderwerp); if (staat.view.sub) q.set('sub', staat.view.sub); }
       else if (staat.view.alles) q.set('weergave', 'alle-documenten');
-      if (staat.indeling !== 'hybride') q.set('indeling', staat.indeling);
+      if (staat.indeling !== STANDAARD_INDELING) q.set('indeling', staat.indeling);
       if (staat.nav !== 'tegels') q.set('nav', staat.nav);
       if (staat.documentkeuze) q.set('documentkeuze', staat.documentkeuze);
       if (staat.documenten !== 'lokaal') q.set('documenten', staat.documenten);
@@ -335,7 +337,8 @@
     if (v.length >= 2) return { vraag: v.slice(0, 500) };
     var o = q.get('onderwerp');
     var s = q.get('sub');
-    if (o && RomThema.bestaat(o)) return s && /^[a-z]{2,20}$/.test(s) ? { onderwerp: o, sub: s } : { onderwerp: o };
+    // Een oude link (van voor I de standaard werd) kan een tegel van een andere set noemen: dan het overzicht.
+    if (o && RomThema.bestaat(o) && RomThema.inSet(o, tegelset())) return s && /^[a-z]{2,20}$/.test(s) ? { onderwerp: o, sub: s } : { onderwerp: o };
     if (q.get('weergave') === 'alle-documenten') return { alles: true };
     return {};
   }
@@ -362,7 +365,7 @@
 
   function indelingUitUrl() {
     var i = new URLSearchParams(location.search).get('indeling');
-    return INDELINGEN[i] ? i : 'hybride';
+    return INDELINGEN[i] ? i : STANDAARD_INDELING;
   }
 
   // ── Zoeken (PDOK Locatieserver) ───────────────────────
@@ -3142,6 +3145,10 @@
       alle.forEach(function (x) { x.art.onderwerpen.forEach(function (id) { tel[id] = (tel[id] || 0) + 1; }); });
       var ids = Object.keys(tel).filter(function (k) { return !RomThema.isKlein(k); })
         .sort(function (a, b) { return tel[b] - tel[a]; });
+      // Indeling I: de tegels in hun vaste volgorde, en tellen zoals de tegels (regels; beleid apart).
+      var telI = isEigen() ? telEigen(alle) : null;
+      if (telI) ids = RomThema.I.tegels.map(function (tg) { return tg.id; })
+        .filter(function (k) { return (telI.regels[k] || 0) + (telI.beleid[k] || 0); });
       if (!ids.length) {
         blok.appendChild(el('p', { class: 'leeg-melding', text: 'De regels op dit punt zijn (nog) niet op onderwerp ingedeeld. Bekijk ze via alle documenten.' }));
         return;
@@ -3151,9 +3158,10 @@
         var k = boomKnoop({
           klasse: 'boom-onderwerp',
           kop: [el('span', { class: 'boom-icoon' }, [RomThema.icoon(id, 18)]), el('b', { class: 'boom-naam', text: RomThema.naam(id) })],
-          aantal: tel[id],
+          aantal: telI ? (telI.regels[id] || 'beleid') : tel[id],
           kinderen: function () {
-            return boomSubs(alle.filter(function (x) { return x.art.onderwerpen.indexOf(id) >= 0; }), id);
+            var xs = alle.filter(function (x) { return x.art.onderwerpen.indexOf(id) >= 0; });
+            return telI ? boomSubsEigen(xs, id) : boomSubs(xs, id);
           },
           // Het open onderwerp staat in de link, en blijft staan bij een wissel naar de tegels.
           opWissel: function (open) {
@@ -3172,7 +3180,7 @@
   function boomKnoop(opties) {
     var pijl = icoon(PAD_RECHTS); pijl.classList.add('boom-pijl');
     var rij = el('button', { type: 'button', class: 'boom-rij', 'aria-expanded': 'false' },
-      [pijl].concat(opties.kop, [el('span', { class: 'boom-aantal', text: nl(opties.aantal) })]));
+      [pijl].concat(opties.kop, [el('span', { class: 'boom-aantal', text: typeof opties.aantal === 'string' ? opties.aantal : nl(opties.aantal) })]));
     var bak = el('div', { class: 'boom-kinderen', hidden: true });
     var knoop = el('div', { class: 'boom-knoop ' + (opties.klasse || '') }, [rij, bak]);
     var gevuld = false;
@@ -3228,6 +3236,82 @@
         kinderen: function () { return boomDocumenten(g.xs); }
       });
     });
+  }
+
+  /** Indeling I, zoals toonOnderwerpEigen: de subonderwerpen in hun vaste volgorde, de bestemming
+   *  van de plek bovenaan elk subonderwerp, daaronder het derde niveau (boomVerfijnEigen). */
+  function boomSubsEigen(xs, id) {
+    var tg = RomThema.tegelI(id) || {};
+    var keuzes = (tg.subs || []).map(function (s) { return { id: s.id, naam: s.naam }; })
+      .concat([{ id: RomThema.OVERIG, naam: RomThema.subNaamI(id, RomThema.OVERIG) }]);
+    var vast = [], per = {};
+    xs.forEach(function (x) {
+      var ps = (x.art.plekken || []).filter(function (p) { return p[0] === id; });
+      if (ps.some(function (p) { return p[1] === RomThema.VAST; })) vast.push(x);
+      ps.forEach(function (p) {
+        if (!p[1] || p[1] === RomThema.VAST) return;
+        var l = per[p[1]] = per[p[1]] || [];
+        if (l.indexOf(x) < 0) l.push(x);
+      });
+    });
+    var bezet = keuzes.filter(function (k) { return per[k.id]; });
+    if (!bezet.length) return boomVerfijnEigen(vast, []);
+    return bezet.map(function (k) {
+      var xsSub = per[k.id], n = xsSub.filter(function (x) { return !isBeleid(x.hoofd) && vast.indexOf(x) < 0; }).length;
+      var knoop = boomKnoop({
+        kop: [el('span', { class: 'boom-naam', text: k.naam })],
+        aantal: n || (xsSub.some(function (x) { return isBeleid(x.hoofd); }) ? 'beleid' : 0),
+        kinderen: function () { return boomVerfijnEigen(vast, xsSub); },
+        opWissel: function (open) {
+          staat.view = open ? { onderwerp: id, sub: k.id } : { onderwerp: id };
+          schrijfUrl({ x: staat.loc.x, y: staat.loc.y, label: staat.loc.label }, true);
+        }
+      });
+      if (staat.view.sub === k.id) knoop.zetOpen(true);
+      return knoop;
+    });
+  }
+
+  /** Het derde niveau van I, zoals de verfijnchips: boven VERFIJN_GRENS regels per kopje of activiteit,
+   *  over de documenten heen (verfijnSleutels). De bestemming van de plek bovenaan, beleid apart onderaan. */
+  function boomVerfijnEigen(vast, xs) {
+    var regels = xs.filter(function (x) { return !isBeleid(x.hoofd) && vast.indexOf(x) < 0; });
+    var beleid = xs.filter(function (x) { return isBeleid(x.hoofd) && vast.indexOf(x) < 0; });
+    var uit = vast.map(function (x) { return boomArtikel(x, true); });
+    var groepen = null;
+    if (regels.length > VERFIJN_GRENS) {
+      var sl = verfijnSleutels(regels.map(function (x) { return x.art; })), per = {}, volgorde = [];
+      regels.forEach(function (x, i) {
+        sl[i].forEach(function (k) {
+          if (!per[k]) { per[k] = []; volgorde.push(k); }
+          per[k].push(x);
+        });
+      });
+      if (volgorde.length >= 2 && volgorde.length * 2 <= regels.length) {
+        groepen = volgorde.sort(function (p, q) { return (p === 'overig') - (q === 'overig') || per[q].length - per[p].length; })
+          .map(function (k) {
+            return boomKnoop({
+              kop: [el('span', { class: 'boom-naam' + (k === 'overig' ? ' muted' : ''), text: k === 'overig' ? 'Overige regels' : hoofdletter(k),
+                title: k === 'overig' ? 'Regels zonder eigen kopje of activiteit' : null })],
+              aantal: per[k].length,
+              kinderen: function () { return per[k].map(function (x) { return boomArtikel(x); }); }
+            });
+          });
+      }
+    }
+    uit = uit.concat(groepen || regels.map(function (x) { return boomArtikel(x); }));
+    if (beleid.length) {
+      var lijst = beleid.map(function (x) { return boomArtikel(x); });
+      if (!uit.length) return lijst;
+      uit.push(boomKnoop({
+        klasse: 'boom-beleid',
+        kop: [el('span', { class: 'tag tag-beleid', text: 'Beleid' }),
+          el('span', { class: 'boom-naam muted', text: 'Visies en programma’s' })],
+        aantal: beleid.length,
+        kinderen: function () { return lijst; }
+      }));
+    }
+    return uit;
   }
 
   /** Per document, in de volgorde van de documentenlijst; aanvullende regels vallen onder hun hoofdregeling. */
@@ -3291,10 +3375,12 @@
     }).concat(los);
   }
 
-  function boomArtikel(x) {
+  /** vast: de bestemming van de plek (indeling I), met het label dat de tegels ook tonen. */
+  function boomArtikel(x, vast) {
     var titel = el('span', { class: 'boom-naam' });
     if (x.art.nummer && x.doc.bron_type === 'ow') titel.appendChild(el('span', { class: 'art-nr', text: 'Artikel ' + x.art.nummer + ' ' }));
     titel.appendChild(document.createTextNode(x.art.opschrift || (x.art.nummer ? '' : 'Tekstdeel')));
+    if (vast === true) titel.appendChild(el('span', { class: 'tag ei-vast-tag', text: 'Bestemming van deze plek', title: RomThema.I.bestemming.uitleg }));
     if (!metDocumentkeuze()) titel.appendChild(el('span', { class: 'muted boom-bron', text: ' · ' + (x.hoofd.regeling || '(zonder titel)') }));
     var rij = el('button', { type: 'button', class: 'boom-art' }, [titel]);
     rij.addEventListener('click', function () {
@@ -4219,7 +4305,7 @@
       else if (e.key === 'Escape' && !$('leesvenster').hidden) sluitLeesEnKaart();
     });
     keuze.addEventListener('change', function () {
-      staat.indeling = INDELINGEN[keuze.value] ? keuze.value : 'hybride';
+      staat.indeling = INDELINGEN[keuze.value] ? keuze.value : STANDAARD_INDELING;
       zetDocumentenMenu();
       if (!$('indeling-uitleg').hidden) tekenUitleg();
       // Andere tegelset: een gekozen tegel bestaat daar niet, dus terug naar het overzicht.
