@@ -72,9 +72,16 @@ def _zonder_nummer(opschrift):
     return re.sub(r"^(artikel\s+)?[\d.]+\s*", "", klein(opschrift))
 
 
+def _kopje_tekst(opschrift):
+    """Het kopje zonder nummer, met hoofdletters en accenten (voor de knoppen): '25.2 Bouwregels' -> 'Bouwregels'."""
+    s = re.sub(r"^(artikel\s+)?[\d.]+\s*", "", re.sub(r"\s+", " ", str(opschrift or "")).strip(), flags=re.I)
+    return s[:1] + s[1:].lower() if s.isupper() else s   # 'WONEN' -> 'Wonen'
+
+
 def bereid_wro_voor(artikelen):
-    """Zet a["wro"] = {bestemming, soort} op elk artikel van één bestemmingsplan.
-    soort: begrip | meten | algemeen | bouw | gebruik."""
+    """Zet a["wro"] = {bestemming, soort, eigen, naam, paragraaf} op elk artikel van één bestemmingsplan.
+    soort: begrip | meten | algemeen | bouw | gebruik. naam: de bestemming zoals in het plan geschreven
+    (voor de knoppen); paragraaf: het kopje op het tweede niveau (25.2 Bouwregels), anders ''."""
     W = I["_wro"]
     groepen = {}
     for a in artikelen:
@@ -101,6 +108,10 @@ def bereid_wro_voor(artikelen):
         else:
             groep_soort = None
         kop_van = {str(a.get("nummer") or ""): _zonder_nummer(a.get("opschrift")) for a in xs}
+        tekst_van = {str(a.get("nummer") or ""): _kopje_tekst(a.get("opschrift")) for a in xs}
+        # De bestemming zoals het plan haar schrijft, als het artikelkopje dezelfde naam draagt.
+        naam = tekst_van.get(top, "") if kop == bestemming else ""
+        naam = naam or bestemming[:1].upper() + bestemming[1:]
         for a in xs:
             eigen = _zonder_nummer(a.get("opschrift"))
             soort = groep_soort or ("algemeen" if W["algemeen"].search(eigen) else "bouw" if W["bouw"].search(eigen) else "gebruik")
@@ -112,7 +123,10 @@ def bereid_wro_voor(artikelen):
                     if W["bouw"].search(boven):
                         soort = "bouw"
                         break
-            a["wro"] = {"bestemming": "" if groep_soort else bestemming, "soort": soort, "eigen": eigen}
+            delen = str(a.get("nummer") or "").split(".")
+            paragraaf = tekst_van.get(".".join(delen[:2]), "") if len(delen) >= 2 else ""
+            a["wro"] = {"bestemming": "" if groep_soort else bestemming, "soort": soort, "eigen": eigen,
+                        "naam": "" if groep_soort else naam, "paragraaf": paragraaf}
 
 
 # ── indelen ──

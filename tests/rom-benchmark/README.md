@@ -242,6 +242,28 @@ ongewijzigd. Vraag 24 vindt I nu onder Dakkapel, dakopbouw en dakterras; vraag 3
 Wat I nog mist: 3 (staat op de kaart), 19 en 21 (I zet asbest onder Slopen en asverstrooien onder Water › Lozen; de
 gekozen tegel is curatie en verdedigbaar anders), en kleinere verliezen bij 2, 9, 20 en 29 door lange lijsten.
 
+**2026-11-20: bestemmingsplanregels op hun bestemming verfijnd** (run `2026-11-20_215029`, zelfde API-antwoorden).
+Een Wro-artikel heeft geen kopje en geen activiteit en viel bij Verfijn altijd in *Overige regels*. Bij I krijgt het
+nu zijn bestemming (*Wonen*, *Waarde - Beschermd stadsgezicht*); staan er meer dan 10 regels onder één bestemming,
+dan bestemming › paragraaf (*Waarde - Archeologie 1 › Bouwregels*) als het plan dat kopje op het tweede niveau heeft,
+anders de bestemming. Regels zonder bestemming (begrippen, algemene regels) blijven *Overige regels*. Alleen bij I:
+`verfijn_sleutels(eigen=True)` / `verfijnSleutels()` met `isEigen()`; G en H ongewijzigd.
+
+Gemeten op de 30 punten (168 subonderwerpen met meer dan 10 regels en minstens één Wro-regel), aandeel regels in
+een groepje van hooguit 10 na één verfijnkeuze:
+
+| Variant | Wro-regels | Alle regels | Met verfijnrij |
+|---|---|---|---|
+| Was | 39% | 76% | 162 |
+| Alleen bestemming | 51% | 78% | 158 |
+| Bestemming › paragraaf of eigen kopje | 64% | 76% | 127 |
+| **Bestemming › paragraaf als die bestaat (gekozen)** | **56%** | **79%** | **158** |
+| Alleen paragraaf | 48% | 68% | 108 |
+
+Valt de paragraaf terug op het eigen kopje, dan krijgt elk artikel zonder paragraafkopje in de data (zoals 24.3.x in
+Amersfoort BP00138) een eigen knop en verdwijnt de hele rij vaker. De benchmark is gelijk gebleven (30 van 30
+ongewijzigd): een bestemmingsknop bevat zelden een woord uit de vraag, en het zoekveld kende de bestemming al.
+
 ### Variant G: C met een derde niveau (2026-10-30, eigen indeling sinds 2026-11-03)
 
 Indeling *G · Hybride met derde niveau* (`?indeling=hybride_verfijnd`): dezelfde tegels en

@@ -1047,7 +1047,7 @@
         if (fijnLabels.length < 2 || fijnLabels.length * 2 > selectie.length) { telF = {}; fijnVan = new Map(); }
         Object.keys(actiefFijn).forEach(function (k) { if (!telF[k]) delete actiefFijn[k]; });
         var namenF = {}, titelF = {};
-        Object.keys(telF).forEach(function (k) { namenF[k] = k; titelF[k] = k === 'overig' ? 'Artikelen zonder eigen kopje of activiteit' : null; });
+        Object.keys(telF).forEach(function (k) { namenF[k] = kortLabel(k); titelF[k] = verfijnTitel(k, 'Artikelen zonder eigen kopje of activiteit'); });
         directChipRij(fijnRij, 'Verfijn', telF, namenF, titelF, actiefFijn, alleFijn, function (k) {
           directKiezen(actiefFijn, k); teken(); herstelFocus(fijnRij, k);
         }, function () { alleFijn = true; teken(); });
@@ -1486,7 +1486,7 @@
         if (labels.length < 2 || labels.length * 2 > los.length) { telF = {}; fijnVan = new Map(); }
         Object.keys(actiefFijn).forEach(function (k) { if (!telF[k]) delete actiefFijn[k]; });
         var namenF = {}, titelF = {};
-        Object.keys(telF).forEach(function (k) { namenF[k] = k; titelF[k] = k === 'overig' ? 'Regels zonder eigen kopje of activiteit' : null; });
+        Object.keys(telF).forEach(function (k) { namenF[k] = kortLabel(k); titelF[k] = verfijnTitel(k, 'Regels zonder eigen kopje, activiteit of bestemming'); });
         directChipRij(fijnRij, 'Verfijn', telF, namenF, titelF, actiefFijn, alleFijn, function (k) {
           directKiezen(actiefFijn, k); teken();
           Array.prototype.some.call(fijnRij.querySelectorAll('button'), function (b) {
@@ -2215,15 +2215,46 @@
     return acts.length <= MAX_ACT ? acts : [];
   }
 
-  /** arts -> per artikel (zelfde volgorde) de labels van zijn verfijn-chips. */
+  /** arts -> per artikel (zelfde volgorde) de labels van zijn verfijn-chips.
+   *  Bij I (2026-11-20) krijgt een bestemmingsplanregel zonder kopje of activiteit zijn bestemming;
+   *  staan er meer dan VERFIJN_GRENS onder die bestemming, dan bestemming › paragraaf (25.2 Bouwregels)
+   *  als het plan die paragraaf heeft. Regels zonder bestemming (begrippen, algemene regels) blijven
+   *  'overig'. Gemeten op 30 punten: Wro-regels in een groepje van hooguit 10 van 39% naar 57%. */
   function verfijnSleutels(arts) {
     var tel = {};
     arts.forEach(function (a) { if (!kopjeVaag(a.kopje)) tel[a.kopje] = (tel[a.kopje] || 0) + 1; });
-    return arts.map(function (a) {
+    var uit = arts.map(function (a) {
       var acts = activiteitenVan(a);
       if ((kopjeVaag(a.kopje) || tel[a.kopje] > VERFIJN_GRENS) && acts.length) return acts;
       return [kopjeVaag(a.kopje) ? 'overig' : a.kopje];
     });
+    if (!isEigen()) return uit;
+    var telB = {};
+    arts.forEach(function (a) { if (a.wro && a.wro.naam) telB[a.wro.naam] = (telB[a.wro.naam] || 0) + 1; });
+    arts.forEach(function (a, i) {
+      if (!a.wro || !a.wro.naam || uit[i].length !== 1 || uit[i][0] !== 'overig') return;
+      var b = a.wro.naam;
+      uit[i] = [telB[b] > VERFIJN_GRENS && a.wro.paragraaf ? b + ' › ' + a.wro.paragraaf : b];
+    });
+    return uit;
+  }
+
+  /** Een verfijnlabel op een knop: hooguit KORT_LABEL tekens, afgekort op een woordgrens. Bij
+   *  'bestemming › paragraaf' elk deel apart, zodat de paragraaf (het verschil tussen de knoppen) blijft staan. */
+  var KORT_LABEL = 48;
+  function kortLabel(k) {
+    function kort(t, max) {
+      if (t.length <= max) return t;
+      var s = t.slice(0, max), sp = s.lastIndexOf(' ');
+      return (sp > max / 2 ? s.slice(0, sp) : s).replace(/[\s,;:›-]+$/, '') + '…';
+    }
+    if (k.length <= KORT_LABEL) return k;
+    var d = k.split(' › ');
+    return d.length === 2 ? kort(d[0], 24) + ' › ' + kort(d[1], 30) : kort(k, KORT_LABEL);
+  }
+  /** De tooltip bij een verfijnknop: de uitleg bij 'overig', anders de volle tekst als die is afgekort. */
+  function verfijnTitel(k, overig) {
+    return k === 'overig' ? overig : kortLabel(k) !== k ? k : null;
   }
 
   /** Dezelfde regel als verfijnSleutels, voor de onderwerpenboom: [{pad, xs, subs}] in documentvolgorde.
@@ -2549,8 +2580,8 @@
       labels.forEach(function (label, i) {
         var k = el('button', { type: 'button', class: 'chip chip-sub' + (label === 'overig' ? ' chip-leeg' : ''),
           'aria-pressed': actiefFijn[label] ? 'true' : 'false',
-          title: label === 'overig' ? 'Artikelen zonder eigen kopje of activiteit' : null },
-          [label + ' ', el('b', { text: nl(tel[label]) })]);
+          title: verfijnTitel(label, 'Artikelen zonder eigen kopje of activiteit') },
+          [kortLabel(label) + ' ', el('b', { text: nl(tel[label]) })]);
         k.addEventListener('click', function () {
           if (actiefFijn[label]) delete actiefFijn[label]; else actiefFijn[label] = true;
           k.setAttribute('aria-pressed', actiefFijn[label] ? 'true' : 'false');
@@ -3291,8 +3322,8 @@
         groepen = volgorde.sort(function (p, q) { return (p === 'overig') - (q === 'overig') || per[q].length - per[p].length; })
           .map(function (k) {
             return boomKnoop({
-              kop: [el('span', { class: 'boom-naam' + (k === 'overig' ? ' muted' : ''), text: k === 'overig' ? 'Overige regels' : hoofdletter(k),
-                title: k === 'overig' ? 'Regels zonder eigen kopje of activiteit' : null })],
+              kop: [el('span', { class: 'boom-naam' + (k === 'overig' ? ' muted' : ''), text: k === 'overig' ? 'Overige regels' : hoofdletter(kortLabel(k)),
+                title: verfijnTitel(k, 'Regels zonder eigen kopje, activiteit of bestemming') })],
               aantal: per[k].length,
               kinderen: function () { return per[k].map(function (x) { return boomArtikel(x); }); }
             });

@@ -308,8 +308,17 @@
   function wroTop(nummer) { return String(nummer || '').split('.')[0]; }
   function zonderNummer(opschrift) { return klein(opschrift).replace(/^(artikel\s+)?[\d.]+\s*/, ''); }
 
-  /** Zet art.wro = {bestemming, soort, eigen} op elk artikel van één bestemmingsplan.
-   *  soort: begrip | meten | algemeen | bouw | gebruik. Gelijk aan bereid_wro_voor(). */
+  /** Het kopje zonder nummer, met hoofdletters en accenten (voor de knoppen): '25.2 Bouwregels' -> 'Bouwregels'. */
+  function kopjeTekst(opschrift) {
+    var s = String(opschrift || '').replace(/\s+/g, ' ').trim().replace(/^(artikel\s+)?[\d.]+\s*/i, '');
+    // 'WONEN' -> 'Wonen'; zoals str.isupper(): minstens één letter en geen kleine letters.
+    return s.toUpperCase() === s && s.toLowerCase() !== s ? s.charAt(0) + s.slice(1).toLowerCase() : s;
+  }
+
+  /** Zet art.wro = {bestemming, soort, eigen, naam, paragraaf} op elk artikel van één bestemmingsplan.
+   *  soort: begrip | meten | algemeen | bouw | gebruik. naam: de bestemming zoals in het plan geschreven
+   *  (voor de knoppen); paragraaf: het kopje op het tweede niveau (25.2 Bouwregels), anders ''.
+   *  Gelijk aan bereid_wro_voor(). */
   function bereidWroVoor(artikelen) {
     var W = I._wroRx, groepen = {}, volgorde = [];
     if (!W) return;
@@ -337,8 +346,13 @@
       else if (W.begrip.test(kop) || (t === '1' && xs.length >= 5 && !aangewezen)) soortGroep = 'begrip';
       else if (W.meten.test(kop)) soortGroep = 'meten';
       else if (W.algemeen.test(kop)) soortGroep = 'algemeen';
-      var kopVan = {};
-      xs.forEach(function (a) { kopVan[String(a.nummer || '')] = zonderNummer(a.opschrift); });
+      var kopVan = {}, tekstVan = {};
+      xs.forEach(function (a) {
+        kopVan[String(a.nummer || '')] = zonderNummer(a.opschrift);
+        tekstVan[String(a.nummer || '')] = kopjeTekst(a.opschrift);
+      });
+      // De bestemming zoals het plan haar schrijft, als het artikelkopje dezelfde naam draagt.
+      var naamB = (kop === bestemming && tekstVan[t]) || (bestemming.charAt(0).toUpperCase() + bestemming.slice(1));
       xs.forEach(function (a) {
         var eigen = zonderNummer(a.opschrift);
         var soort = soortGroep || (W.algemeen.test(eigen) ? 'algemeen' : W.bouw.test(eigen) ? 'bouw' : 'gebruik');
@@ -349,7 +363,10 @@
             if (W.bouw.test(kopVan[delen.slice(0, i).join('.')] || '')) { soort = 'bouw'; break; }
           }
         }
-        a.wro = { bestemming: soortGroep ? '' : bestemming, eigen: eigen, soort: soort };
+        var delen2 = String(a.nummer || '').split('.');
+        var paragraaf = delen2.length >= 2 ? (tekstVan[delen2.slice(0, 2).join('.')] || '') : '';
+        a.wro = { bestemming: soortGroep ? '' : bestemming, eigen: eigen, soort: soort,
+          naam: soortGroep ? '' : naamB, paragraaf: paragraaf };
       });
     });
   }

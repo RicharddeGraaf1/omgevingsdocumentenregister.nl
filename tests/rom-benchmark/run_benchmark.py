@@ -420,8 +420,13 @@ def kopje_vaag(k):
     return not k or bool(KOPJE_VAAG.match(norm(k)))
 
 
-def verfijn_sleutels(arts):
-    """Per artikel de verfijn-chips (labels), in dezelfde volgorde als arts."""
+def verfijn_sleutels(arts, eigen=False):
+    """Per artikel de verfijn-chips (labels), in dezelfde volgorde als arts.
+    eigen (indeling I, 2026-11-20): een bestemmingsplanregel zonder kopje of activiteit krijgt zijn
+    bestemming; staan er meer dan VERFIJN_GRENS onder die bestemming, dan bestemming › paragraaf
+    (25.2 Bouwregels) als het plan die paragraaf heeft. Regels zonder bestemming (begrippen,
+    algemene regels) blijven 'overig'. Gemeten 2026-11-20 op 30 punten: Wro-regels in een groepje
+    <= 10 van 39% naar 57%, alle regels van 76% naar 80%."""
     tel = {}
     for a in arts:
         k = a.get("kopje")
@@ -435,14 +440,27 @@ def verfijn_sleutels(arts):
             uit.append(acts)
         else:
             uit.append([k if not kopje_vaag(k) else "overig"])
+    if not eigen:
+        return uit
+    tel_b = {}
+    for a in arts:
+        w = a.get("wro")
+        if w and w.get("naam"):
+            tel_b[w["naam"]] = tel_b.get(w["naam"], 0) + 1
+    for i, a in enumerate(arts):
+        w = a.get("wro")
+        if not w or not w.get("naam") or uit[i] != ["overig"]:
+            continue
+        b = w["naam"]
+        uit[i] = [b + " › " + w["paragraaf"]] if tel_b[b] > VERFIJN_GRENS and w.get("paragraaf") else [b]
     return uit
 
 
-def verfijn(selectie, a, termen, n, via):
+def verfijn(selectie, a, termen, n, via, eigen=False):
     """Kan de bezoeker binnen de selectie (n artikelen) verder naar een verfijn-chip met een woord uit zijn vraag?"""
     if n <= VERFIJN_GRENS or a not in selectie:
         return n, via
-    sl = verfijn_sleutels(selectie)
+    sl = verfijn_sleutels(selectie, eigen)
     tel = {}
     for ks in sl:
         for k in ks:
@@ -866,7 +884,7 @@ def toegang_i(raak, alle, keuze, termen, documentkeuze=False):
             continue
         n_sub = n
         if in_keuze:
-            m, w = verfijn(sel, a, termen, n, via)
+            m, w = verfijn(sel, a, termen, n, via, eigen=True)
             if m < n:
                 n, via, keuzes = m, w, keuzes + 1
         tekst = zoektekst_i(a)
