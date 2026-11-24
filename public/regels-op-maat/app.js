@@ -278,6 +278,32 @@
     return per;
   }
 
+  /** Uit regelmix/document?artikelen=true (OCD, 2026-11-24): dezelfde tussenvormen die
+   *  ouderArtikelen, kopjesUitBoom en locatiesUitBoom uit de boom maken, zodat de rest
+   *  van de pagina niet weet waar ze vandaan komen. Het antwoord draagt per rij het
+   *  artikel en per artikel de kopjes, de kenmerken van het hele artikel en de indeling. */
+  function uitArtikelen(d) {
+    var uit = { ouder: {}, kopjes: { kop: {}, pad: {} }, secties: {}, positie: {}, pad: {}, imow: {} };
+    (d.regelmix || []).forEach(function (r) { if (r.wid && r.artikel_wid) uit.ouder[r.wid] = r.artikel_wid; });
+    var nep = [];
+    Object.keys(d.artikelen || {}).forEach(function (w) {
+      var a = d.artikelen[w];
+      // De indeling kijkt alleen naar kopjes met een opschrift (zoals kopjesUitBoom);
+      // de documentweergave toont ook een kopje met alleen een nummer (zoals vulViaBoom).
+      var metOpschrift = (a.kopjes || []).filter(function (k) { return k.opschrift; });
+      uit.kopjes.pad[w] = metOpschrift;
+      uit.kopjes.kop[w] = metOpschrift.length ? metOpschrift[metOpschrift.length - 1].opschrift : null;
+      uit.secties[w] = a.kopjes || [];
+      uit.positie[w] = a.positie;
+      if (a.categorie) uit.pad[w] = { categorie: a.categorie, sub: a.subcategorie || null };
+      if (a.imow_themas && a.imow_themas.length) uit.imow[w] = a.imow_themas;
+      nep.push({ type: 'Artikel', wid: w, annotaties: a.annotaties, kinderen: [] });
+    });
+    uit.locaties = locatiesUitBoom(nep);
+    uit.regelingsgebied = d.regelingsgebied || null;
+    return uit;
+  }
+
   /** Welke locaties liggen op het gekozen punt? Nodig om te zeggen of een norm
    *  hier geldt of elders in het gebied van het artikel. Eén aanroep per locatie. */
   var objectenCache = {};
@@ -2004,40 +2030,57 @@
   function haalAnalyse(doc, sleutel) {
     var loc = staat.loc;
     var q = '?x=' + loc.x + '&y=' + loc.y + '&bron=' + encodeURIComponent(doc.bron_id) + '&bron_type=' + doc.bron_type;
-    var rijen = api('/v1/viewer/regelmix/document' + q);
     // met_annotatie: naast de padindeling ook de IMOW-thema's van de juridische
     // regels, per artikel (imow_themas). Zonder subcategorie: IMOW-thema's
     // hebben geen tweede niveau.
-    var onderwerpen = doc.bron_type === 'ow'
-      ? api('/v1/viewer/regeling/' + encodeURIComponent(doc.bron_id) + '/onderwerpen?met_annotatie=true').catch(function () { return null; })
-      : Promise.resolve(null);
-    // De boom levert twee dingen: leden bij hun artikel (zie artikelWid) en de
-    // locaties waar een artikel geldt. Overslaan alleen voor de grote landelijke
-    // regelingen — die boom is megabytes. Voorbeschermingsregels van het Rijk
-    // zijn klein en krijgen hem dus wél.
+    function onderwerpen() {
+      return api('/v1/viewer/regeling/' + encodeURIComponent(doc.bron_id) + '/onderwerpen?met_annotatie=true').catch(function () { return null; });
+    }
+    // De grote landelijke regelingen krijgen geen artikelblok en geen boom: dat is
+    // megabytes. Hun kenmerken komen per artikel bij het openen. Voorbeschermings-
+    // regels van het Rijk zijn klein en krijgen het dus wél.
     var grootRijk = doc.bestuurslaag === 'rijk' && !/^voorbeschermings/i.test(doc.documenttype || '');
-    var boom = (doc.bron_type === 'ow' && !grootRijk) ? haalBoom(doc.bron_id) : Promise.resolve(null);
-    var p = Promise.all([rijen, onderwerpen, boom]).then(function (r) {
-      return bouwAnalyse(doc, (r[0] && r[0].regelmix) || [], r[1], r[2]);
-    });
+    var p;
+    if (doc.bron_type === 'ow' && !grootRijk) {
+      // Eén aanroep: de leden op het punt, met per artikel de kopjes, de kenmerken en
+      // de indeling (OCD 2026-11-24). Kent de API dat nog niet, dan zoals vroeger
+      // via /onderwerpen en /boom.
+      p = api('/v1/viewer/regelmix/document' + q + '&artikelen=true').then(function (d) {
+        var rijen = (d && d.regelmix) || [];
+        if (d && d.artikelen) return bouwAnalyse(doc, rijen, null, null, uitArtikelen(d));
+        return Promise.all([onderwerpen(), haalBoom(doc.bron_id)]).then(function (r) {
+          return bouwAnalyse(doc, rijen, r[0], r[1]);
+        });
+      });
+    } else {
+      p = Promise.all([
+        api('/v1/viewer/regelmix/document' + q),
+        doc.bron_type === 'ow' ? onderwerpen() : Promise.resolve(null)
+      ]).then(function (r) {
+        return bouwAnalyse(doc, (r[0] && r[0].regelmix) || [], r[1], null);
+      });
+    }
     p.catch(function () { delete analyses[sleutel]; });
     return p;
   }
 
-  function bouwAnalyse(doc, rijen, ond, boom) {
-    var ouder = boom ? ouderArtikelen(boom) : {};
-    var locatiesPerArtikel = boom ? locatiesUitBoom(boom) : {};
-    var kopjes = boom ? kopjesUitBoom(boom) : { kop: {}, pad: {} };
+  /** Twee bronnen: de boom + /onderwerpen (ond, boom), of het artikelblok van
+   *  regelmix/document (art, uit uitArtikelen). Beide leveren dezelfde tussenvormen. */
+  function bouwAnalyse(doc, rijen, ond, boom, art) {
+    var ouder = art ? art.ouder : boom ? ouderArtikelen(boom) : {};
+    var locatiesPerArtikel = art ? art.locaties : boom ? locatiesUitBoom(boom) : {};
+    var kopjes = art ? art.kopjes : boom ? kopjesUitBoom(boom) : { kop: {}, pad: {} };
     // Beide routes ruw per artikel-wid; welke telt beslist indelen().
     // Pad: de categorieën minus wat de API via de annotatie aanvulde.
-    var padIndeling = {}, indelingOpgehaald = !!(ond && ond.categorieen);
+    var padIndeling = {}, indelingOpgehaald = !!(art || (ond && ond.categorieen));
     // Wro: de indeling zit per rij in de regelmix (categorie/subcategorie uit
     // v2a.wro_artikel_indeling, sinds OCD 2026-10-24). Geen rij met een categorie
     // = deze API kent de Wro-indeling (nog) niet: dan zeggen we niets, net als vroeger.
     if (doc.bron_type === 'wro') indelingOpgehaald = rijen.some(function (r) { return !!r.categorie; });
     // imow_themas dekt alle artikelen; annotatie_themas alleen de gaten van het
     // pad (terugval voor een API van vóór 2026-10-23).
-    var imow = (ond && (ond.imow_themas || ond.annotatie_themas)) || {};
+    var imow = art ? art.imow : (ond && (ond.imow_themas || ond.annotatie_themas)) || {};
+    if (art) padIndeling = art.pad;
     // Alleen Ow heeft een onderwerpen-antwoord; Wro draagt zijn indeling per rij.
     if (indelingOpgehaald && ond && ond.categorieen) {
       ond.categorieen.forEach(function (c) {
@@ -2056,7 +2099,9 @@
       if (doc.bron_type === 'wro') {
         sleutel = 'wro-' + i;
       } else {
-        artWid = ouder[r.wid] || artikelWid(r.wid);
+        // Het artikel uit de rij (OCD 2026-11-24), anders uit de boom; de wId-tekst
+        // alleen als laatste redmiddel (onbetrouwbaar, zie artikelWid).
+        artWid = r.artikel_wid || ouder[r.wid] || artikelWid(r.wid);
         sleutel = artWid;
       }
       var a = perSleutel[sleutel];
@@ -2078,12 +2123,16 @@
         var vak = (artWid && locatiesPerArtikel[artWid]) || null;
         a.locaties = vak ? vak.locaties : [];
         a.kenmerken = vak;
-        a.kenmerkenBron = (doc.bron_type === 'ow' && !boom && artWid) ? doc.bron_id : null;
+        a.kenmerkenBron = (doc.bron_type === 'ow' && !boom && !art && artWid) ? doc.bron_id : null;
         a.document = doc;
-        a.regelingsgebied = (boom && boom.regelingsgebied) || null;
+        a.regelingsgebied = (boom && boom.regelingsgebied) || (art && art.regelingsgebied) || null;
         if (doc.bron_type === 'wro') a.wroBron = { idn: doc.bron_id, tekst: r.tekst_id || null };
         a.kopje = (artWid && kopjes.kop[artWid]) || null;
         a.kopjePad = (artWid && kopjes.pad[artWid]) || [];
+        if (art) {
+          a.secties = (artWid && art.secties[artWid]) || [];
+          a.positie = artWid && art.positie[artWid] != null ? art.positie[artWid] : null;
+        }
         artikelen.push(a);
       }
       if (r.wid && r.wid !== artWid) a.leden.push({ nummer: r.lid_nummer || '', wid: r.wid });
@@ -2100,7 +2149,8 @@
 
     // Indeling I leest bij een bestemmingsplan de bestemming en de soort regel; een structuurvisie heeft die niet.
     if (doc.bron_type === 'wro' && !isBeleid(doc)) RomThema.bereidWroVoor(artikelen);
-    return { doc: doc, artikelen: artikelen, indelingOpgehaald: indelingOpgehaald, modus: null };
+    // secties: de kopjes per artikel zijn er, dan is de boom ook voor de documentweergave niet nodig.
+    return { doc: doc, artikelen: artikelen, indelingOpgehaald: indelingOpgehaald, modus: null, secties: !!art };
   }
 
   /** Zet per artikel onderwerp(en) en herkomst volgens staat.indeling en telt
@@ -2413,9 +2463,12 @@
     body.appendChild(el('p', { class: 'laden', text: 'Artikelen ophalen…' }));
     var delen = delenVan(doc).map(function (d) {
       // Structuur (titels) niet voor de grote landelijke regelingen: die boom is megabytes.
+      // En niet als de analyse de kopjes per artikel al heeft (regelmix/document?artikelen=true).
       var groot = d === doc && groep === 'rijk' && !/^voorbeschermings/i.test(d.documenttype || '');
-      var structuur = (d.bron_type === 'ow' && !groot) ? haalBoom(d.bron_id) : Promise.resolve(null);
-      return Promise.all([analyseer(d), structuur]).then(function (r) { return { a: r[0], boom: r[1] }; });
+      return analyseer(d).then(function (a) {
+        var structuur = (d.bron_type === 'ow' && !groot && !a.secties) ? haalBoom(d.bron_id) : Promise.resolve(null);
+        return structuur.then(function (boom) { return { a: a, boom: boom }; });
+      });
     });
     Promise.all(delen).then(function (r) {
       if (nr !== staat.volgnr) return;
@@ -2684,8 +2737,9 @@
         return;
       }
       var dichtklappen = deel.a.artikelen.length > MAX_ART_OPEN_RENDER;
-      var boomGebruikt = deel.boom && vulViaBoom(deel.a, deel.boom, doel, artEls, dichtklappen);
-      if (!boomGebruikt) vulPerHoofdstuk(deel.a, doel, artEls, dichtklappen);
+      var gebruikt = deel.boom ? vulViaBoom(deel.a, deel.boom, doel, artEls, dichtklappen)
+        : deel.a.secties ? vulViaKopjes(deel.a, doel, artEls, dichtklappen) : false;
+      if (!gebruikt) vulPerHoofdstuk(deel.a, doel, artEls, dichtklappen);
     });
 
     var hoofdDoc = delen[delen.length - 1].a.doc;
@@ -2757,6 +2811,41 @@
       });
       lijst.appendChild(sectieElement('Overig', '', 'Niet terug te vinden in de documentstructuur', rest, 0, false));
     }
+    return true;
+  }
+
+  /** Zelfde opbouw als vulViaBoom, maar uit de kopjes per artikel en hun positie in het
+   *  document (regelmix/document?artikelen=true). Diepte 1 voor de bovenste kopjes, net als
+   *  in de boom, waar ze onder het Lichaam hangen. */
+  function vulViaKopjes(a, lijst, artEls, dichtklappen) {
+    var arts = a.artikelen.slice().sort(function (x, y) {
+      var px = x.positie == null ? Infinity : x.positie, py = y.positie == null ? Infinity : y.positie;
+      return px - py;
+    });
+    var wortel = { kinderen: [], per: {} };
+    arts.forEach(function (art) {
+      var knoop = wortel;
+      (art.secties || []).forEach(function (k) {
+        var sleutel = k.type + '|' + k.nummer + '|' + k.opschrift;
+        if (!knoop.per[sleutel]) {
+          knoop.per[sleutel] = { kop: k, kinderen: [], per: {} };
+          knoop.kinderen.push(knoop.per[sleutel]);
+        }
+        knoop = knoop.per[sleutel];
+      });
+      knoop.kinderen.push({ art: art });
+    });
+    function maak(knoop, diepte) {
+      if (knoop.art) {
+        var e = artikelElement(knoop.art, a.doc);
+        artEls.push({ art: knoop.art, el: e });
+        return e;
+      }
+      var kinderen = knoop.kinderen.map(function (k) { return maak(k, diepte + 1); });
+      return sectieElement(knoop.kop.type, knoop.kop.nummer, knoop.kop.opschrift, kinderen, diepte, dichtklappen);
+    }
+    if (!wortel.kinderen.length) return false;
+    wortel.kinderen.forEach(function (k) { lijst.appendChild(maak(k, 1)); });
     return true;
   }
 
