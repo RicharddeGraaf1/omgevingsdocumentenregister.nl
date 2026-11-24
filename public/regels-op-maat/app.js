@@ -2036,28 +2036,29 @@
     function onderwerpen() {
       return api('/v1/viewer/regeling/' + encodeURIComponent(doc.bron_id) + '/onderwerpen?met_annotatie=true').catch(function () { return null; });
     }
-    // De grote landelijke regelingen krijgen geen artikelblok en geen boom: dat is
-    // megabytes. Hun kenmerken komen per artikel bij het openen. Voorbeschermings-
-    // regels van het Rijk zijn klein en krijgen het dus wél.
+    // Alleen voor de oude route: de grote landelijke regelingen krijgen geen boom (dat is
+    // megabytes); hun kenmerken komen dan per artikel bij het openen.
     var grootRijk = doc.bestuurslaag === 'rijk' && !/^voorbeschermings/i.test(doc.documenttype || '');
+    function oudeRoute(rijen) {
+      return Promise.all([rijen, onderwerpen(), grootRijk ? null : haalBoom(doc.bron_id)]).then(function (r) {
+        return bouwAnalyse(doc, (r[0] && r[0].regelmix) || [], r[1], r[2]);
+      });
+    }
     var p;
-    if (doc.bron_type === 'ow' && !grootRijk) {
+    if (doc.bron_type === 'ow') {
       // Eén aanroep: de leden op het punt, met per artikel de kopjes, de kenmerken en
-      // de indeling (OCD 2026-11-24). Kent de API dat nog niet, dan zoals vroeger
-      // via /onderwerpen en /boom.
+      // de indeling (OCD 2026-11-24); ook voor het Rijk, het Bal is zo 150 kB over de
+      // lijn. Kent de API het artikelblok niet, of mislukt de aanroep, dan zoals vroeger.
       p = api('/v1/viewer/regelmix/document' + q + '&artikelen=true').then(function (d) {
-        var rijen = (d && d.regelmix) || [];
-        if (d && d.artikelen) return bouwAnalyse(doc, rijen, null, null, uitArtikelen(d));
-        return Promise.all([onderwerpen(), haalBoom(doc.bron_id)]).then(function (r) {
-          return bouwAnalyse(doc, rijen, r[0], r[1]);
-        });
+        if (d && d.artikelen) return bouwAnalyse(doc, d.regelmix || [], null, null, uitArtikelen(d));
+        return oudeRoute(d);
+      }, function () {
+        return oudeRoute(api('/v1/viewer/regelmix/document' + q));
       });
     } else {
-      p = Promise.all([
-        api('/v1/viewer/regelmix/document' + q),
-        doc.bron_type === 'ow' ? onderwerpen() : Promise.resolve(null)
-      ]).then(function (r) {
-        return bouwAnalyse(doc, (r[0] && r[0].regelmix) || [], r[1], null);
+      // Wro: de indeling staat al per rij in de regelmix.
+      p = api('/v1/viewer/regelmix/document' + q).then(function (d) {
+        return bouwAnalyse(doc, (d && d.regelmix) || [], null, null);
       });
     }
     p.catch(function () { delete analyses[sleutel]; });
