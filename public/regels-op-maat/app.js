@@ -2056,18 +2056,29 @@
         return oudeRoute(api('/v1/viewer/regelmix/document' + q));
       });
     } else {
-      // Wro: de indeling staat al per rij in de regelmix.
-      p = api('/v1/viewer/regelmix/document' + q).then(function (d) {
-        return bouwAnalyse(doc, (d && d.regelmix) || [], null, null);
+      // Wro: de indeling staat al per rij in de regelmix; met artikelen=true ook de kenmerken
+      // per tekst (bestemming, aanduiding, maatvoering op het punt), zodat het openen van een
+      // artikel geen aanroep meer kost (OCD 2026-11-25). Zonder blok: per artikel bij het openen.
+      p = api('/v1/viewer/regelmix/document' + q + '&artikelen=true').then(function (d) {
+        return bouwAnalyse(doc, (d && d.regelmix) || [], null, null, null, d && d.plan ? d : null);
       });
     }
     p.catch(function () { delete analyses[sleutel]; });
     return p;
   }
 
+  /** De kenmerken van één Wro-tekst uit regelmix/document?artikelen=true, in de vorm die
+   *  /wro/{plan}/tekst-annotaties gaf. Teksten delen hun lijst: artikelen[tekst].kenmerken is
+   *  een index in kenmerken. Zonder tekst (plan niet in v2): planbreed, net als die aanroep. */
+  function wroKenmerkenUit(d, tekst) {
+    var i = tekst && d.artikelen && d.artikelen[tekst] ? d.artikelen[tekst].kenmerken : null;
+    var k = (i != null && d.kenmerken && d.kenmerken[i]) || { planbreed: true, objecten: [] };
+    return { plan: d.plan, plangrens: d.plangrens, planbreed: k.planbreed, objecten: k.objecten };
+  }
+
   /** Twee bronnen: de boom + /onderwerpen (ond, boom), of het artikelblok van
    *  regelmix/document (art, uit uitArtikelen). Beide leveren dezelfde tussenvormen. */
-  function bouwAnalyse(doc, rijen, ond, boom, art) {
+  function bouwAnalyse(doc, rijen, ond, boom, art, wro) {
     var ouder = art ? art.ouder : boom ? ouderArtikelen(boom) : {};
     var locatiesPerArtikel = art ? art.locaties : boom ? locatiesUitBoom(boom) : {};
     var kopjes = art ? art.kopjes : boom ? kopjesUitBoom(boom) : { kop: {}, pad: {} };
@@ -2127,7 +2138,10 @@
         a.kenmerkenBron = (doc.bron_type === 'ow' && !boom && !art && artWid) ? doc.bron_id : null;
         a.document = doc;
         a.regelingsgebied = (boom && boom.regelingsgebied) || (art && art.regelingsgebied) || null;
-        if (doc.bron_type === 'wro') a.wroBron = { idn: doc.bron_id, tekst: r.tekst_id || null };
+        if (doc.bron_type === 'wro') {
+          a.wroBron = { idn: doc.bron_id, tekst: r.tekst_id || null };
+          if (wro) a.wroKenmerken = wroKenmerkenUit(wro, r.tekst_id);
+        }
         a.kopje = (artWid && kopjes.kop[artWid]) || null;
         a.kopjePad = (artWid && kopjes.pad[artWid]) || [];
         if (art) {
@@ -3195,7 +3209,11 @@
     lid.scrollIntoView({ block: 'center' });
   }
 
-  function vulArtikel(art, doel) {
+  /** De tekst van een artikel, en bij Ow ook de artikelgewijze toelichting, in één aanroep
+   *  (POST /teksten met expressie en toelichting). De toelichting komt onder de tekst; in het
+   *  leesvenster in opties.toelDoel, open volgens de voorkeur van de lezer; in de lijst dicht. */
+  function vulArtikel(art, doel, opties) {
+    opties = opties || {};
     if (art.inhoud != null && !art.wid) {
       // Wro: platte tekst zit al in de rij.
       zetKenmerkenPlek(art, doel);
@@ -3210,13 +3228,31 @@
     if (art.eigenTekst || !delen.length) delen.unshift({ nummer: '', wid: art.wid });
     var wids = delen.map(function (d) { return d.wid; }).filter(function (w) { return !teksten[w]; });
 
+    var doc = art.document || {};
+    var expr = doc.bron_type === 'ow' && doc.bron_id && art.wid && !art.container ? doc.bron_id : null;
+    var toelSleutel = expr && expr + '|' + art.wid;
+    var toelVragen = !!expr && !toelichtingen[toelSleutel];
+    var vraag = { wids: wids };
+    if (expr) vraag.expressie = expr;
+    if (toelVragen) vraag.toelichting = [art.wid];
+
     var laden = el('p', { class: 'laden', text: 'Tekst ophalen…' });
     doel.appendChild(laden);
-    (wids.length
-      ? api('/v1/viewer/teksten', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ wids: wids }) })
-          .then(function (d) { (d.teksten || []).forEach(function (t) { teksten[t.wid] = t; }); })
-      : Promise.resolve()
-    ).then(function () {
+    var opgehaald = (wids.length || toelVragen)
+      ? api('/v1/viewer/teksten', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(vraag) })
+      : Promise.resolve(null);
+    if (toelVragen) {
+      toelichtingen[toelSleutel] = opgehaald.then(function (d) {
+        return (d && d.toelichting && d.toelichting[art.wid]) || { artikel: [], boven: [] };
+      }).catch(function (e) { delete toelichtingen[toelSleutel]; throw e; });
+    }
+    if (expr) {
+      var toel = opties.toelDoel || el('section', { class: 'toelichting toel-in-lijst', hidden: true, 'aria-label': 'Toelichting' });
+      vulToelichting(art, expr, toel, { dicht: !opties.toelDoel });
+    }
+    opgehaald.then(function (d) {
+      ((d && d.teksten) || []).forEach(function (t) { teksten[t.wid] = t; });
+    }).then(function () {
       doel.removeChild(laden);
       var getoond = 0;
       delen.forEach(function (d) {
@@ -3232,6 +3268,7 @@
       });
       if (art.markeerWid) { markeerLid(doel, art.markeerWid); art.markeerWid = null; }
       if (!getoond) doel.appendChild(el('p', { class: 'leeg-melding', text: 'Voor dit artikel is geen tekst beschikbaar in het register.' }));
+      if (toel && !opties.toelDoel) doel.appendChild(toel);
     }).catch(function (e) {
       if (laden.parentNode) doel.removeChild(laden);
       doel.appendChild(foutBlok(e));
@@ -3543,14 +3580,11 @@
     ]));
     var inhoud = el('div', { class: 'lees-inhoud' });
     vak.appendChild(inhoud);
+    // De toelichting naast inhoud, niet erin: vulArtikel zet de tekst er pas na het laden in.
+    var toel = el('section', { class: 'toelichting', hidden: true, 'aria-label': 'Toelichting' });
+    vak.appendChild(toel);
     if (art.container) vulOnderdeel(art, inhoud);
-    else vulArtikel(art, inhoud);
-    // Naast inhoud, niet erin: vulArtikel zet de tekst er pas na het laden in.
-    if (!art.container && art.wid && doc.bron_type === 'ow' && doc.bron_id) {
-      var toel = el('section', { class: 'toelichting', hidden: true, 'aria-label': 'Toelichting' });
-      vak.appendChild(toel);
-      vulToelichting(art, doc.bron_id, toel);
-    }
+    else vulArtikel(art, inhoud, { toelDoel: toel });
     vak.hidden = false;
     vak.scrollTop = 0;
     document.body.classList.add('lees-open');
@@ -3603,6 +3637,7 @@
   // geen melding — in plannen zonder artikelgewijze toelichting stond die er anders overal.
   var toelichtingen = {};
   var TOELICHTING_OPSLAG = 'rom-toelichting';
+  var toelichtingTeller = 0;
 
   function toelichtingZichtbaar() {
     try { return localStorage.getItem(TOELICHTING_OPSLAG) !== 'uit'; } catch (e) { return true; }
@@ -3619,19 +3654,24 @@
     return toelichtingen[sleutel];
   }
 
-  function vulToelichting(art, expr, doel) {
+  /** opties.dicht: in de lijst begint de toelichting dicht en onthouden we de keuze niet;
+   *  in het leesvenster volgt ze de laatste keuze van de lezer. */
+  function vulToelichting(art, expr, doel, opties) {
+    var dicht = !!(opties && opties.dicht);
     haalToelichting(expr, art.wid).then(function (t) {
       if (!t.artikel.length && !t.boven.length) return;
-      var zichtbaar = toelichtingZichtbaar();
-      var lijf = el('div', { class: 'toel-lijf', id: 'toel-lijf' });
+      var zichtbaar = dicht ? false : toelichtingZichtbaar();
+      // Uniek id: in de lijst staan meerdere toelichtingen open.
+      var lijfId = 'toel-lijf-' + (++toelichtingTeller);
+      var lijf = el('div', { class: 'toel-lijf', id: lijfId });
       var knop = el('button', { type: 'button', class: 'toel-wissel', 'aria-expanded': String(zichtbaar),
-        'aria-controls': 'toel-lijf', text: zichtbaar ? 'verbergen' : 'tonen' });
+        'aria-controls': lijfId, text: zichtbaar ? 'verbergen' : 'tonen' });
       knop.addEventListener('click', function () {
         zichtbaar = !zichtbaar;
         lijf.hidden = !zichtbaar;
         knop.textContent = zichtbaar ? 'verbergen' : 'tonen';
         knop.setAttribute('aria-expanded', String(zichtbaar));
-        try { localStorage.setItem(TOELICHTING_OPSLAG, zichtbaar ? 'aan' : 'uit'); } catch (e) { /* private mode */ }
+        if (!dicht) { try { localStorage.setItem(TOELICHTING_OPSLAG, zichtbaar ? 'aan' : 'uit'); } catch (e) { /* private mode */ } }
       });
       doel.appendChild(el('div', { class: 'toel-kop' }, [
         el('span', { class: 'label', text: (t.artikel.length ? 'Toelichting bij dit artikel' : 'Toelichting') + ' · geen regel' }),
