@@ -26,6 +26,11 @@ body { display: flex; flex-direction: column; min-height: 100vh; }
   padding-block: 7px; padding-inline: 24px; border-bottom: 1px solid var(--lijn); font-size: 13.5px;
 }
 .context[hidden] { display: none; }
+/* Standaard of geavanceerd (gebruiker 2026-11-25): bij standaard alleen locatie en weergave */
+.context.modus-standaard .geavanceerd-optie, .context.modus-standaard .indeling-uitleg { display: none; }
+.modus-pil { gap: 12px; padding-right: 10px; }
+.modus-keuze { display: inline-flex; align-items: center; gap: 5px; cursor: pointer; white-space: nowrap; }
+.modus-keuze input { margin: 0; accent-color: var(--acc); cursor: pointer; }
 .context-pil {
   display: inline-flex; align-items: center; gap: 8px; min-width: 0;
   padding: 3px 4px 3px 10px; background: var(--blad); box-shadow: var(--blad-schaduw); border-radius: 3px;
