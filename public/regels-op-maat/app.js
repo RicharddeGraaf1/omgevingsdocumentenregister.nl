@@ -2073,7 +2073,7 @@
   function wroKenmerkenUit(d, tekst) {
     var i = tekst && d.artikelen && d.artikelen[tekst] ? d.artikelen[tekst].kenmerken : null;
     var k = (i != null && d.kenmerken && d.kenmerken[i]) || { planbreed: true, objecten: [] };
-    return { plan: d.plan, plangrens: d.plangrens, planbreed: k.planbreed, objecten: k.objecten };
+    return { plan: d.plan, plangrens: d.plangrens, planbreed: k.planbreed, objecten: k.objecten, elders: k.elders || 0 };
   }
 
   /** Twee bronnen: de boom + /onderwerpen (ond, boom), of het artikelblok van
@@ -4142,12 +4142,21 @@
   }
 
   /** Wro in de stand objectenpaneel: het plan, en dezelfde knop. */
+  /** Kop van de Wro-kenmerken. Sinds G-194 levert aanroep 2 alleen de planobjecten op het
+   *  punt, met `elders` als telling van de rest; "geldt in het hele plan" alleen bij planbreed. */
+  function wroKenmerkenTelling(d) {
+    var n = (d.objecten || []).length, elders = d.elders || 0;
+    if (d.planbreed) return 'geldt in het hele plan';
+    var tekst = n ? nl(n) + (n === 1 ? ' planobject' : ' planobjecten') + ' op uw locatie' : 'geen planobject op uw locatie';
+    return elders ? tekst + ' · ' + nl(elders) + ' elders' : tekst;
+  }
+
   function wroKenmerkenBlok(art) {
-    var d = art.wroKenmerken || {}, plan = d.plan || {}, n = (d.objecten || []).length;
+    var d = art.wroKenmerken || {}, plan = d.plan || {}, n = (d.objecten || []).length, elders = d.elders || 0;
     var blok = el('div', { class: 'kenmerken' });
     var kop = el('button', { type: 'button', class: 'kenmerken-kop', 'aria-expanded': 'false' }, [
       icoon(PAD_RECHTS), el('span', { class: 'label', text: 'Kenmerken' }),
-      el('span', { class: 'muted', text: n ? nl(n) + (n === 1 ? ' planobject' : ' planobjecten') : 'geldt in het hele plan' })
+      el('span', { class: 'muted', text: wroKenmerkenTelling(d) })
     ]);
     var body = el('div', { class: 'kenmerken-body', hidden: true });
     kop.addEventListener('click', function () {
@@ -4164,6 +4173,11 @@
       lijst.appendChild(el('dt', { text: o.object_type }));
       lijst.appendChild(el('dd', { text: o.naam + (o.op_punt ? ' (op uw locatie)' : '') }));
     });
+    if (elders) {
+      lijst.appendChild(el('dt', { text: 'Elders' }));
+      lijst.appendChild(el('dd', { class: 'muted', text: nl(elders) + (elders === 1 ? ' planobject ligt' : ' planobjecten liggen') +
+        ' elders in het plan en gelden hier niet' }));
+    }
     body.appendChild(lijst);
     blok.appendChild(kop);
     blok.appendChild(body);
@@ -4273,6 +4287,10 @@
     body.appendChild(el('p', { class: 'kp-onder', text: 'Plan: ' + (plan.naam || '') }));
     body.appendChild(el('p', { class: 'kp-onder', text: metPunt([hoofdletter(plan.type_plan), plan.planstatus, plan.datum, plan.bronhouder]) }));
     if (art.categorie) body.appendChild(el('p', { class: 'kp-onder', text: 'Onderwerp: ' + art.categorie + (art.sub ? ' › ' + art.sub : '') }));
+    if (d.elders) {
+      body.appendChild(el('p', { class: 'kp-onder', text: nl(d.elders) + (d.elders === 1 ? ' planobject' : ' planobjecten') +
+        ' van dit artikel ' + (d.elders === 1 ? 'ligt' : 'liggen') + ' elders in het plan en ' + (d.elders === 1 ? 'geldt' : 'gelden') + ' hier niet.' }));
+    }
     if (plan.geometrie_herkomst === 'ambtsgebied-imro2006') {
       body.appendChild(el('p', { class: 'kp-onder', text: 'Van dit plan is de exacte grens niet bekend: het hele ambtsgebied is aangehouden.' }));
     }
