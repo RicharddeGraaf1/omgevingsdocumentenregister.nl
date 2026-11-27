@@ -28,8 +28,8 @@
   // Standaardindeling: I sinds 2026-11-18 (gebruiker), daarvoor C. Een link zonder ?indeling= toont I.
   var STANDAARD_INDELING = 'eigen';
   // Standaardstand (gebruiker 2026-11-25): geen vraagvenster, kenmerkenpaneel bij het artikel.
-  var STANDAARD_PANEEL = 'kenmerken', STANDAARD_VRAAGVENSTER = 'uit';
-  var staat = { loc: null, weergave: 'juridisch', indeling: STANDAARD_INDELING, nav: 'tegels', paneel: STANDAARD_PANEEL, documentkeuze: null, documenten: 'lokaal', vraagvenster: STANDAARD_VRAAGVENSTER, modus: 'standaard', artikel: null, volgnr: 0, docs: null, view: {} };
+  var STANDAARD_PANEEL = 'kenmerken', STANDAARD_VRAAGVENSTER = 'uit', STANDAARD_INSTRUCTIEREGELS = 'verbergen';
+  var staat = { loc: null, weergave: 'juridisch', indeling: STANDAARD_INDELING, nav: 'tegels', paneel: STANDAARD_PANEEL, documentkeuze: null, documenten: 'lokaal', vraagvenster: STANDAARD_VRAAGVENSTER, instructieregels: STANDAARD_INSTRUCTIEREGELS, modus: 'standaard', artikel: null, volgnr: 0, docs: null, view: {} };
 
   //   pad      alleen de kopjes boven het artikel — onderwerp én subcategorie
   //   imow     alleen het IMOW-thema van de juridische regels — geen subcategorie
@@ -74,10 +74,19 @@
   // met Zoek regels, bij I de wegwijzer. Een link met ?vraag= werkt ook als het uit staat.
   var VRAAGVENSTERS = { aan: 1, uit: 1 };
   function metVraagvenster() { return staat.vraagvenster !== 'uit'; }
+  // Instructieregels tonen of verbergen (gebruiker 2026-11-27). Op het IMOW-regeltype per artikel:
+  // instructie- en omgevingswaarderegels binden de overheid, niet de bezoeker. Een artikel met
+  // daarnaast een regel voor iedereen blijft staan; Wro-plannen hebben geen regeltype en blijven ook.
+  var INSTRUCTIEREGELS = { verbergen: 1, tonen: 1 };
+  var REGELS_VOOR_OVERHEID = { Instructieregel: 1, Omgevingswaarderegel: 1, Omgevingswaardegel: 1 };
+  function alleenVoorOverheid(art) {
+    var regels = (art.kenmerken && art.kenmerken.regels) || [];
+    return regels.length > 0 && regels.every(function (r) { return REGELS_VOOR_OVERHEID[r.type]; });
+  }
   // Standaard of geavanceerd (gebruiker 2026-11-25). Standaard toont alleen locatie en weergave en
   // gebruikt de standaardinstellingen; geavanceerd toont alle keuzemenu's. Een link met een van
   // deze parameters opent geavanceerd, anders zou een gedeelde instelling onzichtbaar meegaan.
-  var GEAVANCEERDE_PARAMS = ['indeling', 'nav', 'documentkeuze', 'documenten', 'paneel', 'vraagvenster'];
+  var GEAVANCEERDE_PARAMS = ['indeling', 'nav', 'documentkeuze', 'documenten', 'paneel', 'vraagvenster', 'instructieregels'];
   function zetModus() {
     $('context').classList.toggle('modus-standaard', staat.modus !== 'geavanceerd');
     Array.prototype.forEach.call(document.querySelectorAll('input[name="modus"]'), function (r) { r.checked = r.value === staat.modus; });
@@ -358,6 +367,7 @@
       if (staat.documenten !== 'lokaal') q.set('documenten', staat.documenten);
       if (staat.paneel !== STANDAARD_PANEEL) q.set('paneel', staat.paneel);
       if (staat.vraagvenster !== STANDAARD_VRAAGVENSTER) q.set('vraagvenster', staat.vraagvenster);
+      if (staat.instructieregels !== STANDAARD_INSTRUCTIEREGELS) q.set('instructieregels', staat.instructieregels);
       if (staat.modus === 'geavanceerd') q.set('modus', 'geavanceerd');
     }
     var url = location.pathname + (loc ? '?' + q.toString() : '');
@@ -408,6 +418,11 @@
   function vraagvensterUitUrl() {
     var v = new URLSearchParams(location.search).get('vraagvenster');
     return VRAAGVENSTERS[v] ? v : STANDAARD_VRAAGVENSTER;
+  }
+
+  function instructieregelsUitUrl() {
+    var v = new URLSearchParams(location.search).get('instructieregels');
+    return INSTRUCTIEREGELS[v] ? v : STANDAARD_INSTRUCTIEREGELS;
   }
 
   function modusUitUrl() {
@@ -1998,6 +2013,14 @@
     var chevron = icoon(PAD_NEER); chevron.classList.add('doc-chevron');
     var body = el('div', { class: 'doc-body', hidden: true });
     var eenheid = doc.via === 'gebied' ? 'tekstdelen' : 'regels';
+    // doc.aantal komt uit de API en telt alles; hoeveel artikelen het filter weglaat, weten we pas na de analyse.
+    var verborgenTag = el('span', { class: 'tag tag-verborgen', hidden: true });
+    function zetVerborgen(lijst) {
+      var n = lijst.reduce(function (s, a) { return s + (a.verborgen || 0); }, 0);
+      verborgenTag.hidden = !n;
+      verborgenTag.textContent = n ? '− ' + nl(n) + (n === 1 ? ' artikel' : ' artikelen') + ' met alleen instructieregels' : '';
+      verborgenTag.title = n ? 'Verborgen omdat Instructieregels op Verbergen staat' : '';
+    }
 
     var kop = el('button', { type: 'button', class: 'doc-kop', 'aria-expanded': 'false' }, [
       el('span', { class: 'doc-titelrij' }, [el('span', { class: 'doc-titel', text: doc.regeling || '(zonder titel)' }), chevron]),
@@ -2006,6 +2029,7 @@
         statusTag(doc),
         el('span', { text: hoofdletter(doc.documenttype || '') + ' · ' + hoofdletter(doc.bestuurslaag || '') }),
         el('span', { class: 'mono', text: nl(doc.aantal) + ' ' + eenheid }),
+        verborgenTag,
         doc.aanvullend ? el('span', { class: 'tag tag-aanvullend', text:
           '+ ' + (doc.aanvullend.length === 1 ? 'aanvullende regels' : doc.aanvullend.length + '× aanvullende regels') }) : null
       ]),
@@ -2019,7 +2043,10 @@
       kop.setAttribute('aria-expanded', open ? 'true' : 'false');
       kaart.classList.toggle('open', open);
       body.hidden = !open;
-      if (open && !geopend) { geopend = true; vulDocument(doc, groep, body, nr, onderwerp); }
+      if (open && !geopend) {
+        geopend = true; vulDocument(doc, groep, body, nr, onderwerp);
+        if (!isWro) Promise.all(delenVan(doc).map(analyseer)).then(zetVerborgen, function () {});
+      }
     });
 
     // Chips vooraf alleen voor de lokale Ow-documenten: klein genoeg, en daar
@@ -2029,6 +2056,7 @@
       Promise.all(delenVan(doc).map(analyseer)).then(function (lijst) {
         if (nr !== staat.volgnr) return;
         leeg(chips);
+        zetVerborgen(lijst);
         kopChips(voegSamen(lijst), onderwerp).forEach(function (c) { chips.appendChild(c); });
       }).catch(function () { leeg(chips); });
     } else if (isWro) {
@@ -2203,7 +2231,13 @@
    *  dan niet meer op tot het aantal artikelen. Herkomst telt per artikel. */
   function indelen(an) {
     var modus = basisIndeling();
-    if (an.modus === modus) return an;
+    var sleutel = modus + '|' + staat.instructieregels;
+    if (an.modus === sleutel) return an;
+    // De volledige lijst blijft in an.alle; an.artikelen is wat de bezoeker ziet.
+    if (!an.alle) an.alle = an.artikelen;
+    an.artikelen = staat.instructieregels === 'tonen' ? an.alle
+      : an.alle.filter(function (a) { return !alleenVoorOverheid(a); });
+    an.verborgen = an.alle.length - an.artikelen.length;
     var tegels = {}, viaAnnotatie = {}, herkomst = { pad: 0, annotatie: 0, geen: 0 }, meervoudig = 0;
     an.artikelen.forEach(function (a) {
       a.subs = null;
@@ -2264,7 +2298,7 @@
       });
       herkomst[a.herkomst || 'geen']++;
     });
-    an.modus = modus;
+    an.modus = sleutel;
     an.tegels = tegels; an.viaAnnotatie = viaAnnotatie; an.herkomst = herkomst; an.meervoudig = meervoudig;
     an.nietIngedeeld = tegels['niet-ingedeeld'] || tegels[RomThema.REST] || 0;
     an.heeftIndeling = an.indelingOpgehaald && an.artikelen.some(function (a) { return a.categorie; });
@@ -2775,7 +2809,9 @@
         lijst.appendChild(doel);
       }
       if (!deel.a.artikelen.length) {
-        doel.appendChild(el('p', { class: 'leeg-melding', text: 'Geen artikelen gevonden voor dit punt.' }));
+        doel.appendChild(el('p', { class: 'leeg-melding', text: deel.a.verborgen
+          ? 'Op dit punt staan hier alleen instructieregels (' + nl(deel.a.verborgen) + '). Zet Instructieregels op Tonen om ze te zien.'
+          : 'Geen artikelen gevonden voor dit punt.' }));
         return;
       }
       var dichtklappen = deel.a.artikelen.length > MAX_ART_OPEN_RENDER;
@@ -4549,6 +4585,14 @@
       bewaar();
       if (staat.docs) toon(staat.volgnr);
     });
+    var ir = $('instructieregels');
+    staat.instructieregels = instructieregelsUitUrl(); ir.value = staat.instructieregels;
+    ir.addEventListener('change', function () {
+      staat.instructieregels = INSTRUCTIEREGELS[ir.value] ? ir.value : STANDAARD_INSTRUCTIEREGELS;
+      // Een gekozen tegel kan nu leeg zijn; het overzicht laat dat zelf zien.
+      bewaar();
+      if (staat.docs) toon(staat.volgnr);
+    });
     staat.modus = modusUitUrl(); zetModus();
     Array.prototype.forEach.call(document.querySelectorAll('input[name="modus"]'), function (r) {
       r.addEventListener('change', function () {
@@ -4563,11 +4607,13 @@
     /** Alle keuzes terug op hun standaard; true als de lijst opnieuw getekend moet worden. */
     function naarStandaard() {
       var anders = staat.indeling !== STANDAARD_INDELING || staat.nav !== 'tegels' || !!staat.documentkeuze ||
-        staat.documenten !== 'lokaal' || staat.vraagvenster !== STANDAARD_VRAAGVENSTER;
+        staat.documenten !== 'lokaal' || staat.vraagvenster !== STANDAARD_VRAAGVENSTER ||
+        staat.instructieregels !== STANDAARD_INSTRUCTIEREGELS;
       staat.indeling = STANDAARD_INDELING; $('indeling').value = staat.indeling;
       staat.nav = 'tegels'; nav.value = 'tegels';
       staat.documentkeuze = null; staat.documenten = 'lokaal'; zetDocumentenMenu();
       staat.vraagvenster = STANDAARD_VRAAGVENSTER; vv.value = STANDAARD_VRAAGVENSTER;
+      staat.instructieregels = STANDAARD_INSTRUCTIEREGELS; ir.value = STANDAARD_INSTRUCTIEREGELS;
       if (staat.view.onderwerp && !RomThema.inSet(staat.view.onderwerp, tegelset())) staat.view = {};
       if (staat.paneel !== STANDAARD_PANEEL) { pan.value = STANDAARD_PANEEL; pan.dispatchEvent(new Event('change')); }
       return anders;
@@ -4750,6 +4796,7 @@
       zetDocumentenMenu();
       zetPaneelKlasse();
       staat.vraagvenster = vraagvensterUitUrl(); $('vraagvenster').value = staat.vraagvenster;
+      staat.instructieregels = instructieregelsUitUrl(); $('instructieregels').value = staat.instructieregels;
       staat.modus = modusUitUrl(); zetModus();
       if (staat.loc && staat.docs && loc.x === staat.loc.x && loc.y === staat.loc.y) {
         staat.view = viewUitUrl();
