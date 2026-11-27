@@ -151,9 +151,13 @@ details.sectie > summary { cursor: pointer; list-style-position: outside; }
 .art-pijl { color: var(--inkt-3); margin-top: 4px; transition: transform .12s; flex: none; }
 .art.open .art-pijl { transform: rotate(90deg); }
 .art-dot { width: 8px; height: 8px; border-radius: 2px; margin-top: 7px; flex: none; background: transparent; border: 1px dashed var(--lijn); }
-.art-titel { flex: 1; font-family: var(--serif); font-size: 15.5px; line-height: 1.4; }
+.art-titel { flex: 1; min-width: 0; font-family: var(--serif); font-size: 15.5px; line-height: 1.4; }
 .art-titel .art-nr { font-weight: 600; }
-.art-onderwerp { font-size: 11.5px; color: var(--inkt-3); white-space: nowrap; margin-top: 3px; }
+/* Het label op één regel, hooguit 40% van de rij en met puntjes; anders knijpt een
+   lange activiteitnaam de artikeltitel tot één woord per regel. Volledig in de tooltip. */
+.art-onderwerp { font-size: 11.5px; color: var(--inkt-3); white-space: nowrap; margin-top: 3px;
+  flex: 0 1 auto; min-width: 0; max-width: 40%; overflow: hidden; text-overflow: ellipsis; }
+.art-onderwerp-tekst { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .art.open .art-titel { font-weight: 600; }
 .art-inhoud { padding: 2px 0 12px 22px; display: flex; flex-direction: column; gap: 6px; }
 .art-inhoud[hidden] { display: none; }
@@ -516,7 +520,7 @@ body.boom-weergave.lees-open .werkvlak { grid-template-columns: minmax(0, var(--
   .lijst { min-width: 0; }
   .direct-doc .art-kop { flex-wrap: wrap; }
   .direct-doc .art-titel { flex: 1 1 60%; min-width: 0; overflow-wrap: anywhere; }
-  .direct-doc .art-onderwerp { flex-basis: 100%; white-space: normal; overflow-wrap: anywhere; margin-top: 0; padding-left: 44px; }
+  .direct-doc .art-onderwerp { flex-basis: 100%; max-width: none; white-space: normal; overflow-wrap: anywhere; margin-top: 0; padding-left: 44px; }
 }
 
 /* Versleepbare vensters */
@@ -531,7 +535,7 @@ body.venster-slepen { cursor: col-resize; user-select: none; }
 @container lijst (max-width: 460px) {
   .art-kop { flex-wrap: wrap; }
   .art-titel { flex: 1 1 60%; min-width: 0; overflow-wrap: anywhere; }
-  .art-onderwerp { flex-basis: 100%; white-space: normal; overflow-wrap: anywhere; margin-top: 0; padding-left: 44px; }
+  .art-onderwerp { flex-basis: 100%; max-width: none; white-space: normal; overflow-wrap: anywhere; margin-top: 0; padding-left: 44px; }
   .vraagvak { flex-wrap: wrap; }
   .vraagvak .vraagveld { flex-basis: 100%; }
   .ow-raster { grid-template-columns: minmax(0, 1fr); }

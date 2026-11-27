@@ -27,7 +27,9 @@
   // view: {} = tussenscherm met onderwerpen · {onderwerp: id} · {alles: true}
   // Standaardindeling: I sinds 2026-11-18 (gebruiker), daarvoor C. Een link zonder ?indeling= toont I.
   var STANDAARD_INDELING = 'eigen';
-  var staat = { loc: null, weergave: 'juridisch', indeling: STANDAARD_INDELING, nav: 'tegels', paneel: 'objecten', documentkeuze: null, documenten: 'lokaal', vraagvenster: 'aan', modus: 'standaard', artikel: null, volgnr: 0, docs: null, view: {} };
+  // Standaardstand (gebruiker 2026-11-25): geen vraagvenster, kenmerkenpaneel bij het artikel.
+  var STANDAARD_PANEEL = 'kenmerken', STANDAARD_VRAAGVENSTER = 'uit';
+  var staat = { loc: null, weergave: 'juridisch', indeling: STANDAARD_INDELING, nav: 'tegels', paneel: STANDAARD_PANEEL, documentkeuze: null, documenten: 'lokaal', vraagvenster: STANDAARD_VRAAGVENSTER, modus: 'standaard', artikel: null, volgnr: 0, docs: null, view: {} };
 
   //   pad      alleen de kopjes boven het artikel — onderwerp én subcategorie
   //   imow     alleen het IMOW-thema van de juridische regels — geen subcategorie
@@ -354,8 +356,8 @@
       if (staat.nav !== 'tegels') q.set('nav', staat.nav);
       if (staat.documentkeuze) q.set('documentkeuze', staat.documentkeuze);
       if (staat.documenten !== 'lokaal') q.set('documenten', staat.documenten);
-      if (staat.paneel !== 'objecten') q.set('paneel', staat.paneel);
-      if (staat.vraagvenster !== 'aan') q.set('vraagvenster', staat.vraagvenster);
+      if (staat.paneel !== STANDAARD_PANEEL) q.set('paneel', staat.paneel);
+      if (staat.vraagvenster !== STANDAARD_VRAAGVENSTER) q.set('vraagvenster', staat.vraagvenster);
       if (staat.modus === 'geavanceerd') q.set('modus', 'geavanceerd');
     }
     var url = location.pathname + (loc ? '?' + q.toString() : '');
@@ -390,7 +392,7 @@
 
   function paneelUitUrl() {
     var v = new URLSearchParams(location.search).get('paneel');
-    return PANEEL_VORMEN[v] ? v : 'objecten';
+    return PANEEL_VORMEN[v] ? v : STANDAARD_PANEEL;
   }
 
   function documentkeuzeUitUrl() {
@@ -405,7 +407,7 @@
 
   function vraagvensterUitUrl() {
     var v = new URLSearchParams(location.search).get('vraagvenster');
-    return VRAAGVENSTERS[v] ? v : 'aan';
+    return VRAAGVENSTERS[v] ? v : STANDAARD_VRAAGVENSTER;
   }
 
   function modusUitUrl() {
@@ -2937,8 +2939,9 @@
       art.categorie ? (art.herkomst === 'annotatie'
         ? el('span', { class: 'art-onderwerp art-onderwerp-annot',
             title: 'Onderwerp uit de IMOW-annotatie van de regel, niet uit de kopjes: ' + (art.themas || []).join(', ') },
-            [el('i', { class: 'hk-annot', 'aria-hidden': 'true' }), themaLabel(art.themas || [art.categorie])])
-        : el('span', { class: 'art-onderwerp', text: art.sub || art.categorie })) : null
+            [el('i', { class: 'hk-annot', 'aria-hidden': 'true' }),
+              el('span', { class: 'art-onderwerp-tekst', text: themaLabel(art.themas || [art.categorie]) })])
+        : el('span', { class: 'art-onderwerp', title: art.sub || art.categorie, text: art.sub || art.categorie })) : null
     ]);
     var wrap = el('div', { class: 'art' }, [kop, inhoud]);
     var geladen = false;
@@ -4542,7 +4545,7 @@
     var vv = $('vraagvenster');
     staat.vraagvenster = vraagvensterUitUrl(); vv.value = staat.vraagvenster;
     vv.addEventListener('change', function () {
-      staat.vraagvenster = VRAAGVENSTERS[vv.value] ? vv.value : 'aan';
+      staat.vraagvenster = VRAAGVENSTERS[vv.value] ? vv.value : STANDAARD_VRAAGVENSTER;
       bewaar();
       if (staat.docs) toon(staat.volgnr);
     });
@@ -4560,13 +4563,13 @@
     /** Alle keuzes terug op hun standaard; true als de lijst opnieuw getekend moet worden. */
     function naarStandaard() {
       var anders = staat.indeling !== STANDAARD_INDELING || staat.nav !== 'tegels' || !!staat.documentkeuze ||
-        staat.documenten !== 'lokaal' || staat.vraagvenster !== 'aan';
+        staat.documenten !== 'lokaal' || staat.vraagvenster !== STANDAARD_VRAAGVENSTER;
       staat.indeling = STANDAARD_INDELING; $('indeling').value = staat.indeling;
       staat.nav = 'tegels'; nav.value = 'tegels';
       staat.documentkeuze = null; staat.documenten = 'lokaal'; zetDocumentenMenu();
-      staat.vraagvenster = 'aan'; vv.value = 'aan';
+      staat.vraagvenster = STANDAARD_VRAAGVENSTER; vv.value = STANDAARD_VRAAGVENSTER;
       if (staat.view.onderwerp && !RomThema.inSet(staat.view.onderwerp, tegelset())) staat.view = {};
-      if (staat.paneel !== 'objecten') { pan.value = 'objecten'; pan.dispatchEvent(new Event('change')); }
+      if (staat.paneel !== STANDAARD_PANEEL) { pan.value = STANDAARD_PANEEL; pan.dispatchEvent(new Event('change')); }
       return anders;
     }
     nav.addEventListener('change', function () {
@@ -4575,7 +4578,7 @@
       if (staat.docs) toon(staat.volgnr);
     });
     pan.addEventListener('change', function () {
-      staat.paneel = PANEEL_VORMEN[pan.value] ? pan.value : 'objecten';
+      staat.paneel = PANEEL_VORMEN[pan.value] ? pan.value : STANDAARD_PANEEL;
       if (paneel.alleenArtikel) herstelObjecten();
       zetPaneelKlasse();
       bewaar();
