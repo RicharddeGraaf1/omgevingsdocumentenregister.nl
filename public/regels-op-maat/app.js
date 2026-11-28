@@ -75,10 +75,11 @@
   var VRAAGVENSTERS = { aan: 1, uit: 1 };
   function metVraagvenster() { return staat.vraagvenster !== 'uit'; }
   // Instructieregels tonen of verbergen (gebruiker 2026-11-27). Op het IMOW-regeltype per artikel:
-  // instructie- en omgevingswaarderegels binden de overheid, niet de bezoeker. Een artikel met
-  // daarnaast een regel voor iedereen blijft staan; Wro-plannen hebben geen regeltype en blijven ook.
+  // instructieregels binden de overheid, niet de bezoeker. Omgevingswaarderegels blijven altijd
+  // staan: een omgevingswaarde zegt wat hier geldt (gebruiker 2026-11-28). Een artikel met daarnaast
+  // een ander regeltype blijft staan; Wro-plannen hebben geen regeltype en blijven ook.
   var INSTRUCTIEREGELS = { verbergen: 1, tonen: 1 };
-  var REGELS_VOOR_OVERHEID = { Instructieregel: 1, Omgevingswaarderegel: 1, Omgevingswaardegel: 1 };
+  var REGELS_VOOR_OVERHEID = { Instructieregel: 1 };
   function alleenVoorOverheid(art) {
     var regels = (art.kenmerken && art.kenmerken.regels) || [];
     return regels.length > 0 && regels.every(function (r) { return REGELS_VOOR_OVERHEID[r.type]; });
